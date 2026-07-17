@@ -1,0 +1,4 @@
+node_modules/
+google-calendar-key.json
+credentials.json
+.env

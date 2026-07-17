@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agendar Cita | Clínica del Pie Isabel Aguiar</title>
+  <link rel="icon" type="image/png" href="imagenes/logo.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --green-dark: #0b5345;
+      --green-medium: #0e6b58;
+      --turquoise: #1a9e8e;
+      --cyan-light: #7fdbd0;
+      --cyan-soft: #b8ece3;
+      --pine-dark: #084236;
+      --text-dark: #1a2a3a;
+      --white-off: #faf6f2;
+      --shadow: 0 8px 32px rgba(0,0,0,0.12);
+      --radius: 20px;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--text-dark);
+      background: linear-gradient(180deg, var(--green-dark) 0%, var(--green-medium) 20%, var(--turquoise) 50%, var(--cyan-light) 80%, var(--cyan-soft) 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      background: rgba(11, 83, 69, 0.92);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+    nav .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+    nav .brand img { height: 44px; border-radius: 10px; }
+    nav .brand span { font-size: 1.05rem; font-weight: 700; color: #fff; display: none; }
+    @media (min-width:500px) { nav .brand span { display: inline; } nav { padding: 14px 32px; } }
+    nav a.btn-volver {
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+    nav a.btn-volver:hover { background: var(--turquoise); }
+
+    .container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px 60px;
+    }
+    .card {
+      background: #fff;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 40px 32px;
+      width: 100%;
+      max-width: 520px;
+      animation: fadeUp 0.5s ease-out;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .card .icon {
+      width: 64px; height: 64px;
+      background: linear-gradient(135deg, var(--turquoise), var(--green-medium));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+    }
+    .card h1 {
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--green-dark);
+      margin-bottom: 6px;
+    }
+    .card p.sub {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #4a6a7a;
+      margin-bottom: 28px;
+    }
+
+    .form-group { margin-bottom: 20px; }
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-dark);
+      margin-bottom: 6px;
+    }
+    .form-group label .req { color: #dc2626; margin-left: 2px; }
+    .form-group input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      color: var(--text-dark);
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      outline: none;
+    }
+    .form-group input:focus {
+      border-color: var(--turquoise);
+      box-shadow: 0 0 0 4px rgba(26, 158, 142, 0.12);
+    }
+    .form-group input::placeholder { color: #94a3b8; }
+
+    .btn-submit {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--turquoise), var(--green-medium));
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 6px 20px rgba(26, 158, 142, 0.35);
+      font-family: inherit;
+    }
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(26, 158, 142, 0.45);
+    }
+    .btn-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .alert {
+      display: none;
+      padding: 16px 20px;
+      border-radius: 14px;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      align-items: center;
+      gap: 12px;
+    }
+    .alert.show { display: flex; }
+    .alert.success { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+    .alert.error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+    .alert svg { flex-shrink: 0; width: 22px; height: 22px; }
+
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    footer {
+      background: var(--green-dark);
+      color: rgba(255,255,255,0.7);
+      text-align: center;
+      padding: 24px 20px;
+      font-size: 0.8rem;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    footer strong { color: var(--cyan-soft); }
+
+    @media (max-width:480px) {
+      .card { padding: 28px 20px; }
+      .card h1 { font-size: 1.3rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="home.html" class="brand">
+      <img src="imagenes/logo.png" alt="Clínica del Pie Isabel Aguiar">
+      <span>Clínica del Pie</span>
+    </a>
+    <a href="home.html" class="btn-volver">&larr; Volver</a>
+  </nav>
+
+  <div class="container">
+    <div class="card">
+      <div class="icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </div>
+      <h1>Agendar Cita</h1>
+      <p class="sub">Completá tus datos y elegí el día y horario que prefieras</p>
+
+      <div id="alerta" class="alert" role="alert">
+        <svg id="alertaIcono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span id="alertaMensaje"></span>
+      </div>
+
+      <form id="citaForm" novalidate>
+        <div class="form-group">
+          <label for="nombre">Nombre completo <span class="req">*</span></label>
+          <input type="text" id="nombre" placeholder="Ej: María Pérez" required>
+        </div>
+        <div class="form-group">
+          <label for="telefono">Teléfono de contacto <span class="req">*</span></label>
+          <input type="tel" id="telefono" placeholder="Ej: 091 234 567" required>
+        </div>
+        <div class="form-group">
+          <label for="email">Correo electrónico <span class="req">*</span></label>
+          <input type="email" id="email" placeholder="Ej: maria@ejemplo.com" required>
+        </div>
+        <div class="form-group">
+          <label for="fechaHora">Fecha y hora deseada <span class="req">*</span></label>
+          <input type="datetime-local" id="fechaHora" required>
+        </div>
+        <button type="submit" class="btn-submit" id="btnEnviar">
+          <span id="btnTexto">Agendar Cita</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2026 <strong>Clínica del Pie Isabel Aguiar</strong> — Pedicuría Técnica · Habilitación MSP · Montevideo, Uruguay</p>
+  </footer>
+
+  <script>
+    const form = document.getElementById('citaForm');
+    const btn = document.getElementById('btnEnviar');
+    const btnTexto = document.getElementById('btnTexto');
+    const alerta = document.getElementById('alerta');
+    const alertaMensaje = document.getElementById('alertaMensaje');
+    const alertaIcono = document.getElementById('alertaIcono');
+
+    // ⚠️ Cambiar esta URL por la del servidor cuando esté en producción
+    const API_URL = 'http://localhost:3000/api/crear-cita';
+
+    function mostrarAlerta(msg, tipo) {
+      alerta.className = 'alert show ' + tipo;
+      alertaMensaje.textContent = msg;
+      if (tipo === 'success') {
+        alertaIcono.innerHTML = '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>';
+      } else {
+        alertaIcono.innerHTML = '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>';
+      }
+      alerta.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      alerta.className = 'alert';
+
+      const nombre = document.getElementById('nombre').value.trim();
+      const telefono = document.getElementById('telefono').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const fechaHora = document.getElementById('fechaHora').value;
+
+      if (!nombre || !telefono || !email || !fechaHora) {
+        mostrarAlerta('Completá todos los campos obligatorios.', 'error');
+        return;
+      }
+
+      btn.disabled = true;
+      btnTexto.innerHTML = '<span class="spinner"></span>Agendando...';
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nombre, telefono, email, fechaHora })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          mostrarAlerta('Cita agendada correctamente. Te esperamos.', 'success');
+          form.reset();
+        } else {
+          mostrarAlerta(data.message || 'Error al agendar la cita.', 'error');
+        }
+      } catch (error) {
+        mostrarAlerta('No se pudo conectar con el servidor. Verificá que el servidor esté encendido.', 'error');
+      } finally {
+        btn.disabled = false;
+        btnTexto.textContent = 'Agendar Cita';
+      }
+    });
+
+    // Setear fecha mínima (ahora + 1 hora)
+    (function() {
+      const input = document.getElementById('fechaHora');
+      const now = new Date();
+      now.setHours(now.getHours() + 1);
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      const hh = String(now.getHours()).padStart(2, '0');
+      const mi = String(now.getMinutes()).padStart(2, '0');
+      input.min = `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+    })();
+  </script>
+</body>
+</html>

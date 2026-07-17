@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clínica del Pie Isabel Aguiar | Pedicuría en Montevideo</title>
+  <link rel="icon" type="image/png" href="imagenes/logo.png">
+  <meta property="og:title" content="Clínica del Pie Isabel Aguiar">
+  <meta property="og:description" content="Atención Integral del Pie - Pedicuría Técnica. Habilitada por el MSP.">
+  <meta property="og:image" content="https://clinicadelpieisabelaguiar.web.app/imagenes/og-whatsapp.png">
+  <meta property="og:url" content="https://clinicadelpieisabelaguiar.web.app">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://clinicadelpieisabelaguiar.web.app/imagenes/og-whatsapp.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --green-dark: #0b5345;
+      --green-medium: #0e6b58;
+      --turquoise: #1a9e8e;
+      --cyan-light: #7fdbd0;
+      --cyan-soft: #b8ece3;
+      --pine-dark: #084236;
+      --blue-medical: #1a5276;
+      --blue-dark: #0d3b5e;
+      --white-off: #faf6f2;
+      --pale-pink: #fdf6f5;
+      --text-dark: #1a2a3a;
+      --shadow: 0 8px 32px rgba(0,0,0,0.12);
+      --radius: 20px;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--text-dark);
+      line-height: 1.6;
+      background: linear-gradient(180deg, var(--green-dark) 0%, var(--green-medium) 20%, var(--turquoise) 50%, var(--cyan-light) 80%, var(--cyan-soft) 100%);
+      min-height: 100vh;
+    }
+
+    /* ========== NAVBAR ========== */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 900;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      background: rgba(11, 83, 69, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+
+    nav .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    nav .brand img {
+      height: 44px;
+      width: auto;
+      border-radius: 10px;
+    }
+
+    nav .brand span {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.3px;
+      display: none;
+    }
+
+    nav .btn-agendar {
+      background: var(--turquoise);
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      white-space: nowrap;
+      box-shadow: 0 4px 14px rgba(26, 158, 142, 0.4);
+    }
+
+    nav .btn-agendar:hover {
+      background: var(--cyan-light);
+      color: var(--green-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(26, 158, 142, 0.5);
+    }
+
+    /* ========== HERO ========== */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 20px 80px;
+      overflow: hidden;
+    }
+
+    .hero-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+    }
+
+    .hero-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(180deg, rgba(11,83,69,0.75) 0%, rgba(11,83,69,0.40) 50%, rgba(11,83,69,0.80) 100%);
+      z-index: 1;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 800px;
+    }
+
+    .hero-content h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.15;
+      margin-bottom: 16px;
+      text-shadow: 0 4px 30px rgba(0,0,0,0.3);
+    }
+
+    .hero-content h1 span {
+      color: var(--cyan-soft);
+    }
+
+    .hero-badges {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .hero-badges .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.25);
+      padding: 8px 18px;
+      border-radius: 50px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: 0.3px;
+    }
+
+    .hero-content p {
+      font-size: 1.05rem;
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 32px;
+      font-weight: 300;
+    }
+
+    .btn-whatsapp {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: #25d366;
+      color: #fff;
+      border: none;
+      padding: 16px 36px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      box-shadow: 0 6px 24px rgba(37, 211, 102, 0.45);
+    }
+
+    .btn-whatsapp:hover {
+      background: #20bd5a;
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(37, 211, 102, 0.55);
+    }
+
+    .hero-scroll {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      color: rgba(255,255,255,0.6);
+      font-size: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      animation: bounce 2s infinite;
+    }
+
+    .hero-scroll svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(8px); }
+    }
+
+    /* ========== SECTION COMMON ========== */
+    section {
+      padding: 60px 20px;
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 40px;
+      letter-spacing: -0.5px;
+    }
+
+    .section-title span {
+      color: var(--turquoise);
+      text-shadow: 0 2px 12px rgba(0,0,0,0.15);
+    }
+
+    /* ========== SERVICES ========== */
+    #servicios {
+      background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.08) 100%);
+    }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .service-card {
+      background: var(--pale-pink);
+      border-radius: var(--radius);
+      padding: 22px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: var(--shadow);
+      transition: all 0.3s ease;
+      cursor: default;
+    }
+
+    .service-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+    }
+
+    .service-card .icon {
+      flex-shrink: 0;
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--turquoise), var(--green-medium));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+
+    .service-card .icon svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .service-card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--blue-medical);
+      margin-bottom: 2px;
+    }
+
+    .service-card p {
+      font-size: 0.82rem;
+      color: #4a6a7a;
+      font-weight: 400;
+    }
+
+    /* ========== GALLERY ========== */
+    #trabajos {
+      background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, transparent 100%);
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 28px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .gallery-case {
+      background: var(--pale-pink);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .gallery-case h3 {
+      font-size: 1.1rem;
+      color: var(--blue-medical);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .gallery-case h3 .tag {
+      background: var(--pine-dark);
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 50px;
+      letter-spacing: 0.3px;
+    }
+
+    .gallery-viewer {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #e8f4f0;
+      margin-bottom: 14px;
+    }
+
+    .gallery-viewer img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      transition: opacity 0.3s ease;
+    }
+
+    .gallery-thumbs {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .gallery-thumbs button {
+      border: 2px solid transparent;
+      border-radius: 10px;
+      overflow: hidden;
+      cursor: pointer;
+      padding: 0;
+      background: none;
+      transition: all 0.2s ease;
+      aspect-ratio: 1;
+    }
+
+    .gallery-thumbs button img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .gallery-thumbs button:hover {
+      border-color: var(--turquoise);
+      transform: scale(1.03);
+    }
+
+    .gallery-thumbs button.active {
+      border-color: var(--turquoise);
+      box-shadow: 0 0 0 3px rgba(26, 158, 142, 0.3);
+    }
+
+    .gallery-simple {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .gallery-simple img {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border-radius: 12px;
+      display: block;
+      background: #e8f4f0;
+      transition: transform 0.3s ease;
+    }
+
+    .gallery-simple img:hover {
+      transform: scale(1.02);
+    }
+    #ubicacion {
+      background: linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 100%);
+    }
+
+    .location-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 28px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .location-card {
+      background: #fff;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.15);
+    }
+
+    .location-card img {
+      width: 100%;
+      height: 240px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .location-card .info {
+      padding: 24px 26px;
+    }
+
+    .location-card .info h3 {
+      font-size: 1.25rem;
+      color: var(--blue-medical);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .location-card .info h3::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 24px;
+      background: var(--turquoise);
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .location-card .info p {
+      font-size: 0.95rem;
+      color: #1a2a3a;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .location-card .info p a:hover {
+      color: var(--turquoise) !important;
+    }
+
+    .location-card .info p svg {
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+      margin-top: 2px;
+      color: var(--turquoise);
+    }
+
+    .location-card .info .btn-maps {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 16px;
+      background: var(--turquoise);
+      color: #fff;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      cursor: default;
+    }
+
+    .location-card .info .btn-maps:hover {
+      background: var(--green-medium);
+      transform: translateY(-2px);
+    }
+
+    .map-container {
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.15);
+      height: 300px;
+    }
+
+    .map-container iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
+    /* ========== CTA FINAL ========== */
+    .cta-final {
+      background: var(--pine-dark);
+      padding: 50px 20px;
+      text-align: center;
+    }
+
+    .cta-final p {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 1.4rem;
+      color: #f5f0e8;
+      line-height: 1.5;
+      max-width: 600px;
+      margin: 0 auto 20px;
+    }
+
+    .cta-final .btn-whatsapp {
+      background: #25d366;
+    }
+
+    .cta-final .btn-whatsapp:hover {
+      background: #20bd5a;
+    }
+
+    /* ========== FLOATING BUTTONS ========== */
+    .floating-actions {
+      position: fixed;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .floating-actions a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.25);
+      text-decoration: none;
+    }
+
+    .floating-actions a svg {
+      width: 26px;
+      height: 26px;
+      fill: #fff;
+    }
+
+    .floating-actions .btn-wa {
+      background: #25d366;
+    }
+
+    .floating-actions .btn-wa:hover {
+      background: #20bd5a;
+      transform: scale(1.1);
+    }
+
+    .floating-actions .btn-call {
+      background: #1877f2;
+    }
+
+    .floating-actions .btn-call:hover {
+      background: #1464d0;
+      transform: scale(1.1);
+    }
+
+    /* ========== FOOTER ========== */
+    footer {
+      background: var(--green-dark);
+      color: rgba(255,255,255,0.7);
+      text-align: center;
+      padding: 24px 20px;
+      font-size: 0.8rem;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    footer strong {
+      color: var(--cyan-soft);
+    }
+
+    /* ========== RESPONSIVE ========== */
+    @media (min-width: 500px) {
+      nav .brand span {
+        display: inline;
+      }
+      nav {
+        padding: 14px 32px;
+      }
+    }
+
+    @media (min-width: 640px) {
+      .hero-content h1 {
+        font-size: 3.2rem;
+      }
+      .services-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .location-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .map-container {
+        height: 100%;
+      }
+      .cta-final p {
+        font-size: 1.6rem;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      nav {
+        padding: 16px 48px;
+      }
+      nav .brand span {
+        font-size: 1.2rem;
+      }
+      .hero-content h1 {
+        font-size: 4rem;
+      }
+      section {
+        padding: 80px 40px;
+      }
+      .services-grid {
+        gap: 20px;
+      }
+      .service-card {
+        padding: 26px 28px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========== NAVBAR ========== -->
+  <nav>
+    <a href="#" class="brand">
+      <img src="imagenes/logo.png" alt="Clínica del Pie Isabel Aguiar">
+      <span>Clínica del Pie Isabel Aguiar</span>
+    </a>
+    <a href="https://wa.me/59894943875?text=Hola,%20quiero%20coordinar%20un%20turno%20en%20la%20Cl%C3%ADnica%20del%20Pie" class="btn-agendar" target="_blank" rel="noopener">
+      Agendar Turno
+    </a>
+  </nav>
+
+  <!-- ========== HERO ========== -->
+  <section class="hero" id="inicio">
+    <img class="hero-bg" src="imagenes/cabezal.png" alt="Clínica del Pie Isabel Aguiar">
+    <div class="hero-overlay"></div>
+
+    <div class="hero-content">
+      <h1>Cuidado <span>profesional</span> para tus pies</h1>
+
+      <div class="hero-badges">
+        <span class="badge">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Habilitación MSP
+        </span>
+        <span class="badge">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          Pedicuría Técnica
+        </span>
+      </div>
+
+      <p>Materiales 100% estériles · Atención personalizada en Montevideo</p>
+
+      <a href="https://wa.me/59894943875?text=Hola,%20quiero%20coordinar%20un%20turno%20en%20la%20Cl%C3%ADnica%20del%20Pie" class="btn-whatsapp" target="_blank" rel="noopener">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Reservar Cita por WhatsApp
+      </a>
+    </div>
+
+    <div class="hero-scroll">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 13l5 5 5-5"/><path d="M7 6l5 5 5-5"/></svg>
+      <span>Descubrí más</span>
+    </div>
+  </section>
+
+  <!-- ========== SERVICIOS ========== -->
+  <section id="servicios">
+    <h2 class="section-title">Nuestros <span>Servicios</span></h2>
+
+    <div class="services-grid">
+      <div class="service-card">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div>
+          <h3>Pedicuría Técnica</h3>
+          <p>Cuidado profesional e integral de la salud de tus pies</p>
+        </div>
+      </div>
+
+      <div class="service-card">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div>
+          <h3>Atención integral del pie</h3>
+          <p>Evaluación y tratamiento completo de la salud podal</p>
+        </div>
+      </div>
+
+      <div class="service-card">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </div>
+        <div>
+          <h3>Onicotomía</h3>
+          <p>Corte correcto de uñas con técnica especializada</p>
+        </div>
+      </div>
+
+      <div class="service-card">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+        </div>
+        <div>
+          <h3>Hiperqueratosis</h3>
+          <p>Tratamiento profesional de durezas y callosidades</p>
+        </div>
+      </div>
+
+      <div class="service-card">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        </div>
+        <div>
+          <h3>Callos</h3>
+          <p>Eliminación y prevención de callos plantares</p>
+        </div>
+      </div>
+
+      <div class="service-card">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        </div>
+        <div>
+          <h3>Pie diabético</h3>
+          <p>Atención especializada para pacientes con diabetes</p>
+        </div>
+      </div>
+
+      <div class="service-card" style="grid-column: 1 / -1;">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div>
+          <h3>Masajes relajantes y descontracturantes</h3>
+          <p>Terapia manual para aliviar tensiones y mejorar la circulación</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== TRABAJOS REALIZADOS ========== -->
+  <section id="trabajos">
+    <h2 class="section-title">Trabajos <span>Realizados</span></h2>
+
+    <div class="gallery-grid">
+      <div class="gallery-case">
+        <h3>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Caso 1: Verruga Plantar
+          <span class="tag">Antes / Después</span>
+        </h3>
+        <div class="gallery-viewer">
+          <img id="caso1-main" src="imagenes/caso1.1.jpeg" alt="Verruga plantar - imagen 1">
+        </div>
+        <div class="gallery-thumbs">
+          <button class="active" onclick="document.getElementById('caso1-main').src='imagenes/caso1.1.jpeg'; this.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('active')); this.classList.add('active')">
+            <img src="imagenes/caso1.1.jpeg" alt="Verruga 1.1" loading="lazy">
+          </button>
+          <button onclick="document.getElementById('caso1-main').src='imagenes/caso1.2.jpeg'; this.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('active')); this.classList.add('active')">
+            <img src="imagenes/caso1.2.jpeg" alt="Verruga 1.2" loading="lazy">
+          </button>
+          <button onclick="document.getElementById('caso1-main').src='imagenes/caso1.3.jpeg'; this.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('active')); this.classList.add('active')">
+            <img src="imagenes/caso1.3.jpeg" alt="Verruga 1.3" loading="lazy">
+          </button>
+          <button onclick="document.getElementById('caso1-main').src='imagenes/caso1.4.jpeg'; this.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('active')); this.classList.add('active')">
+            <img src="imagenes/caso1.4.jpeg" alt="Verruga 1.4" loading="lazy">
+          </button>
+        </div>
+      </div>
+
+      <div class="gallery-case">
+        <h3>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          Caso 2: Onicomicosis
+          <span class="tag">Antes / Después</span>
+        </h3>
+        <div class="gallery-viewer">
+          <img id="caso2-main" src="imagenes/caso2.4.jpeg" alt="Caso 2 - imagen 1">
+        </div>
+        <div class="gallery-thumbs">
+          <button class="active" onclick="document.getElementById('caso2-main').src='imagenes/caso2.4.jpeg'; this.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('active')); this.classList.add('active')">
+            <img src="imagenes/caso2.4.jpeg" alt="Caso 2.4" loading="lazy">
+          </button>
+          <button onclick="document.getElementById('caso2-main').src='imagenes/caso2.3.jpeg'; this.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('active')); this.classList.add('active')">
+            <img src="imagenes/caso2.3.jpeg" alt="Caso 2.3" loading="lazy">
+          </button>
+          <button onclick="document.getElementById('caso2-main').src='imagenes/caso2.2.jpeg'; this.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('active')); this.classList.add('active')">
+            <img src="imagenes/caso2.2.jpeg" alt="Caso 2.2" loading="lazy">
+          </button>
+          <button onclick="document.getElementById('caso2-main').src='imagenes/caso2.1.jpeg'; this.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('active')); this.classList.add('active')">
+            <img src="imagenes/caso2.1.jpeg" alt="Caso 2.1" loading="lazy">
+          </button>
+        </div>
+      </div>
+
+      <div class="gallery-case">
+        <h3>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          Instalaciones
+        </h3>
+        <div class="gallery-simple">
+          <img src="imagenes/sillon.jpeg" alt="Sillón de atención" loading="lazy">
+          <img src="imagenes/materialesesteriles.jpeg" alt="Materiales estériles" loading="lazy">
+          <img src="imagenes/materialesesteriles1.jpeg" alt="Materiales estériles" loading="lazy">
+          <img src="imagenes/puertaEntrada.jpeg" alt="Entrada a la clínica" loading="lazy">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== UBICACIÓN ========== -->
+  <section id="ubicacion">
+    <h2 class="section-title">Nuestra Ubicación</h2>
+
+    <div class="location-grid">
+      <div class="location-card">
+        <img src="imagenes/puertaEntrada.jpeg" alt="Entrada a la Clínica del Pie - Galería Uruguay" loading="lazy">
+        <div class="info">
+          <h3>Galería Uruguay — Local 6</h3>
+          <p>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Av. 18 de Julio 966, Local 6, Montevideo
+          </p>
+          <p>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <a href="mailto:ysabelcirta@gmail.com" style="color:inherit;text-decoration:none">ysabelcirta@gmail.com</a>
+          </p>
+          <p>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            <a href="tel:094943875" style="color:inherit;text-decoration:none">094 943 875</a>
+          </p>
+
+          <span class="btn-maps">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Ver en Google Maps
+          </span>
+        </div>
+      </div>
+
+      <div class="map-container">
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3271.852884156142!2d-56.19019198476489!3d-34.90646448037724!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x959f81b7a4b1b1b1%3A0x1b1b1b1b1b1b1b1b!2sAv.%2018%20de%20Julio%20966%2C%20Montevideo!5e0!3m2!1ses!2suy!4v1"
+          allowfullscreen=""
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          title="Mapa - Galería Uruguay Montevideo">
+        </iframe>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== CTA FINAL ========== -->
+  <section class="cta-final">
+    <p>Reservá tu turno al <strong>094 943 875</strong>, ¡con gusto te atenderé!</p>
+    <a href="https://wa.me/59894943875?text=Hola,%20quiero%20coordinar%20un%20turno%20en%20la%20Cl%C3%ADnica%20del%20Pie" class="btn-whatsapp" target="_blank" rel="noopener">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      Reservar Cita por WhatsApp
+    </a>
+  </section>
+
+  <!-- ========== FLOATING ACTIONS ========== -->
+  <div class="floating-actions">
+    <a href="https://wa.me/59894943875?text=Hola,%20quiero%20coordinar%20un%20turno%20en%20la%20Cl%C3%ADnica%20del%20Pie" class="btn-wa" target="_blank" rel="noopener" aria-label="WhatsApp">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+    </a>
+    <a href="tel:094943875" class="btn-call" aria-label="Llamar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+    </a>
+
+  </div>
+
+  <!-- ========== AGENDAR CITA EN LÍNEA ========== -->
+  <section style="background:linear-gradient(135deg,var(--green-dark),var(--green-medium));padding:60px 20px;text-align:center">
+    <div style="max-width:600px;margin:0 auto">
+      <div style="width:72px;height:72px;background:rgba(255,255,255,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
+      </div>
+      <h2 style="font-size:1.8rem;font-weight:800;color:#fff;margin-bottom:12px">Reservá tu <span style="color:var(--cyan-soft)">Turno Online</span></h2>
+      <p style="color:rgba(255,255,255,0.85);font-size:1rem;margin-bottom:28px;max-width:460px;margin-left:auto;margin-right:auto">Elegí el día y horario que mejor te quede desde nuestro sistema de agendamiento web.</p>
+      <a href="/agendar-cita.html" style="display:inline-flex;align-items:center;gap:10px;background:var(--turquoise);color:#fff;padding:16px 36px;border-radius:50px;font-weight:700;font-size:1.05rem;text-decoration:none;transition:all 0.3s ease;box-shadow:0 6px 24px rgba(26,158,142,0.45);cursor:pointer" onmouseover="this.style.background='var(--cyan-light)';this.style.color='var(--green-dark)';this.style.transform='translateY(-3px)'" onmouseout="this.style.background='var(--turquoise)';this.style.color='#fff';this.style.transform='translateY(0)'">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Agendar Cita en Línea
+      </a>
+      <p style="color:rgba(255,255,255,0.5);font-size:0.8rem;margin-top:18px">O también podés reservar por <a href="https://wa.me/59894943875?text=Hola%2C%20quiero%20coordinar%20un%20turno%20en%20la%20Cl%C3%ADnica%20del%20Pie" style="color:var(--cyan-soft);text-decoration:underline">WhatsApp</a></p>
+    </div>
+  </section>
+
+  <!-- ========== SIGUENOS EN INSTAGRAM ========== -->
+  <section style="background:var(--pine-dark);padding:50px 20px;text-align:center">
+    <h2 style="font-size:1.6rem;font-weight:700;color:#fff;margin-bottom:12px">Síguenos en <span style="color:var(--cyan-soft)">Instagram</span></h2>
+    <p style="color:rgba(255,255,255,0.7);margin-bottom:24px;font-size:0.95rem">Mirá más trabajos y novedades en nuestras redes</p>
+    <a href="https://www.instagram.com/isabel_pedicuria_tecnica/" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#833ab4,#fd1d1d,#f77737);color:#fff;padding:14px 32px;border-radius:50px;font-weight:700;font-size:1rem;text-decoration:none;transition:all 0.3s ease;box-shadow:0 6px 24px rgba(131,58,180,0.4)">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+      @isabel_pedicuria_tecnica
+    </a>
+  </section>
+
+  <!-- ========== FOOTER ========== -->
+  <footer>
+    <p>&copy; 2026 <strong>Clínica del Pie Isabel Aguiar</strong> — Pedicuría Técnica · Habilitación MSP · Montevideo, Uruguay</p>
+  </footer>
+
+</body>
+</html>
