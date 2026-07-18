@@ -17,10 +17,17 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Google Calendar — service account auth
 // -------------------------------------------------------------------
 function getCredentials() {
+  console.log('GOOGLE_CREDENTIALS exists:', !!process.env.GOOGLE_CREDENTIALS);
+  console.log('GOOGLE_CREDENTIALS length:', process.env.GOOGLE_CREDENTIALS ? process.env.GOOGLE_CREDENTIALS.length : 0);
   if (process.env.GOOGLE_CREDENTIALS) {
-    return JSON.parse(process.env.GOOGLE_CREDENTIALS);
+    try {
+      return JSON.parse(process.env.GOOGLE_CREDENTIALS);
+    } catch (e) {
+      console.error('Failed to parse GOOGLE_CREDENTIALS:', e.message);
+    }
   }
   const filePath = path.join(__dirname, 'google-calendar-key.json');
+  console.log('Falling back to file:', filePath);
   return JSON.parse(fs.readFileSync(filePath, 'utf8'));
 }
 
@@ -162,7 +169,7 @@ app.post('/api/crear-cita', async (req, res) => {
     console.error('Error al crear la cita:', error);
     res.status(500).json({
       success: false,
-      message: 'Ocurrió un error: ' + error.message
+      message: 'Ocurrió un error al agendar la cita. Intentalo de nuevo más tarde.'
     });
   }
 });
