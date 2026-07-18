@@ -25,22 +25,11 @@ function getCredentials() {
 }
 
 async function getCalendarClient() {
-  let auth;
-  if (process.env.GOOGLE_CREDENTIALS) {
-    // En Render: usar GoogleAuth con credenciales desde variable de entorno
-    const { GoogleAuth } = require('google-auth-library');
-    auth = new GoogleAuth({
-      credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS),
-      scopes: ['https://www.googleapis.com/auth/calendar']
-    });
-  } else {
-    // Local: usar JWT con archivo
-    const creds = JSON.parse(fs.readFileSync(path.join(__dirname, 'google-calendar-key.json'), 'utf8'));
-    auth = new google.auth.JWT(
-      creds.client_email, null, creds.private_key,
-      ['https://www.googleapis.com/auth/calendar']
-    );
-  }
+  const creds = getCredentials();
+  const auth = new google.auth.JWT(
+    creds.client_email, null, creds.private_key,
+    ['https://www.googleapis.com/auth/calendar']
+  );
   return google.calendar({ version: 'v3', auth });
 }
 
@@ -173,7 +162,7 @@ app.post('/api/crear-cita', async (req, res) => {
     console.error('Error al crear la cita:', error);
     res.status(500).json({
       success: false,
-      message: 'Ocurrió un error al agendar la cita. Intentalo de nuevo más tarde.'
+      message: 'Ocurrió un error: ' + error.message
     });
   }
 });
