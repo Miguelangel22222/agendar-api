@@ -13,6 +13,16 @@ app.use(express.json());
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Debug endpoint para verificar variables de entorno
+app.get('/api/debug', (req, res) => {
+  res.json({
+    GOOGLE_CREDENTIALS_EXISTS: !!process.env.GOOGLE_CREDENTIALS,
+    GOOGLE_CREDENTIALS_LENGTH: process.env.GOOGLE_CREDENTIALS ? process.env.GOOGLE_CREDENTIALS.length : 0,
+    MAIL_USER_EXISTS: !!process.env.MAIL_USER,
+    MAIL_PASS_EXISTS: !!process.env.MAIL_PASS
+  });
+});
+
 // -------------------------------------------------------------------
 // Google Calendar — service account auth
 // -------------------------------------------------------------------
