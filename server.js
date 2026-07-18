@@ -20,15 +20,27 @@ function getCredentials() {
   if (process.env.GOOGLE_CREDENTIALS) {
     return JSON.parse(process.env.GOOGLE_CREDENTIALS);
   }
-  return JSON.parse(fs.readFileSync(path.join(__dirname, 'google-calendar-key.json'), 'utf8'));
+  const filePath = path.join(__dirname, 'google-calendar-key.json');
+  return JSON.parse(fs.readFileSync(filePath, 'utf8'));
 }
 
 async function getCalendarClient() {
-  const creds = getCredentials();
-  const auth = new google.auth.JWT(
-    creds.client_email, null, creds.private_key,
-    ['https://www.googleapis.com/auth/calendar']
-  );
+  let auth;
+  if (process.env.GOOGLE_CREDENTIALS) {
+    // En Render: usar GoogleAuth con credenciales desde variable de entorno
+    const { GoogleAuth } = require('google-auth-library');
+    auth = new GoogleAuth({
+      credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS),
+      scopes: ['https://www.googleapis.com/auth/calendar']
+    });
+  } else {
+    // Local: usar JWT con archivo
+    const creds = JSON.parse(fs.readFileSync(path.join(__dirname, 'google-calendar-key.json'), 'utf8'));
+    auth = new google.auth.JWT(
+      creds.client_email, null, creds.private_key,
+      ['https://www.googleapis.com/auth/calendar']
+    );
+  }
   return google.calendar({ version: 'v3', auth });
 }
 
