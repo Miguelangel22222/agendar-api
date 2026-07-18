@@ -13,6 +13,14 @@ app.use(express.json());
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Debug
+app.get('/api/debug', (req, res) => {
+  res.json({
+    GOOGLE_CREDENTIALS_EXISTS: !!process.env.GOOGLE_CREDENTIALS,
+    GOOGLE_CREDENTIALS_LENGTH: process.env.GOOGLE_CREDENTIALS ? process.env.GOOGLE_CREDENTIALS.length : 0
+  });
+});
+
 // -------------------------------------------------------------------
 // Google Calendar — service account auth
 // -------------------------------------------------------------------
