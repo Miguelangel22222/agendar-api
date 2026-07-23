@@ -166,6 +166,70 @@ app.post('/api/crear-cita', async (req, res) => {
   }
 });
 
+// -------------------------------------------------------------------
+// GET /api/scrape-emails?url=...
+// -------------------------------------------------------------------
+const axios = require('axios');
+const cheerio = require('cheerio');
+
+app.get('/api/scrape-emails', async (req, res) => {
+  try {
+    const { url } = req.query;
+    if (!url) return res.status(400).json({ success: false, message: 'Falta url' });
+
+    const { data } = await axios.get(url, {
+      timeout: 15000,
+      headers: { 'User-Agent': 'Mozilla/5.0' }
+    });
+    const $ = cheerio.load(data);
+    const text = $('body').text();
+    const emails = [...new Set(text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g) || [])]
+      .filter(e => !e.includes('.png') && !e.includes('.jpg') && !e.includes('.gif') && !e.includes('.svg'));
+
+    res.json({ success: true, emails, url });
+  } catch (err) {
+    res.json({ success: false, message: err.message, emails: [] });
+  }
+});
+
+// -------------------------------------------------------------------
+// GET /api/google-places?query=...&apiKey=...
+// -------------------------------------------------------------------
+app.get('/api/google-places', async (req, res) => {
+  try {
+    const { query, apiKey } = req.query;
+    if (!query || !apiKey) return res.status(400).json({ success: false, message: 'Falta query o apiKey' });
+
+    const { data } = await axios.get('https://maps.googleapis.com/maps/api/place/textsearch/json', {
+      params: { query, key: apiKey, language: 'es' }
+    });
+
+    if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
+      return res.json({ success: false, message: data.status, places: [] });
+    }
+
+    const places = await Promise.all((data.results || []).slice(0, 20).map(async (p) => {
+      const detail = await axios.get('https://maps.googleapis.com/maps/api/place/details/json', {
+        params: { place_id: p.place_id, key: apiKey, fields: 'name,formatted_address,formatted_phone_number,website,url', language: 'es' }
+      });
+      const d = detail.data.result || {};
+      return {
+        name: p.name,
+        address: d.formatted_address || p.formatted_address,
+        phone: d.formatted_phone_number || '',
+        website: d.website || '',
+        googleUrl: d.url || '',
+        rating: p.rating || 0,
+        emails: []
+      };
+    }));
+
+    res.json({ success: true, places });
+  } catch (err) {
+    res.json({ success: false, message: err.message, places: [] });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
