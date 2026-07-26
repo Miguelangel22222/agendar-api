@@ -97,7 +97,7 @@ app.post('/api/crear-cita', async (req, res) => {
 
     // ⚠️ El calendario de la podóloga debe estar compartido con la cuenta de servicio:
     //    agendar@gen-lang-client-0386738774.iam.gserviceaccount.com (permiso: "Hacer cambios")
-    const CALENDAR_ID = 'arteyestilomodas@gmail.com';
+    const CALENDAR_ID = 'c7783219afc953f883f3e0b4e540a65abaf3ba835b41656b1058832aeaf8f147@group.calendar.google.com';
 
     const event = {
       summary: `Cita Podológica: ${nombre}`,
