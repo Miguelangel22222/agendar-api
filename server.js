@@ -19,7 +19,11 @@ const auth = new google.auth.JWT(
 
 const calendar = google.calendar({ version: 'v3', auth });
 
-app.post('/agendar', async (req, res) => {
+app.get(['/ping', '/api/ping'], (req, res) => {
+  res.status(200).json({ status: 'ok', message: 'Servidor activo' });
+});
+
+app.post(['/agendar', '/api/agendar'], async (req, res) => {
   try {
     await auth.authorize();
 
@@ -33,12 +37,6 @@ app.post('/agendar', async (req, res) => {
     console.error('Error al crear la cita:', error.message);
     res.status(500).json({ error: error.message });
   }
-});
-
-const PORT = process.env.PORT || 10000;
-
-app.get('/api/ping', (req, res) => {
-  res.status(200).json({ status: 'ok', message: 'Servidor activo' });
 });
 
 app.listen(PORT, () => console.log(`Servidor corriendo en el puerto ${PORT}`));
