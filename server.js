@@ -6,28 +6,69 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+function getAuthAndCalendar() {
+  const rawKey = process.env.PRIVATE_KEY || '';
+  const formattedKey = rawKey.replace(/\\n/g, '\n');
+  const auth = new google.auth.JWT({
+    email: process.env.CLIENT_EMAIL,
+    key: formattedKey,
+    scopes: ['https://www.googleapis.com/auth/calendar'],
+  });
+  const calendar = google.calendar({ version: 'v3', auth });
+  return { auth, calendar };
+}
+
 app.get(['/', '/ping', '/api/ping'], (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
 
-app.post(['/agendar', '/api/agendar'], async (req, res) => {
+app.get(['/ocupados', '/api/ocupados'], async (req, res) => {
   try {
-    const rawKey = process.env.PRIVATE_KEY || '';
-    const formattedKey = rawKey.replace(/\\n/g, '\n');
+    const { fecha } = req.query;
+    if (!fecha) {
+      return res.status(400).json({ error: 'Falta el parámetro ?fecha=YYYY-MM-DD' });
+    }
 
-    const auth = new google.auth.JWT({
-      email: process.env.CLIENT_EMAIL,
-      key: formattedKey,
-      scopes: ['https://www.googleapis.com/auth/calendar'],
+    const { calendar } = getAuthAndCalendar();
+    const calendarId = process.env.CALENDAR_ID || 'primary';
+
+    const timeMin = new Date(`${fecha}T00:00:00-03:00`).toISOString();
+    const timeMax = new Date(`${fecha}T23:59:59-03:00`).toISOString();
+
+    const response = await calendar.events.list({
+      calendarId,
+      timeMin,
+      timeMax,
+      singleEvents: true,
+      orderBy: 'startTime',
     });
 
-    const calendar = google.calendar({ version: 'v3', auth });
+    const ocupados = (response.data.items || []).map(event => ({
+      inicio: event.start.dateTime || event.start.date,
+      fin: event.end.dateTime || event.end.date,
+    }));
 
+    res.status(200).json({ ocupados });
+  } catch (error) {
+    console.error('Error al consultar ocupados (Detalle):', error.response ? error.response.data : error.message);
+    res.status(500).json({ error: error.message, details: error.response ? error.response.data : null });
+  }
+});
+
+app.post(['/agendar', '/api/agendar'], async (req, res) => {
+  try {
+    const { calendar } = getAuthAndCalendar();
     const calendarId = process.env.CALENDAR_ID || 'primary';
+
+    const requestBody = {
+      ...req.body,
+      attendees: req.body.email ? [{ email: req.body.email }] : [],
+    };
 
     const response = await calendar.events.insert({
       calendarId,
-      requestBody: req.body,
+      requestBody,
+      sendUpdates: 'all',
     });
 
     res.status(200).json({ success: true, data: response.data });
