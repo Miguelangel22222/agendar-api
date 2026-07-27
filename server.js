@@ -24,6 +24,14 @@ function getCredentials() {
     }
     return parsed;
   }
+
+  if (process.env.CLIENT_EMAIL && process.env.PRIVATE_KEY) {
+    return {
+      client_email: process.env.CLIENT_EMAIL,
+      private_key: process.env.PRIVATE_KEY.replace(/\\n/g, '\n')
+    };
+  }
+
   return JSON.parse(fs.readFileSync(path.join(__dirname, 'google-calendar-key.json'), 'utf8'));
 }
 
@@ -165,7 +173,8 @@ app.post('/api/crear-cita', async (req, res) => {
     console.error('Error al crear la cita:', error);
     res.status(500).json({
       success: false,
-      message: 'Ocurrió un error al agendar la cita. Intentalo de nuevo más tarde.'
+      message: error.message || 'Error interno del servidor',
+      details: error.response?.data?.error || null
     });
   }
 });

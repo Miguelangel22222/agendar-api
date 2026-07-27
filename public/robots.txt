@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://clinicadelpieisabelaguiar.web.app/sitemap.xml
