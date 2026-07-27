@@ -18,7 +18,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 // -------------------------------------------------------------------
 function getCredentials() {
   if (process.env.GOOGLE_CREDENTIALS) {
-    return JSON.parse(process.env.GOOGLE_CREDENTIALS);
+    const parsed = JSON.parse(process.env.GOOGLE_CREDENTIALS);
+    if (parsed.private_key) {
+      parsed.private_key = parsed.private_key.replace(/\\n/g, '\n');
+    }
+    return parsed;
   }
   return JSON.parse(fs.readFileSync(path.join(__dirname, 'google-calendar-key.json'), 'utf8'));
 }
@@ -27,7 +31,7 @@ async function getCalendarClient() {
   const creds = getCredentials();
   const auth = new google.auth.JWT(
     creds.client_email, null, creds.private_key,
-    ['https://www.googleapis.com/auth/calendar']
+    ['https://www.googleapis.com/auth/calendar', 'https://www.googleapis.com/auth/calendar.events']
   );
   return google.calendar({ version: 'v3', auth });
 }
