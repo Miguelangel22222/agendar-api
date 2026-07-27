@@ -29,7 +29,6 @@
       display: flex;
       flex-direction: column;
     }
-
     nav {
       display: flex;
       align-items: center;
@@ -59,7 +58,6 @@
       transition: all 0.3s ease;
     }
     nav a.btn-volver:hover { background: var(--turquoise); }
-
     .container {
       flex: 1;
       display: flex;
@@ -102,7 +100,6 @@
       color: #4a6a7a;
       margin-bottom: 28px;
     }
-
     .form-group { margin-bottom: 20px; }
     .form-group label {
       display: block;
@@ -112,7 +109,7 @@
       margin-bottom: 6px;
     }
     .form-group label .req { color: #dc2626; margin-left: 2px; }
-    .form-group input {
+    .form-group input, .form-group select {
       width: 100%;
       padding: 14px 16px;
       border: 2px solid #e2e8f0;
@@ -123,11 +120,48 @@
       transition: border-color 0.3s ease, box-shadow 0.3s ease;
       outline: none;
     }
-    .form-group input:focus {
+    .form-group input:focus, .form-group select:focus {
       border-color: var(--turquoise);
       box-shadow: 0 0 0 4px rgba(26, 158, 142, 0.12);
     }
     .form-group input::placeholder { color: #94a3b8; }
+
+    .slots-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .slot-btn {
+      padding: 12px;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      background: #fff;
+      font-size: 0.9rem;
+      font-weight: 600;
+      font-family: inherit;
+      color: var(--text-dark);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .slot-btn:hover:not(:disabled) {
+      border-color: var(--turquoise);
+      background: var(--cyan-soft);
+    }
+    .slot-btn.selected {
+      border-color: var(--turquoise);
+      background: var(--turquoise);
+      color: #fff;
+    }
+    .slot-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      background: #f1f5f9;
+    }
+    .slot-btn.loading {
+      opacity: 0.6;
+      cursor: wait;
+    }
 
     .btn-submit {
       width: 100%;
@@ -142,6 +176,7 @@
       transition: all 0.3s ease;
       box-shadow: 0 6px 20px rgba(26, 158, 142, 0.35);
       font-family: inherit;
+      margin-top: 8px;
     }
     .btn-submit:hover {
       transform: translateY(-2px);
@@ -152,7 +187,6 @@
       cursor: not-allowed;
       transform: none;
     }
-
     .alert {
       display: none;
       padding: 16px 20px;
@@ -167,7 +201,6 @@
     .alert.success { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
     .alert.error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
     .alert svg { flex-shrink: 0; width: 22px; height: 22px; }
-
     .spinner {
       display: inline-block;
       width: 20px;
@@ -180,7 +213,12 @@
       margin-right: 8px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-
+    .loading-text {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-top: 8px;
+    }
     footer {
       background: var(--green-dark);
       color: rgba(255,255,255,0.7);
@@ -190,10 +228,10 @@
       border-top: 1px solid rgba(255,255,255,0.08);
     }
     footer strong { color: var(--cyan-soft); }
-
     @media (max-width:480px) {
       .card { padding: 28px 20px; }
       .card h1 { font-size: 1.3rem; }
+      .slots-grid { grid-template-columns: repeat(2, 1fr); }
     }
   </style>
 </head>
@@ -234,9 +272,17 @@
           <input type="email" id="email" placeholder="Ej: maria@ejemplo.com" required>
         </div>
         <div class="form-group">
-          <label for="fechaHora">Fecha y hora deseada <span class="req">*</span></label>
-          <input type="datetime-local" id="fechaHora" required>
+          <label for="fecha">Fecha <span class="req">*</span> <span style="font-weight:400;color:#94a3b8;font-size:0.75rem;">(Lun–Vie)</span></label>
+          <input type="date" id="fecha" required>
         </div>
+        <div class="form-group">
+          <label>Horario disponible <span class="req">*</span></label>
+          <div id="slotsContainer" class="slots-grid"></div>
+          <p id="slotsLoading" class="loading-text" style="display:none;">Cargando horarios disponibles...</p>
+          <p id="slotsEmpty" class="loading-text" style="display:none;color:#dc2626;">No hay horarios disponibles para esta fecha.</p>
+        </div>
+        <input type="hidden" id="horaSeleccionada">
+
         <button type="submit" class="btn-submit" id="btnEnviar">
           <span id="btnTexto">Agendar Cita</span>
         </button>
@@ -255,11 +301,16 @@
     const alerta = document.getElementById('alerta');
     const alertaMensaje = document.getElementById('alertaMensaje');
     const alertaIcono = document.getElementById('alertaIcono');
+    const fechaInput = document.getElementById('fecha');
+    const slotsContainer = document.getElementById('slotsContainer');
+    const slotsLoading = document.getElementById('slotsLoading');
+    const slotsEmpty = document.getElementById('slotsEmpty');
+    const horaHidden = document.getElementById('horaSeleccionada');
 
     const API_URL = 'https://agendar-api-tatn.onrender.com/api/agendar';
+    const OCUPADOS_URL = 'https://agendar-api-tatn.onrender.com/api/ocupados';
     const PING_URL = 'https://agendar-api-tatn.onrender.com/api/ping';
 
-    // Pre-calentamiento: despierta Render mientras el usuario completa el formulario
     fetch(PING_URL).catch(() => {});
 
     function mostrarAlerta(msg, tipo) {
@@ -273,6 +324,107 @@
       alerta.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
+    function generarSlots() {
+      const slots = [];
+      for (let h = 9; h <= 17; h++) {
+        slots.push(`${String(h).padStart(2, '0')}:00`);
+        if (h < 17) slots.push(`${String(h).padStart(2, '0')}:30`);
+      }
+      return slots;
+    }
+
+    function fechaEsValida(dateStr) {
+      const d = new Date(dateStr + 'T12:00:00');
+      const dia = d.getDay();
+      if (dia === 0 || dia === 6) return false;
+      const hoy = new Date();
+      hoy.setHours(0, 0, 0, 0);
+      return d >= hoy;
+    }
+
+    function setMinDate() {
+      const hoy = new Date();
+      const yyyy = hoy.getFullYear();
+      const mm = String(hoy.getMonth() + 1).padStart(2, '0');
+      const dd = String(hoy.getDate()).padStart(2, '0');
+      fechaInput.min = `${yyyy}-${mm}-${dd}`;
+    }
+    setMinDate();
+
+    async function cargarOcupados(fecha) {
+      if (!fecha || !fechaEsValida(fecha)) {
+        slotsContainer.innerHTML = '';
+        slotsEmpty.style.display = 'none';
+        slotsLoading.style.display = 'none';
+        return;
+      }
+
+      slotsContainer.innerHTML = '';
+      slotsLoading.style.display = 'block';
+      slotsEmpty.style.display = 'none';
+
+      let ocupados = [];
+      try {
+        const res = await fetch(`${OCUPADOS_URL}?fecha=${fecha}`);
+        const data = await res.json();
+        ocupados = (data.ocupados || []).map(o => {
+          const d = new Date(o.inicio);
+          return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+        });
+      } catch (e) {
+        console.error('Error al consultar ocupados:', e);
+      }
+
+      slotsLoading.style.display = 'none';
+
+      const todosSlots = generarSlots();
+      const ahora = new Date();
+      const hoyStr = ahora.toISOString().slice(0, 10);
+
+      let algunoDisponible = false;
+      todosSlots.forEach(hora => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'slot-btn';
+        btn.textContent = hora;
+        btn.dataset.hora = hora;
+
+        const [hh, mm] = hora.split(':').map(Number);
+        const slotDate = new Date(fecha + 'T12:00:00');
+        slotDate.setHours(hh, mm, 0, 0);
+
+        if (fecha === hoyStr && slotDate <= ahora) {
+          btn.disabled = true;
+          btn.textContent = hora + ' (pasado)';
+        } else if (ocupados.includes(hora)) {
+          btn.disabled = true;
+          btn.textContent = hora + ' (ocupado)';
+        } else {
+          algunoDisponible = true;
+        }
+
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
+          if (!btn.disabled) {
+            btn.classList.add('selected');
+            horaHidden.value = btn.dataset.hora;
+          }
+        });
+
+        slotsContainer.appendChild(btn);
+      });
+
+      slotsEmpty.style.display = algunoDisponible ? 'none' : 'block';
+    }
+
+    fechaInput.addEventListener('change', () => {
+      horaHidden.value = '';
+      document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
+      if (fechaInput.value) {
+        cargarOcupados(fechaInput.value);
+      }
+    });
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       alerta.className = 'alert';
@@ -280,10 +432,11 @@
       const nombre = document.getElementById('nombre').value.trim();
       const telefono = document.getElementById('telefono').value.trim();
       const email = document.getElementById('email').value.trim();
-      const fechaHora = document.getElementById('fechaHora').value;
+      const fecha = fechaInput.value;
+      const hora = horaHidden.value;
 
-      if (!nombre || !telefono || !email || !fechaHora) {
-        mostrarAlerta('Completá todos los campos obligatorios.', 'error');
+      if (!nombre || !telefono || !email || !fecha || !hora) {
+        mostrarAlerta('Completá todos los campos obligatorios y seleccioná un horario.', 'error');
         return;
       }
 
@@ -291,14 +444,16 @@
       btnTexto.innerHTML = '<span class="spinner"></span>Agendando...';
 
       try {
-        const start = new Date(fechaHora);
+        const start = new Date(`${fecha}T${hora}:00`);
         const end = new Date(start.getTime() + 45 * 60 * 1000);
+
         const res = await fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             summary: `Cita Podológica: ${nombre}`,
             description: `Paciente: ${nombre}\nTeléfono: ${telefono}\nEmail: ${email}`,
+            email: email,
             start: { dateTime: start.toISOString(), timeZone: 'America/Montevideo' },
             end: { dateTime: end.toISOString(), timeZone: 'America/Montevideo' }
           })
@@ -308,7 +463,9 @@
         if (data.success) {
           mostrarAlerta('Cita agendada correctamente. Te esperamos.', 'success');
           form.reset();
-          setTimeout(() => window.location.reload(), 1500);
+          horaHidden.value = '';
+          slotsContainer.innerHTML = '';
+          slotsEmpty.style.display = 'none';
         } else {
           mostrarAlerta(data.error || data.message || 'Error al agendar la cita.', 'error');
         }
@@ -319,19 +476,6 @@
         btnTexto.textContent = 'Agendar Cita';
       }
     });
-
-    // Setear fecha mínima (ahora + 1 hora)
-    (function() {
-      const input = document.getElementById('fechaHora');
-      const now = new Date();
-      now.setHours(now.getHours() + 1);
-      const yyyy = now.getFullYear();
-      const mm = String(now.getMonth() + 1).padStart(2, '0');
-      const dd = String(now.getDate()).padStart(2, '0');
-      const hh = String(now.getHours()).padStart(2, '0');
-      const mi = String(now.getMinutes()).padStart(2, '0');
-      input.min = `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
-    })();
   </script>
 </body>
 </html>
