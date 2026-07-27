@@ -12,6 +12,10 @@ const formattedPrivateKey = process.env.PRIVATE_KEY
   ? process.env.PRIVATE_KEY.replace(/\\n/g, '\n')
   : '';
 
+if (!process.env.CLIENT_EMAIL || !formattedPrivateKey) {
+  console.error('Faltan CLIENT_EMAIL o PRIVATE_KEY en las variables de entorno');
+}
+
 // 2. Crear la autenticación JWT
 const auth = new google.auth.JWT(
   process.env.CLIENT_EMAIL,
@@ -20,7 +24,18 @@ const auth = new google.auth.JWT(
   ['https://www.googleapis.com/auth/calendar']
 );
 
-// 3. Crear el cliente pasando 'auth' explícitamente
+// 3. Obtener token al iniciar
+async function initAuth() {
+  try {
+    const token = await auth.getAccessToken();
+    console.log('Google Calendar auth OK — token obtenido');
+  } catch (err) {
+    console.error('Error al autenticar con Google Calendar:', err.message);
+  }
+}
+initAuth();
+
+// 4. Crear el cliente
 const calendar = google.calendar({ version: 'v3', auth });
 
 // Ruta para agendar
