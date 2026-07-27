@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const axios = require('axios');
 const { google } = require('googleapis');
 require('dotenv').config();
 
@@ -33,46 +34,44 @@ const auth = new google.auth.JWT(
   ['https://www.googleapis.com/auth/calendar']
 );
 
-// 3. Obtener token al iniciar
-async function initAuth() {
-  try {
-    const token = await auth.getAccessToken();
-    console.log('Google Calendar auth OK — token obtenido');
-  } catch (err) {
-    console.error('Error al autenticar con Google Calendar:', err.message);
-  }
+async function getAccessToken() {
+  const res = await auth.getAccessToken();
+  return res.token;
 }
-initAuth();
-
-// 4. Crear el cliente
-const calendar = google.calendar({ version: 'v3', auth });
 
 // Ruta para agendar
 app.post('/api/agendar', async (req, res) => {
   try {
     const { summary, description, start, end } = req.body;
 
-    const response = await calendar.events.insert({
-      auth: auth, // <-- Poner auth aquí garantiza que no dé error 401
-      calendarId: 'arteyestilomodas@gmail.com',
-      requestBody: {
-        summary: summary,
-        description: description,
-        start: start,
-        end: end,
+    const token = await getAccessToken();
+
+    const response = await axios.post(
+      `https://www.googleapis.com/calendar/v3/calendars/arteyestilomodas@gmail.com/events`,
+      {
+        summary,
+        description,
+        start,
+        end
       },
-    });
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
 
     res.status(200).json({ success: true, event: response.data });
   } catch (error) {
-    console.error('Error al crear la cita:', error);
-    res.status(500).json({ error: error.message });
+    console.error('Error al crear la cita:', error.response?.data || error.message);
+    res.status(500).json({ error: error.response?.data?.error?.message || error.message });
   }
 });
 
 const PORT = process.env.PORT || 10000;
 
-// Health check para evitar timeout por inactividad en Render
+// Health check
 app.get('/api/ping', (req, res) => {
   res.json({ status: 'ok' });
 });
