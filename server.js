@@ -17,7 +17,7 @@ const auth = new google.auth.JWT(
   ['https://www.googleapis.com/auth/calendar']
 );
 
-const calendar = google.calendar({ version: 'v3', auth });
+const calendar = google.calendar({ version: 'v3', auth: auth });
 
 app.get(['/ping', '/api/ping'], (req, res) => {
   res.status(200).json({ status: 'ok', message: 'Servidor activo' });
