@@ -308,6 +308,7 @@
         if (data.success) {
           mostrarAlerta('Cita agendada correctamente. Te esperamos.', 'success');
           form.reset();
+          setTimeout(() => window.location.reload(), 1500);
         } else {
           mostrarAlerta(data.error || data.message || 'Error al agendar la cita.', 'error');
         }
