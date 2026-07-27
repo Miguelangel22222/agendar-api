@@ -36,4 +36,9 @@ app.post('/agendar', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 10000;
+
+app.get('/api/ping', (req, res) => {
+  res.status(200).json({ status: 'ok', message: 'Servidor activo' });
+});
+
 app.listen(PORT, () => console.log(`Servidor corriendo en el puerto ${PORT}`));
