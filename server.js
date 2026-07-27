@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const { google } = require('googleapis');
 const nodemailer = require('nodemailer');
+const axios = require('axios');
+const cheerio = require('cheerio');
 const path = require('path');
 const fs = require('fs');
 
@@ -16,31 +18,25 @@ app.use(express.static(path.join(__dirname, 'public')));
 // -------------------------------------------------------------------
 // Google Calendar — service account auth
 // -------------------------------------------------------------------
-function getCredentials() {
-  if (process.env.GOOGLE_CREDENTIALS) {
-    const parsed = JSON.parse(process.env.GOOGLE_CREDENTIALS);
-    if (parsed.private_key) {
-      parsed.private_key = parsed.private_key.replace(/\\n/g, '\n');
-    }
-    return parsed;
-  }
-
-  if (process.env.CLIENT_EMAIL && process.env.PRIVATE_KEY) {
-    return {
-      client_email: process.env.CLIENT_EMAIL,
-      private_key: process.env.PRIVATE_KEY.replace(/\\n/g, '\n')
-    };
-  }
-
-  return JSON.parse(fs.readFileSync(path.join(__dirname, 'google-calendar-key.json'), 'utf8'));
-}
+const CALENDAR_ID = 'c7783219afc953f883f3e0b4e540a65abaf3ba835b41656b1058832aeaf8f147@group.calendar.google.com';
 
 async function getCalendarClient() {
-  const creds = getCredentials();
+  const clientEmail = process.env.CLIENT_EMAIL;
+  const privateKey = process.env.PRIVATE_KEY
+    ? process.env.PRIVATE_KEY.replace(/\\n/g, '\n')
+    : '';
+
+  if (!clientEmail || !privateKey) {
+    throw new Error('Faltan CLIENT_EMAIL o PRIVATE_KEY en las variables de entorno');
+  }
+
   const auth = new google.auth.JWT(
-    creds.client_email, null, creds.private_key,
-    ['https://www.googleapis.com/auth/calendar', 'https://www.googleapis.com/auth/calendar.events']
+    clientEmail,
+    null,
+    privateKey,
+    ['https://www.googleapis.com/auth/calendar']
   );
+
   return google.calendar({ version: 'v3', auth });
 }
 
@@ -106,10 +102,6 @@ app.post('/api/crear-cita', async (req, res) => {
 
     // ---------- Google Calendar ----------
     const calendar = await getCalendarClient();
-
-    // ⚠️ El calendario de la podóloga debe estar compartido con la cuenta de servicio:
-    //    agendar@gen-lang-client-0386738774.iam.gserviceaccount.com (permiso: "Hacer cambios")
-    const CALENDAR_ID = 'c7783219afc953f883f3e0b4e540a65abaf3ba835b41656b1058832aeaf8f147@group.calendar.google.com';
 
     const event = {
       summary: `Cita Podológica: ${nombre}`,
@@ -182,8 +174,6 @@ app.post('/api/crear-cita', async (req, res) => {
 // -------------------------------------------------------------------
 // GET /api/scrape-emails?url=...
 // -------------------------------------------------------------------
-const axios = require('axios');
-const cheerio = require('cheerio');
 
 app.get('/api/scrape-emails', async (req, res) => {
   try {
