@@ -1,230 +1,52 @@
 const express = require('express');
 const cors = require('cors');
 const { google } = require('googleapis');
-const nodemailer = require('nodemailer');
-const axios = require('axios');
-const cheerio = require('cheerio');
-const path = require('path');
-const fs = require('fs');
+require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-
 app.use(cors());
 app.use(express.json());
 
-app.use(express.static(path.join(__dirname, 'public')));
-
-// -------------------------------------------------------------------
-// Google Calendar — service account auth
-// -------------------------------------------------------------------
-const privateKey = process.env.PRIVATE_KEY
+// 1. Formatear correctamente la clave privada para Render
+const formattedPrivateKey = process.env.PRIVATE_KEY
   ? process.env.PRIVATE_KEY.replace(/\\n/g, '\n')
   : '';
 
+// 2. Crear la autenticación JWT
 const auth = new google.auth.JWT(
   process.env.CLIENT_EMAIL,
   null,
-  privateKey,
+  formattedPrivateKey,
   ['https://www.googleapis.com/auth/calendar']
 );
 
+// 3. Crear el cliente pasando 'auth' explícitamente
 const calendar = google.calendar({ version: 'v3', auth });
-const CALENDAR_ID = 'c7783219afc953f883f3e0b4e540a65abaf3ba835b41656b1058832aeaf8f147@group.calendar.google.com';
 
-// -------------------------------------------------------------------
-// Mail transporter (uses Gmail SMTP — enable App Password in Gmail)
-// -------------------------------------------------------------------
-function getTransporter() {
-  return nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
-    auth: {
-      user: process.env.MAIL_USER || 'arteyestilomodas@gmail.com',
-      pass: process.env.MAIL_PASS || ''
-    }
-  });
-}
-
-async function sendEmail({ to, subject, html }) {
+// Ruta para agendar
+app.post('/api/agendar', async (req, res) => {
   try {
-    const transporter = getTransporter();
-    await transporter.sendMail({
-      from: `"Clínica del Pie" <${process.env.MAIL_USER || 'arteyestilomodas@gmail.com'}>`,
-      to,
-      subject,
-      html
-    });
-    return true;
-  } catch (err) {
-    console.error('Error sending email:', err.message);
-    return false;
-  }
-}
+    const { summary, description, start, end } = req.body;
 
-// -------------------------------------------------------------------
-// POST /api/crear-cita
-// -------------------------------------------------------------------
-app.post('/api/crear-cita', async (req, res) => {
-  try {
-    const { nombre, telefono, email, fechaHora } = req.body;
-
-    if (!nombre || !telefono || !email || !fechaHora) {
-      return res.status(400).json({
-        success: false,
-        message: 'Todos los campos son obligatorios.'
-      });
-    }
-
-    const startTime = new Date(fechaHora);
-    if (isNaN(startTime.getTime())) {
-      return res.status(400).json({
-        success: false,
-        message: 'La fecha/hora ingresada no es válida.'
-      });
-    }
-
-    const endTime = new Date(startTime.getTime() + 45 * 60 * 1000);
-    const opciones = {
-      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-      hour: '2-digit', minute: '2-digit', timeZone: 'America/Montevideo'
-    };
-    const fechaFormateada = startTime.toLocaleString('es-UY', opciones);
-
-    // ---------- Google Calendar ----------
-
-    const event = {
-      summary: `Cita Podológica: ${nombre}`,
-      description: `Paciente: ${nombre}\nTeléfono: ${telefono}\nEmail: ${email}`,
-      start: { dateTime: startTime.toISOString(), timeZone: 'America/Montevideo' },
-      end: { dateTime: endTime.toISOString(), timeZone: 'America/Montevideo' }
-    };
-
-    const calResponse = await calendar.events.insert({
-      auth: auth,
-      calendarId: CALENDAR_ID,
-      requestBody: event
+    const response = await calendar.events.insert({
+      auth: auth, // <-- Poner auth aquí garantiza que no dé error 401
+      calendarId: 'arteyestilomodas@gmail.com',
+      requestBody: {
+        summary: summary,
+        description: description,
+        start: start,
+        end: end,
+      },
     });
 
-    console.log(`Cita creada en calendario: ${calResponse.data.htmlLink}`);
-
-    // ---------- Email a la podóloga ----------
-    await sendEmail({
-      to: 'arteyestilomodas@gmail.com',
-      subject: `Nueva cita: ${nombre} - ${fechaFormateada}`,
-      html: `
-        <div style="font-family:sans-serif;max-width:500px">
-          <h2 style="color:#0b5345">Nueva Cita Agendada</h2>
-          <table style="width:100%;border-collapse:collapse">
-            <tr><td style="padding:8px 0;color:#4a6a7a">Paciente</td><td style="padding:8px 0;font-weight:600">${nombre}</td></tr>
-            <tr><td style="padding:8px 0;color:#4a6a7a">Teléfono</td><td style="padding:8px 0;font-weight:600">${telefono}</td></tr>
-            <tr><td style="padding:8px 0;color:#4a6a7a">Email</td><td style="padding:8px 0;font-weight:600">${email}</td></tr>
-            <tr><td style="padding:8px 0;color:#4a6a7a">Fecha y hora</td><td style="padding:8px 0;font-weight:600">${fechaFormateada}</td></tr>
-          </table>
-          <p style="margin-top:16px;color:#94a3b8;font-size:0.85rem">Clínica del Pie Isabel Aguiar</p>
-        </div>
-      `
-    });
-
-    // ---------- Email de confirmación al paciente ----------
-    await sendEmail({
-      to: email,
-      subject: 'Tu cita fue agendada - Clínica del Pie',
-      html: `
-        <div style="font-family:sans-serif;max-width:500px">
-          <h2 style="color:#0b5345">¡Cita confirmada!</h2>
-          <p>Hola <strong>${nombre}</strong>,</p>
-          <p>Tu cita podológica fue agendada correctamente.</p>
-          <table style="width:100%;border-collapse:collapse;background:#f0fdfa;border-radius:12px;padding:16px;margin:16px 0">
-            <tr><td style="padding:6px 12px;color:#4a6a7a">Día</td><td style="padding:6px 12px;font-weight:600">${fechaFormateada}</td></tr>
-            <tr><td style="padding:6px 12px;color:#4a6a7a">Dirección</td><td style="padding:6px 12px;font-weight:600">Av. 18 de Julio 966, Local 6</td></tr>
-            <tr><td style="padding:6px 12px;color:#4a6a7a">Teléfono</td><td style="padding:6px 12px;font-weight:600">094 943 875</td></tr>
-          </table>
-          <p style="color:#4a6a7a">Si necesitás cancelar o reagendar, comunicate al 094 943 875.</p>
-          <p style="color:#94a3b8;font-size:0.85rem">Clínica del Pie Isabel Aguiar — Pedicuría Técnica</p>
-        </div>
-      `
-    });
-
-    res.json({
-      success: true,
-      message: 'Cita agendada correctamente. Revisá tu email para los detalles.',
-      eventLink: calResponse.data.htmlLink
-    });
-
+    res.status(200).json({ success: true, event: response.data });
   } catch (error) {
     console.error('Error al crear la cita:', error);
-    res.status(500).json({
-      success: false,
-      message: error.message || 'Error interno del servidor',
-      details: error.response?.data?.error || null
-    });
+    res.status(500).json({ error: error.message });
   }
 });
 
-// -------------------------------------------------------------------
-// GET /api/scrape-emails?url=...
-// -------------------------------------------------------------------
-
-app.get('/api/scrape-emails', async (req, res) => {
-  try {
-    const { url } = req.query;
-    if (!url) return res.status(400).json({ success: false, message: 'Falta url' });
-
-    const { data } = await axios.get(url, {
-      timeout: 15000,
-      headers: { 'User-Agent': 'Mozilla/5.0' }
-    });
-    const $ = cheerio.load(data);
-    const text = $('body').text();
-    const emails = [...new Set(text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g) || [])]
-      .filter(e => !e.includes('.png') && !e.includes('.jpg') && !e.includes('.gif') && !e.includes('.svg'));
-
-    res.json({ success: true, emails, url });
-  } catch (err) {
-    res.json({ success: false, message: err.message, emails: [] });
-  }
-});
-
-// -------------------------------------------------------------------
-// GET /api/google-places?query=...&apiKey=...
-// -------------------------------------------------------------------
-app.get('/api/google-places', async (req, res) => {
-  try {
-    const { query, apiKey } = req.query;
-    if (!query || !apiKey) return res.status(400).json({ success: false, message: 'Falta query o apiKey' });
-
-    const { data } = await axios.get('https://maps.googleapis.com/maps/api/place/textsearch/json', {
-      params: { query, key: apiKey, language: 'es' }
-    });
-
-    if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
-      return res.json({ success: false, message: data.status, places: [] });
-    }
-
-    const places = await Promise.all((data.results || []).slice(0, 20).map(async (p) => {
-      const detail = await axios.get('https://maps.googleapis.com/maps/api/place/details/json', {
-        params: { place_id: p.place_id, key: apiKey, fields: 'name,formatted_address,formatted_phone_number,website,url', language: 'es' }
-      });
-      const d = detail.data.result || {};
-      return {
-        name: p.name,
-        address: d.formatted_address || p.formatted_address,
-        phone: d.formatted_phone_number || '',
-        website: d.website || '',
-        googleUrl: d.url || '',
-        rating: p.rating || 0,
-        emails: []
-      };
-    }));
-
-    res.json({ success: true, places });
-  } catch (err) {
-    res.json({ success: false, message: err.message, places: [] });
-  }
-});
-
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+  console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
