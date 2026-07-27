@@ -257,6 +257,10 @@
     const alertaIcono = document.getElementById('alertaIcono');
 
     const API_URL = 'https://agendar-api-tatn.onrender.com/api/agendar';
+    const PING_URL = 'https://agendar-api-tatn.onrender.com/api/ping';
+
+    // Pre-calentamiento: despierta Render mientras el usuario completa el formulario
+    fetch(PING_URL).catch(() => {});
 
     function mostrarAlerta(msg, tipo) {
       alerta.className = 'alert show ' + tipo;

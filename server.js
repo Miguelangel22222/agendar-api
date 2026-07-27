@@ -47,6 +47,12 @@ app.post('/api/agendar', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 10000;
+
+// Health check para evitar timeout por inactividad en Render
+app.get('/api/ping', (req, res) => {
+  res.json({ status: 'ok' });
+});
+
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
