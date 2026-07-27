@@ -3,6 +3,7 @@ const cors = require('cors');
 const { google } = require('googleapis');
 
 const app = express();
+
 app.use(cors());
 app.use(express.json());
 
@@ -17,9 +18,9 @@ const auth = new google.auth.JWT(
   ['https://www.googleapis.com/auth/calendar']
 );
 
-const calendar = google.calendar({ version: 'v3', auth: auth });
+const calendar = google.calendar({ version: 'v3', auth });
 
-app.get(['/ping', '/api/ping'], (req, res) => {
+app.get(['/', '/ping', '/api/ping'], (req, res) => {
   res.status(200).json({ status: 'ok', message: 'Servidor activo' });
 });
 
