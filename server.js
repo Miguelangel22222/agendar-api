@@ -1,6 +1,5 @@
 const express = require('express');
 const cors = require('cors');
-const axios = require('axios');
 const { google } = require('googleapis');
 require('dotenv').config();
 
@@ -27,6 +26,7 @@ if (!process.env.CLIENT_EMAIL || !privateKey) {
 }
 
 // 2. Crear la autenticación JWT
+console.log('Creando JWT con privateKey length:', privateKey.length);
 const auth = new google.auth.JWT(
   process.env.CLIENT_EMAIL,
   null,
@@ -34,38 +34,31 @@ const auth = new google.auth.JWT(
   ['https://www.googleapis.com/auth/calendar']
 );
 
-async function getAccessToken() {
-  const res = await auth.getAccessToken();
-  return res.token;
-}
+// 3. Crear el cliente de Calendar con auth
+console.log('Creando cliente calendar...');
+const calendar = google.calendar({ version: 'v3', auth });
 
 // Ruta para agendar
 app.post('/api/agendar', async (req, res) => {
   try {
     const { summary, description, start, end } = req.body;
 
-    const token = await getAccessToken();
-
-    const response = await axios.post(
-      `https://www.googleapis.com/calendar/v3/calendars/arteyestilomodas@gmail.com/events`,
-      {
+    const response = await calendar.events.insert({
+      auth: auth,
+      calendarId: 'arteyestilomodas@gmail.com',
+      requestBody: {
         summary,
         description,
         start,
         end
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
       }
-    );
+    });
 
     res.status(200).json({ success: true, event: response.data });
   } catch (error) {
-    console.error('Error al crear la cita:', error.response?.data || error.message);
-    res.status(500).json({ error: error.response?.data?.error?.message || error.message });
+    console.error('Error al crear la cita:', error.message);
+    console.error('Stack:', error.stack);
+    res.status(500).json({ error: error.message });
   }
 });
 
