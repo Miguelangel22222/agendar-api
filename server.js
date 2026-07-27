@@ -8,19 +8,20 @@ app.use(cors());
 app.use(express.json());
 
 // 1. Formatear correctamente la clave privada para Render
-const rawKey = process.env.PRIVATE_KEY || '';
-const formattedPrivateKey = rawKey.replace(/\\n/g, '\n');
-
-// Diagnóstico: qué variables de entorno están presentes (sin exponer la clave completa)
+let privateKey = process.env.PRIVATE_KEY || '';
 console.log('=== DIAGNÓSTICO ENV ===');
 console.log('CLIENT_EMAIL definido:', !!process.env.CLIENT_EMAIL);
-console.log('PRIVATE_KEY definido:', !!rawKey);
-console.log('PRIVATE_KEY empieza con:', rawKey ? rawKey.substring(0, 30) + '...' : '(vacio)');
-console.log('PRIVATE_KEY incluye \\n:', rawKey.includes('\\n'));
-console.log('PRIVATE_KEY incluye newline real:', rawKey.includes('\n'));
+console.log('PRIVATE_KEY definido:', !!privateKey);
+console.log('PRIVATE_KEY empieza con:', privateKey ? privateKey.substring(0, 40) + '...' : '(vacio)');
+console.log('PRIVATE_KEY incluye \\n literal:', privateKey.includes('\\n'));
+console.log('PRIVATE_KEY incluye newline real:', privateKey.includes('\n'));
 console.log('=======================');
 
-if (!process.env.CLIENT_EMAIL || !rawKey) {
+if (privateKey) {
+  privateKey = privateKey.replace(/\\n/g, '\n');
+}
+
+if (!process.env.CLIENT_EMAIL || !privateKey) {
   console.error('Faltan CLIENT_EMAIL o PRIVATE_KEY en las variables de entorno');
 }
 
@@ -28,7 +29,7 @@ if (!process.env.CLIENT_EMAIL || !rawKey) {
 const auth = new google.auth.JWT(
   process.env.CLIENT_EMAIL,
   null,
-  formattedPrivateKey,
+  privateKey,
   ['https://www.googleapis.com/auth/calendar']
 );
 
