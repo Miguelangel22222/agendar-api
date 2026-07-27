@@ -18,27 +18,19 @@ app.use(express.static(path.join(__dirname, 'public')));
 // -------------------------------------------------------------------
 // Google Calendar — service account auth
 // -------------------------------------------------------------------
+const privateKey = process.env.PRIVATE_KEY
+  ? process.env.PRIVATE_KEY.replace(/\\n/g, '\n')
+  : '';
+
+const auth = new google.auth.JWT(
+  process.env.CLIENT_EMAIL,
+  null,
+  privateKey,
+  ['https://www.googleapis.com/auth/calendar']
+);
+
+const calendar = google.calendar({ version: 'v3', auth });
 const CALENDAR_ID = 'c7783219afc953f883f3e0b4e540a65abaf3ba835b41656b1058832aeaf8f147@group.calendar.google.com';
-
-async function getCalendarClient() {
-  const clientEmail = process.env.CLIENT_EMAIL;
-  const privateKey = process.env.PRIVATE_KEY
-    ? process.env.PRIVATE_KEY.replace(/\\n/g, '\n')
-    : '';
-
-  if (!clientEmail || !privateKey) {
-    throw new Error('Faltan CLIENT_EMAIL o PRIVATE_KEY en las variables de entorno');
-  }
-
-  const auth = new google.auth.JWT(
-    clientEmail,
-    null,
-    privateKey,
-    ['https://www.googleapis.com/auth/calendar']
-  );
-
-  return google.calendar({ version: 'v3', auth });
-}
 
 // -------------------------------------------------------------------
 // Mail transporter (uses Gmail SMTP — enable App Password in Gmail)
@@ -101,7 +93,6 @@ app.post('/api/crear-cita', async (req, res) => {
     const fechaFormateada = startTime.toLocaleString('es-UY', opciones);
 
     // ---------- Google Calendar ----------
-    const calendar = await getCalendarClient();
 
     const event = {
       summary: `Cita Podológica: ${nombre}`,
@@ -111,6 +102,7 @@ app.post('/api/crear-cita', async (req, res) => {
     };
 
     const calResponse = await calendar.events.insert({
+      auth: auth,
       calendarId: CALENDAR_ID,
       requestBody: event
     });
