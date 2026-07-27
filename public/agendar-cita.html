@@ -256,8 +256,7 @@
     const alertaMensaje = document.getElementById('alertaMensaje');
     const alertaIcono = document.getElementById('alertaIcono');
 
-    // ⚠️ Cambiar esta URL por la del servidor cuando esté en producción
-    const API_URL = 'https://agendar-api-tatn.onrender.com/api/crear-cita';
+    const API_URL = 'https://agendar-api-tatn.onrender.com/api/agendar';
 
     function mostrarAlerta(msg, tipo) {
       alerta.className = 'alert show ' + tipo;
@@ -288,10 +287,17 @@
       btnTexto.innerHTML = '<span class="spinner"></span>Agendando...';
 
       try {
+        const start = new Date(fechaHora);
+        const end = new Date(start.getTime() + 45 * 60 * 1000);
         const res = await fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ nombre, telefono, email, fechaHora })
+          body: JSON.stringify({
+            summary: `Cita Podológica: ${nombre}`,
+            description: `Paciente: ${nombre}\nTeléfono: ${telefono}\nEmail: ${email}`,
+            start: { dateTime: start.toISOString(), timeZone: 'America/Montevideo' },
+            end: { dateTime: end.toISOString(), timeZone: 'America/Montevideo' }
+          })
         });
         const data = await res.json();
 
@@ -299,7 +305,7 @@
           mostrarAlerta('Cita agendada correctamente. Te esperamos.', 'success');
           form.reset();
         } else {
-          mostrarAlerta(data.message || 'Error al agendar la cita.', 'error');
+          mostrarAlerta(data.error || data.message || 'Error al agendar la cita.', 'error');
         }
       } catch (error) {
         mostrarAlerta('No se pudo conectar con el servidor. Verificá que el servidor esté encendido.', 'error');
