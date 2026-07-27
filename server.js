@@ -60,15 +60,9 @@ app.post(['/agendar', '/api/agendar'], async (req, res) => {
     const { calendar } = getAuthAndCalendar();
     const calendarId = process.env.CALENDAR_ID || 'primary';
 
-    const requestBody = {
-      ...req.body,
-      attendees: req.body.email ? [{ email: req.body.email }] : [],
-    };
-
     const response = await calendar.events.insert({
       calendarId,
-      requestBody,
-      sendUpdates: 'all',
+      requestBody: req.body,
     });
 
     res.status(200).json({ success: true, data: response.data });
