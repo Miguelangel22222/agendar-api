@@ -17,7 +17,7 @@ console.log('PRIVATE_KEY definido:', !!process.env.PRIVATE_KEY);
 console.log('PRIVATE_KEY length:', privateKey.length);
 console.log('=======================');
 
-app.post('/agendar', async (req, res) => {
+app.post('/api/agendar', async (req, res) => {
   try {
     const auth = new google.auth.JWT(
       process.env.CLIENT_EMAIL,
