@@ -1,28 +1,13 @@
 const express = require('express');
 const cors = require('cors');
 const { google } = require('googleapis');
-const nodemailer = require('nodemailer');
-const dns = require('dns');
+const { Resend } = require('resend');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 2525,
-  secure: false,
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: (process.env.GMAIL_APP_PASSWORD || '').replace(/\s+/g, ''),
-  },
-  lookup: (hostname, options, callback) => {
-    dns.lookup(hostname, { family: 4 }, callback);
-  },
-  tls: {
-    rejectUnauthorized: false,
-  },
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 function getAuthAndCalendar() {
   const rawKey = process.env.PRIVATE_KEY || '';
@@ -88,9 +73,9 @@ app.post(['/agendar', '/api/agendar'], async (req, res) => {
     const start = req.body.start?.dateTime || '';
     const fechaHora = start ? new Date(start).toLocaleString('es-UY', { timeZone: 'America/Montevideo' }) : '';
 
-    if (emailPaciente && transporter.options.auth.user) {
-      transporter.sendMail({
-        from: `"Clínica del Pie" <${process.env.GMAIL_USER}>`,
+    if (emailPaciente && process.env.RESEND_API_KEY) {
+      resend.emails.send({
+        from: 'onboarding@resend.dev',
         to: emailPaciente,
         subject: 'Cita confirmada - Clínica del Pie Isabel Aguiar',
         html: `<div style="font-family:sans-serif;max-width:600px">
@@ -102,8 +87,8 @@ app.post(['/agendar', '/api/agendar'], async (req, res) => {
         </div>`,
       }).catch(e => console.log('Error email paciente:', e.message));
 
-      transporter.sendMail({
-        from: `"Clínica del Pie" <${process.env.GMAIL_USER}>`,
+      resend.emails.send({
+        from: 'onboarding@resend.dev',
         to: process.env.GMAIL_USER,
         subject: `Nueva cita agendada - ${paciente}`,
         html: `<div style="font-family:sans-serif;max-width:600px">
