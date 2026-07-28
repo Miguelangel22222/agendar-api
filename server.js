@@ -73,19 +73,21 @@ app.post(['/agendar', '/api/agendar'], async (req, res) => {
     const start = req.body.start?.dateTime || '';
     const fechaHora = start ? new Date(start).toLocaleString('es-UY', { timeZone: 'America/Montevideo' }) : '';
 
-    if (emailPaciente && process.env.RESEND_API_KEY) {
-      resend.emails.send({
-        from: 'Clinica del Pie Isabel Aguiar <onboarding@resend.dev>',
-        to: emailPaciente,
-        subject: 'Cita confirmada - Clínica del Pie Isabel Aguiar',
-        html: `<div style="font-family:sans-serif;max-width:600px">
-          <h2 style="color:#0b5345">¡Cita confirmada!</h2>
-          <p>Hola, tu cita fue agendada correctamente.</p>
-          <p><strong>Fecha y hora:</strong> ${fechaHora}</p>
-          <p><strong>Dirección:</strong> Galería — Montevideo</p>
-          <p style="color:#64748b;font-size:0.85rem">Si necesitas cancelar o reprogramar, comunicate al teléfono de la clínica.</p>
-        </div>`,
-      }).catch(e => console.log('Error email paciente:', e.message));
+    if (process.env.RESEND_API_KEY) {
+      if (emailPaciente) {
+        resend.emails.send({
+          from: 'Clinica del Pie Isabel Aguiar <onboarding@resend.dev>',
+          to: emailPaciente,
+          subject: 'Cita confirmada - Clínica del Pie Isabel Aguiar',
+          html: `<div style="font-family:sans-serif;max-width:600px">
+            <h2 style="color:#0b5345">¡Cita confirmada!</h2>
+            <p>Hola, tu cita fue agendada correctamente.</p>
+            <p><strong>Fecha y hora:</strong> ${fechaHora}</p>
+            <p><strong>Dirección:</strong> Galería — Montevideo</p>
+            <p style="color:#64748b;font-size:0.85rem">Si necesitas cancelar o reprogramar, comunicate al teléfono de la clínica.</p>
+          </div>`,
+        }).catch(e => console.log('Error email paciente:', e.message));
+      }
 
       resend.emails.send({
         from: 'Clinica del Pie Isabel Aguiar <onboarding@resend.dev>',
