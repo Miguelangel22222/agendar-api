@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const { google } = require('googleapis');
 const nodemailer = require('nodemailer');
+const dns = require('dns');
 
 const app = express();
 app.use(cors());
@@ -11,10 +12,12 @@ const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
   port: 587,
   secure: false,
-  family: 4,
   auth: {
     user: process.env.GMAIL_USER,
     pass: (process.env.GMAIL_APP_PASSWORD || '').replace(/\s+/g, ''),
+  },
+  lookup: (hostname, options, callback) => {
+    dns.lookup(hostname, { family: 4 }, callback);
   },
 });
 
