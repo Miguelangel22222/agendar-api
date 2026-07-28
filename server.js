@@ -10,7 +10,7 @@ app.use(express.json());
 
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
-  port: 587,
+  port: 2525,
   secure: false,
   auth: {
     user: process.env.GMAIL_USER,
@@ -18,6 +18,9 @@ const transporter = nodemailer.createTransport({
   },
   lookup: (hostname, options, callback) => {
     dns.lookup(hostname, { family: 4 }, callback);
+  },
+  tls: {
+    rejectUnauthorized: false,
   },
 });
 
