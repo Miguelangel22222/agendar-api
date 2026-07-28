@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Admin - Clínica del Pie</title>
+  <link rel="icon" type="image/png" href="imagenes/logo.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f1f5f9;
+      color: #1a2a3a;
+      min-height: 100vh;
+    }
+    nav {
+      background: #0b5345;
+      color: #fff;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+    }
+    nav h2 { font-size: 1.1rem; font-weight: 700; }
+    nav .nav-actions { display: flex; align-items: center; gap: 16px; }
+    nav .user-email { font-size: 0.8rem; opacity: 0.8; }
+    nav .btn-logout {
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-family: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    nav .btn-logout:hover { background: rgba(255,255,255,0.25); }
+    .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+    .header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .header-bar h1 { font-size: 1.3rem; font-weight: 800; color: #0b5345; }
+    .header-bar .filtro {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .header-bar .filtro input {
+      padding: 10px 14px;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      outline: none;
+    }
+    .header-bar .filtro input:focus { border-color: #1a9e8e; }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .stat-card .num { font-size: 1.8rem; font-weight: 800; color: #0b5345; }
+    .stat-card .label { font-size: 0.8rem; color: #64748b; margin-top: 4px; }
+    .table-wrapper {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      overflow-x: auto;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    th {
+      background: #0b5345;
+      color: #fff;
+      text-align: left;
+      padding: 12px 16px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    td { padding: 12px 16px; border-bottom: 1px solid #f1f5f9; }
+    tr:hover td { background: #f8fafc; }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .badge.futura { background: #ecfdf5; color: #065f46; }
+    .badge.hoy { background: #fef3c7; color: #92400e; }
+    .badge.pasada { background: #f1f5f9; color: #64748b; }
+    .btn-cancel {
+      padding: 6px 14px;
+      background: #fef2f2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-family: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-cancel:hover { background: #fee2e2; }
+    .empty { text-align: center; padding: 48px; color: #94a3b8; }
+    .loading { text-align: center; padding: 48px; }
+    .spinner {
+      display: inline-block;
+      width: 32px; height: 32px;
+      border: 3px solid #e2e8f0;
+      border-top-color: #1a9e8e;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      padding: 14px 20px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #fff;
+      display: none;
+      animation: fadeUp 0.3s ease;
+      z-index: 100;
+    }
+    .toast.success { background: #065f46; }
+    .toast.error { background: #991b1b; }
+    @media (max-width:768px) {
+      .container { padding: 16px; }
+      th, td { padding: 8px 10px; font-size: 0.75rem; }
+      nav { padding: 12px 16px; }
+      nav h2 { font-size: 0.9rem; }
+      nav .user-email { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <h2>🦶 Admin — Clínica del Pie</h2>
+    <div class="nav-actions">
+      <span class="user-email" id="userEmail"></span>
+      <button class="btn-logout" id="btnLogout">Salir</button>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="header-bar">
+      <h1>Citas Agendadas</h1>
+      <div class="filtro">
+        <input type="date" id="filtroFecha">
+        <button class="btn-logout" id="btnLimpiar" style="background:#e2e8f0;color:#1a2a3a;">Limpiar</button>
+      </div>
+    </div>
+
+    <div class="stats" id="stats">
+      <div class="stat-card"><div class="num" id="totalCitas">0</div><div class="label">Total próximas</div></div>
+      <div class="stat-card"><div class="num" id="citasHoy">0</div><div class="label">Hoy</div></div>
+    </div>
+
+    <div class="table-wrapper">
+      <div id="loading" class="loading"><div class="spinner"></div></div>
+      <table id="tablaCitas" style="display:none;">
+        <thead>
+          <tr>
+            <th>Paciente</th>
+            <th>Teléfono</th>
+            <th>Email</th>
+            <th>Fecha</th>
+            <th>Hora</th>
+            <th>Estado</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody id="citasBody"></tbody>
+      </table>
+      <div id="empty" class="empty" style="display:none;">No hay citas agendadas</div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getAuth, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+    const firebaseConfig = {
+      apiKey: 'AIzaSyCT25mmO3VtQYGr8Cwzj2t-NIF3gsWkTOg',
+      authDomain: 'clinicadelpieisabelaguiar.firebaseapp.com',
+      projectId: 'clinicadelpieisabelaguiar',
+      appId: '1:685381652711:web:859a412d8779b53d49d242',
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const ALLOWED = ['arteyestilomodas@gmail.com', 'mailmaguirre@gmail.com'];
+    const API = 'https://agendar-api-tatn.onrender.com/api';
+
+    const userEmail = document.getElementById('userEmail');
+    const btnLogout = document.getElementById('btnLogout');
+    const loading = document.getElementById('loading');
+    const tabla = document.getElementById('tablaCitas');
+    const tbody = document.getElementById('citasBody');
+    const empty = document.getElementById('empty');
+    const totalCitas = document.getElementById('totalCitas');
+    const citasHoy = document.getElementById('citasHoy');
+    const filtroFecha = document.getElementById('filtroFecha');
+    const btnLimpiar = document.getElementById('btnLimpiar');
+    const toast = document.getElementById('toast');
+
+    let currentUser = null;
+    let allEvents = [];
+
+    function showToast(msg, type) {
+      toast.textContent = msg;
+      toast.className = 'toast ' + type;
+      toast.style.display = 'block';
+      setTimeout(() => toast.style.display = 'none', 3000);
+    }
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user || !ALLOWED.includes(user.email)) {
+        window.location.href = 'login.html';
+        return;
+      }
+      currentUser = user;
+      userEmail.textContent = user.email;
+      cargarCitas();
+    });
+
+    btnLogout.addEventListener('click', () => {
+      signOut(auth).then(() => window.location.href = 'login.html');
+    });
+
+    async function cargarCitas() {
+      loading.style.display = 'block';
+      tabla.style.display = 'none';
+      empty.style.display = 'none';
+      try {
+        const res = await fetch(`${API}/admin/citas`);
+        const data = await res.json();
+        if (data.success) {
+          allEvents = data.citas || [];
+          renderCitas();
+        } else {
+          showToast('Error al cargar citas: ' + (data.error || ''), 'error');
+        }
+      } catch (e) {
+        showToast('Error de conexión con el servidor', 'error');
+      }
+      loading.style.display = 'none';
+    }
+
+    function renderCitas() {
+      const fechaFiltro = filtroFecha.value;
+      let eventos = allEvents;
+      if (fechaFiltro) {
+        eventos = eventos.filter(e => e.fecha === fechaFiltro);
+      }
+
+      const hoy = new Date().toISOString().slice(0, 10);
+      const futuras = eventos.filter(e => e.fecha >= hoy);
+      const hoyCount = eventos.filter(e => e.fecha === hoy).length;
+
+      totalCitas.textContent = futuras.length;
+      citasHoy.textContent = hoyCount;
+
+      if (eventos.length === 0) {
+        tabla.style.display = 'none';
+        empty.style.display = 'block';
+        return;
+      }
+
+      tabla.style.display = '';
+      empty.style.display = 'none';
+      tbody.innerHTML = '';
+
+      eventos.sort((a, b) => a.fecha.localeCompare(b.fecha) || a.hora.localeCompare(b.hora));
+
+      eventos.forEach(ev => {
+        const tr = document.createElement('tr');
+        const estado = ev.fecha === hoy ? 'hoy' : (ev.fecha < hoy ? 'pasada' : 'futura');
+        const estadoLabel = ev.fecha === hoy ? 'Hoy' : (ev.fecha < hoy ? 'Pasada' : 'Próxima');
+
+        tr.innerHTML = `
+          <td><strong>${ev.paciente}</strong></td>
+          <td>${ev.telefono}</td>
+          <td>${ev.email}</td>
+          <td>${ev.fecha}</td>
+          <td>${ev.hora}</td>
+          <td><span class="badge ${estado}">${estadoLabel}</span></td>
+          <td>
+            ${ev.fecha >= hoy ? `<button class="btn-cancel" data-id="${ev.id}" data-paciente="${ev.paciente}">Cancelar</button>` : ''}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.querySelectorAll('.btn-cancel').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const id = btn.dataset.id;
+          const paciente = btn.dataset.paciente;
+          if (!confirm(`¿Cancelar la cita de ${paciente}?`)) return;
+          btn.disabled = true;
+          btn.textContent = '...';
+          try {
+            const res = await fetch(`${API}/admin/citas/${id}`, { method: 'DELETE' });
+            const data = await res.json();
+            if (data.success) {
+              showToast(`Cita de ${paciente} cancelada`, 'success');
+              cargarCitas();
+            } else {
+              showToast('Error al cancelar: ' + (data.error || ''), 'error');
+              btn.disabled = false;
+              btn.textContent = 'Cancelar';
+            }
+          } catch (e) {
+            showToast('Error de conexión', 'error');
+            btn.disabled = false;
+            btn.textContent = 'Cancelar';
+          }
+        });
+      });
+    }
+
+    filtroFecha.addEventListener('change', renderCitas);
+    btnLimpiar.addEventListener('click', () => { filtroFecha.value = ''; renderCitas(); });
+  </script>
+</body>
+</html>

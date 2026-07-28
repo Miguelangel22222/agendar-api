@@ -325,12 +325,7 @@
     }
 
     function generarSlots() {
-      const slots = [];
-      for (let h = 9; h <= 17; h++) {
-        slots.push(`${String(h).padStart(2, '0')}:00`);
-        if (h < 17) slots.push(`${String(h).padStart(2, '0')}:30`);
-      }
-      return slots;
+      return ['09:30', '10:30', '11:30', '14:00', '15:00', '16:00', '17:00'];
     }
 
     function fechaEsValida(dateStr) {
@@ -339,7 +334,13 @@
       if (dia === 0 || dia === 6) return false;
       const hoy = new Date();
       hoy.setHours(0, 0, 0, 0);
-      return d >= hoy;
+      if (d < hoy) return false;
+      const noLaborables = [
+        '2026-01-01', '2026-04-03', '2026-05-01',
+        '2026-08-25', '2026-12-25'
+      ];
+      if (noLaborables.includes(dateStr)) return false;
+      return true;
     }
 
     function setMinDate() {

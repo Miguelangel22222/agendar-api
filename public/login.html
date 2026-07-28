@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Clínica del Pie</title>
+  <link rel="icon" type="image/png" href="imagenes/logo.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(180deg, #0b5345 0%, #0e6b58 20%, #1a9e8e 50%, #7fdbd0 80%, #b8ece3 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+      padding: 48px 36px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+      animation: fadeUp 0.5s ease-out;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .logo {
+      width: 72px; height: 72px;
+      background: linear-gradient(135deg, #1a9e8e, #0e6b58);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 32px;
+      color: #fff;
+    }
+    h1 { font-size: 1.4rem; font-weight: 800; color: #0b5345; margin-bottom: 6px; }
+    p { font-size: 0.9rem; color: #4a6a7a; margin-bottom: 32px; }
+    .btn-google {
+      width: 100%;
+      padding: 14px;
+      background: #fff;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: inherit;
+      color: #1a2a3a;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      transition: all 0.3s ease;
+    }
+    .btn-google:hover { border-color: #1a9e8e; background: #f0fdfa; }
+    .btn-google:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-google svg { width: 20px; height: 20px; }
+    .error { color: #dc2626; font-size: 0.85rem; margin-top: 16px; display: none; }
+    .spinner {
+      display: inline-block;
+      width: 20px; height: 20px;
+      border: 3px solid #e2e8f0;
+      border-top-color: #1a9e8e;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">🦶</div>
+    <h1>Panel Admin</h1>
+    <p>Clínica del Pie Isabel Aguiar</p>
+    <button class="btn-google" id="btnGoogle">
+      <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.54 28.59A14.5 14.5 0 0 1 9.5 24c0-1.59.28-3.14.76-4.59l-7.98-6.19A23.99 23.99 0 0 0 0 24c0 3.77.87 7.35 2.56 10.56l7.98-5.97z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 5.97C6.51 42.62 14.62 48 24 48z"/></svg>
+      <span id="btnTexto">Entrar con Google</span>
+    </button>
+    <div class="error" id="errorMsg"></div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+    const firebaseConfig = {
+      apiKey: 'AIzaSyCT25mmO3VtQYGr8Cwzj2t-NIF3gsWkTOg',
+      authDomain: 'clinicadelpieisabelaguiar.firebaseapp.com',
+      projectId: 'clinicadelpieisabelaguiar',
+      appId: '1:685381652711:web:859a412d8779b53d49d242',
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    const ALLOWED_EMAILS = ['arteyestilomodas@gmail.com', 'mailmaguirre@gmail.com'];
+    const btn = document.getElementById('btnGoogle');
+    const btnTexto = document.getElementById('btnTexto');
+    const errorMsg = document.getElementById('errorMsg');
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        if (ALLOWED_EMAILS.includes(user.email)) {
+          window.location.href = 'admin.html';
+        } else {
+          auth.signOut();
+          errorMsg.style.display = 'block';
+          errorMsg.textContent = 'Acceso denegado. Este correo no está autorizado.';
+          btn.disabled = false;
+          btnTexto.textContent = 'Entrar con Google';
+        }
+      }
+    });
+
+    btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      btnTexto.innerHTML = '<span class="spinner"></span>';
+      errorMsg.style.display = 'none';
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (e) {
+        errorMsg.style.display = 'block';
+        errorMsg.textContent = e.message;
+        btn.disabled = false;
+        btnTexto.textContent = 'Entrar con Google';
+      }
+    });
+  </script>
+</body>
+</html>
