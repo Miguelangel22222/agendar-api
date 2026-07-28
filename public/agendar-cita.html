@@ -219,6 +219,53 @@
       color: #94a3b8;
       margin-top: 8px;
     }
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal-box {
+      background: #fff;
+      border-radius: 24px;
+      padding: 40px 36px 32px;
+      width: 90%;
+      max-width: 380px;
+      text-align: center;
+      animation: fadeUp 0.4s ease-out;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+    .modal-icon {
+      width: 72px; height: 72px;
+      background: linear-gradient(135deg, #1a9e8e, #0e6b58);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+    }
+    .modal-icon svg { width: 36px; height: 36px; stroke: #fff; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+    .modal-box h2 { font-size: 1.3rem; font-weight: 800; color: #0b5345; margin-bottom: 8px; }
+    .modal-box p { font-size: 0.9rem; color: #64748b; margin-bottom: 24px; line-height: 1.5; }
+    .modal-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #1a9e8e, #0e6b58);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      font-size: 1rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .modal-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(26,158,142,0.4); }
     footer {
       background: var(--green-dark);
       color: rgba(255,255,255,0.7);
@@ -256,6 +303,17 @@
       <div id="alerta" class="alert" role="alert">
         <svg id="alertaIcono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
         <span id="alertaMensaje"></span>
+      </div>
+
+      <div class="modal-overlay" id="modalExito">
+        <div class="modal-box">
+          <div class="modal-icon">
+            <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+          <h2>¡Cita agendada!</h2>
+          <p>Te esperamos el día y hora indicados.<br>Te llegará un email de confirmación.</p>
+          <button class="modal-btn" id="modalCerrar">Entendido</button>
+        </div>
       </div>
 
       <form id="citaForm" novalidate>
@@ -306,6 +364,8 @@
     const slotsLoading = document.getElementById('slotsLoading');
     const slotsEmpty = document.getElementById('slotsEmpty');
     const horaHidden = document.getElementById('horaSeleccionada');
+    const modalExito = document.getElementById('modalExito');
+    const modalCerrar = document.getElementById('modalCerrar');
 
     const API_URL = 'https://agendar-api-tatn.onrender.com/api/agendar';
     const OCUPADOS_URL = 'https://agendar-api-tatn.onrender.com/api/ocupados';
@@ -462,7 +522,7 @@
         const data = await res.json();
 
         if (data.success) {
-          mostrarAlerta('Cita agendada correctamente. Te esperamos.', 'success');
+          modalExito.classList.add('show');
           form.reset();
           horaHidden.value = '';
           slotsContainer.innerHTML = '';
@@ -476,6 +536,10 @@
         btn.disabled = false;
         btnTexto.textContent = 'Agendar Cita';
       }
+    });
+
+    modalCerrar.addEventListener('click', () => {
+      modalExito.classList.remove('show');
     });
   </script>
 </body>

@@ -143,6 +143,54 @@
     }
     .toast.success { background: #065f46; }
     .toast.error { background: #991b1b; }
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal-box {
+      background: #fff;
+      border-radius: 24px;
+      padding: 36px 32px 28px;
+      width: 90%;
+      max-width: 360px;
+      text-align: center;
+      animation: fadeUp 0.3s ease-out;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+    .modal-icon {
+      width: 64px; height: 64px;
+      background: #fef2f2;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+    }
+    .modal-box h3 { font-size: 1.1rem; font-weight: 700; color: #1a2a3a; margin-bottom: 8px; }
+    .modal-box p { font-size: 0.85rem; color: #64748b; margin-bottom: 24px; }
+    .modal-actions { display: flex; gap: 10px; }
+    .modal-actions button {
+      flex: 1;
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+    .modal-btn-cancel { background: #f1f5f9; color: #64748b; }
+    .modal-btn-cancel:hover { background: #e2e8f0; }
+    .modal-btn-confirm { background: #dc2626; color: #fff; }
+    .modal-btn-confirm:hover { background: #b91c1c; }
     @media (max-width:768px) {
       .container { padding: 16px; }
       th, td { padding: 8px 10px; font-size: 0.75rem; }
@@ -197,6 +245,18 @@
 
   <div class="toast" id="toast"></div>
 
+  <div class="modal-overlay" id="modalConfirm">
+    <div class="modal-box">
+      <div class="modal-icon">🗑️</div>
+      <h3>Cancelar cita</h3>
+      <p id="modalTexto">¿Estás segura de cancelar esta cita?</p>
+      <div class="modal-actions">
+        <button class="modal-btn-cancel" id="modalNo">No, mantener</button>
+        <button class="modal-btn-confirm" id="modalSi">Sí, cancelar</button>
+      </div>
+    </div>
+  </div>
+
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
     import { getAuth, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
@@ -224,9 +284,15 @@
     const filtroFecha = document.getElementById('filtroFecha');
     const btnLimpiar = document.getElementById('btnLimpiar');
     const toast = document.getElementById('toast');
+    const modalConfirm = document.getElementById('modalConfirm');
+    const modalTexto = document.getElementById('modalTexto');
+    const modalSi = document.getElementById('modalSi');
+    const modalNo = document.getElementById('modalNo');
 
     let currentUser = null;
     let allEvents = [];
+    let pendingCancelId = null;
+    let pendingCancelPaciente = null;
 
     function showToast(msg, type) {
       toast.textContent = msg;
@@ -314,30 +380,39 @@
       });
 
       document.querySelectorAll('.btn-cancel').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          const id = btn.dataset.id;
-          const paciente = btn.dataset.paciente;
-          if (!confirm(`¿Cancelar la cita de ${paciente}?`)) return;
-          btn.disabled = true;
-          btn.textContent = '...';
-          try {
-            const res = await fetch(`${API}/admin/citas/${id}`, { method: 'DELETE' });
-            const data = await res.json();
-            if (data.success) {
-              showToast(`Cita de ${paciente} cancelada`, 'success');
-              cargarCitas();
-            } else {
-              showToast('Error al cancelar: ' + (data.error || ''), 'error');
-              btn.disabled = false;
-              btn.textContent = 'Cancelar';
-            }
-          } catch (e) {
-            showToast('Error de conexión', 'error');
-            btn.disabled = false;
-            btn.textContent = 'Cancelar';
-          }
+        btn.addEventListener('click', () => {
+          pendingCancelId = btn.dataset.id;
+          pendingCancelPaciente = btn.dataset.paciente;
+          modalTexto.textContent = `¿Cancelar la cita de ${pendingCancelPaciente}?`;
+          modalConfirm.classList.add('show');
         });
       });
+
+      function ejecutarCancelacion() {
+        modalConfirm.classList.remove('show');
+        const btn = document.querySelector(`.btn-cancel[data-id="${pendingCancelId}"]`);
+        if (!btn) return;
+        btn.disabled = true;
+        btn.textContent = '...';
+        fetch(`${API}/admin/citas/${pendingCancelId}`, { method: 'DELETE' })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              showToast(`Cita de ${pendingCancelPaciente} cancelada`, 'success');
+              cargarCitas();
+            } else {
+              showToast('Error: ' + (data.error || ''), 'error');
+              if (btn) { btn.disabled = false; btn.textContent = 'Cancelar'; }
+            }
+          })
+          .catch(() => {
+            showToast('Error de conexión', 'error');
+            if (btn) { btn.disabled = false; btn.textContent = 'Cancelar'; }
+          });
+      }
+
+      modalSi.addEventListener('click', ejecutarCancelacion);
+      modalNo.addEventListener('click', () => modalConfirm.classList.remove('show'));
     }
 
     filtroFecha.addEventListener('change', renderCitas);
