@@ -168,10 +168,18 @@ app.delete(['/admin/citas/:eventId', '/api/admin/citas/:eventId'], async (req, r
     const { calendar } = getAuthAndCalendar();
     const calendarId = process.env.CALENDAR_ID || 'primary';
 
-    await calendar.events.delete({
-      calendarId,
-      eventId: req.params.eventId,
-    });
+    try {
+      await calendar.events.delete({
+        calendarId,
+        eventId: req.params.eventId,
+      });
+    } catch (deleteError) {
+      if (deleteError.code === 410 || deleteError.status === 410) {
+        console.log(`El evento ${req.params.eventId} ya había sido eliminado de Google Calendar.`);
+      } else {
+        throw deleteError;
+      }
+    }
 
     res.status(200).json({ success: true, message: 'Cita cancelada' });
   } catch (error) {
