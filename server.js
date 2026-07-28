@@ -195,7 +195,12 @@ app.put(['/admin/citas/:eventId', '/api/admin/citas/:eventId'], async (req, res)
     const response = await calendar.events.update({
       calendarId,
       eventId: req.params.eventId,
-      requestBody: req.body,
+      requestBody: {
+        summary: existing.data.summary,
+        description: existing.data.description,
+        start: req.body.start,
+        end: req.body.end,
+      },
     });
 
     const startNew = req.body.start?.dateTime || '';
