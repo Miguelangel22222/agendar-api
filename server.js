@@ -1,10 +1,21 @@
 const express = require('express');
 const cors = require('cors');
 const { google } = require('googleapis');
+const nodemailer = require('nodemailer');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+const transporter = nodemailer.createTransport({
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true,
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_APP_PASSWORD,
+  },
+});
 
 function getAuthAndCalendar() {
   const rawKey = process.env.PRIVATE_KEY || '';
@@ -64,6 +75,39 @@ app.post(['/agendar', '/api/agendar'], async (req, res) => {
       calendarId,
       requestBody: req.body,
     });
+
+    const paciente = req.body.summary || 'Paciente';
+    const emailPaciente = req.body.email || '';
+    const start = req.body.start?.dateTime || '';
+    const fechaHora = start ? new Date(start).toLocaleString('es-UY', { timeZone: 'America/Montevideo' }) : '';
+
+    if (emailPaciente && transporter.options.auth.user) {
+      transporter.sendMail({
+        from: `"Clínica del Pie" <${process.env.GMAIL_USER}>`,
+        to: emailPaciente,
+        subject: 'Cita confirmada - Clínica del Pie Isabel Aguiar',
+        html: `<div style="font-family:sans-serif;max-width:600px">
+          <h2 style="color:#0b5345">¡Cita confirmada!</h2>
+          <p>Hola, tu cita fue agendada correctamente.</p>
+          <p><strong>Fecha y hora:</strong> ${fechaHora}</p>
+          <p><strong>Dirección:</strong> Galería — Montevideo</p>
+          <p style="color:#64748b;font-size:0.85rem">Si necesitas cancelar o reprogramar, comunicate al teléfono de la clínica.</p>
+        </div>`,
+      }).catch(e => console.log('Error email paciente:', e.message));
+
+      transporter.sendMail({
+        from: `"Clínica del Pie" <${process.env.GMAIL_USER}>`,
+        to: process.env.GMAIL_USER,
+        subject: `Nueva cita agendada - ${paciente}`,
+        html: `<div style="font-family:sans-serif;max-width:600px">
+          <h2 style="color:#0b5345">Nueva cita agendada</h2>
+          <p><strong>Paciente:</strong> ${paciente.replace('Cita Podológica: ', '')}</p>
+          <p><strong>Email:</strong> ${emailPaciente}</p>
+          <p><strong>Fecha y hora:</strong> ${fechaHora}</p>
+          <p><a href="https://clinicadelpieisabelaguiar.web.app/admin.html" style="color:#1a9e8e">Ver panel admin</a></p>
+        </div>`,
+      }).catch(e => console.log('Error email isabel:', e.message));
+    }
 
     res.status(200).json({ success: true, data: response.data });
   } catch (error) {
