@@ -182,11 +182,55 @@ app.put(['/admin/citas/:eventId', '/api/admin/citas/:eventId'], async (req, res)
     const { calendar } = getAuthAndCalendar();
     const calendarId = process.env.CALENDAR_ID || 'primary';
 
+    const existing = await calendar.events.get({
+      calendarId,
+      eventId: req.params.eventId,
+    });
+
+    const desc = existing.data.description || '';
+    const paciente = (desc.match(/Paciente:\s*(.+)/) || [])[1] || existing.data.summary || 'Paciente';
+    const emailPaciente = (desc.match(/Email:\s*(.+)/) || [])[1] || '';
+    const startOld = existing.data.start?.dateTime || existing.data.start?.date || '';
+
     const response = await calendar.events.update({
       calendarId,
       eventId: req.params.eventId,
       requestBody: req.body,
     });
+
+    const startNew = req.body.start?.dateTime || '';
+    const fechaHoraNueva = startNew ? new Date(startNew).toLocaleString('es-UY', { timeZone: 'America/Montevideo' }) : '';
+    const fechaHoraVieja = startOld ? new Date(startOld).toLocaleString('es-UY', { timeZone: 'America/Montevideo' }) : '';
+
+    if (emailPaciente && process.env.RESEND_API_KEY) {
+      resend.emails.send({
+        from: 'Clinica del Pie Isabel Aguiar <onboarding@resend.dev>',
+        to: emailPaciente,
+        subject: 'Cita reagendada - Clínica del Pie Isabel Aguiar',
+        html: `<div style="font-family:sans-serif;max-width:600px">
+          <h2 style="color:#0b5345">Cita reagendada</h2>
+          <p>Hola ${paciente}, tu cita fue reprogramada.</p>
+          <p><strong>Anterior:</strong> ${fechaHoraVieja}</p>
+          <p><strong>Nueva fecha y hora:</strong> ${fechaHoraNueva}</p>
+          <p><strong>Dirección:</strong> Galería — Montevideo</p>
+          <p style="color:#64748b;font-size:0.85rem">Si necesitas cancelar o reprogramar, comunicate al teléfono de la clínica.</p>
+        </div>`,
+      }).catch(e => console.log('Error email reagendar paciente:', e.message));
+
+      resend.emails.send({
+        from: 'Clinica del Pie Isabel Aguiar <onboarding@resend.dev>',
+        to: process.env.GMAIL_USER,
+        subject: `Cita reagendada - ${paciente}`,
+        html: `<div style="font-family:sans-serif;max-width:600px">
+          <h2 style="color:#0b5345">Cita reagendada</h2>
+          <p><strong>Paciente:</strong> ${paciente}</p>
+          <p><strong>Email:</strong> ${emailPaciente}</p>
+          <p><strong>Anterior:</strong> ${fechaHoraVieja}</p>
+          <p><strong>Nueva fecha y hora:</strong> ${fechaHoraNueva}</p>
+          <p><a href="https://clinicadelpieisabelaguiar.web.app/admin.html" style="color:#1a9e8e">Ver panel admin</a></p>
+        </div>`,
+      }).catch(e => console.log('Error email isabel reagendar:', e.message));
+    }
 
     res.status(200).json({ success: true, data: response.data });
   } catch (error) {
