@@ -75,7 +75,7 @@ app.post(['/agendar', '/api/agendar'], async (req, res) => {
 
     if (emailPaciente && process.env.RESEND_API_KEY) {
       resend.emails.send({
-        from: 'onboarding@resend.dev',
+        from: 'Clínica del Pie <onboarding@resend.dev>',
         to: emailPaciente,
         subject: 'Cita confirmada - Clínica del Pie Isabel Aguiar',
         html: `<div style="font-family:sans-serif;max-width:600px">
@@ -88,7 +88,7 @@ app.post(['/agendar', '/api/agendar'], async (req, res) => {
       }).catch(e => console.log('Error email paciente:', e.message));
 
       resend.emails.send({
-        from: 'onboarding@resend.dev',
+        from: 'Clínica del Pie <onboarding@resend.dev>',
         to: process.env.GMAIL_USER,
         subject: `Nueva cita agendada - ${paciente}`,
         html: `<div style="font-family:sans-serif;max-width:600px">
