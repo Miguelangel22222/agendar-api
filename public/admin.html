@@ -8,195 +8,77 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-    body {
-      font-family: 'Inter', sans-serif;
-      background: #f1f5f9;
-      color: #1a2a3a;
-      min-height: 100vh;
-    }
-    nav {
-      background: #0b5345;
-      color: #fff;
-      padding: 14px 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.1);
-    }
+    body { font-family: 'Inter', sans-serif; background: #f1f5f9; color: #1a2a3a; min-height: 100vh; }
+    nav { background: #0b5345; color: #fff; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
     nav h2 { font-size: 1.1rem; font-weight: 700; }
     nav .nav-actions { display: flex; align-items: center; gap: 16px; }
     nav .user-email { font-size: 0.8rem; opacity: 0.8; }
-    nav .btn-logout {
-      background: rgba(255,255,255,0.15);
-      color: #fff;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-size: 0.8rem;
-      font-family: inherit;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
+    nav .btn-logout { background: rgba(255,255,255,0.15); color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-size: 0.8rem; font-family: inherit; font-weight: 600; cursor: pointer; transition: all 0.2s; }
     nav .btn-logout:hover { background: rgba(255,255,255,0.25); }
     .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
-    .header-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 24px;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
+    .header-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
     .header-bar h1 { font-size: 1.3rem; font-weight: 800; color: #0b5345; }
-    .header-bar .filtro {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .header-bar .filtro input {
-      padding: 10px 14px;
-      border: 2px solid #e2e8f0;
-      border-radius: 10px;
-      font-size: 0.9rem;
-      font-family: inherit;
-      outline: none;
-    }
-    .header-bar .filtro input:focus { border-color: #1a9e8e; }
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-    .stat-card {
-      background: #fff;
-      padding: 20px;
-      border-radius: 14px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    }
-    .stat-card .num { font-size: 1.8rem; font-weight: 800; color: #0b5345; }
-    .stat-card .label { font-size: 0.8rem; color: #64748b; margin-top: 4px; }
-    .table-wrapper {
-      background: #fff;
-      border-radius: 14px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-      overflow-x: auto;
-    }
-    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-    th {
-      background: #0b5345;
-      color: #fff;
-      text-align: left;
-      padding: 12px 16px;
-      font-weight: 600;
-      white-space: nowrap;
-    }
-    td { padding: 12px 16px; border-bottom: 1px solid #f1f5f9; }
+    .header-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .search-box { padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 0.85rem; font-family: inherit; outline: none; width: 220px; }
+    .search-box:focus { border-color: #1a9e8e; }
+    .btn-sm { padding: 8px 16px; border-radius: 8px; font-size: 0.8rem; font-family: inherit; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
+    .btn-primary { background: #1a9e8e; color: #fff; }
+    .btn-primary:hover { background: #0e6b58; }
+    .btn-outline { background: #fff; color: #1a2a3a; border: 2px solid #e2e8f0; }
+    .btn-outline:hover { border-color: #1a9e8e; }
+    .btn-danger { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+    .btn-danger:hover { background: #fee2e2; }
+    .filtros-rapidos { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+    .filtro-btn { padding: 6px 14px; border-radius: 20px; font-size: 0.78rem; font-family: inherit; font-weight: 600; cursor: pointer; border: 2px solid #e2e8f0; background: #fff; color: #64748b; transition: all 0.2s; }
+    .filtro-btn.active { background: #0b5345; color: #fff; border-color: #0b5345; }
+    .filtro-btn:hover:not(.active) { border-color: #1a9e8e; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
+    .stat-card { background: #fff; padding: 16px; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .stat-card .num { font-size: 1.6rem; font-weight: 800; color: #0b5345; }
+    .stat-card .label { font-size: 0.75rem; color: #64748b; margin-top: 4px; }
+    .table-wrapper { background: #fff; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    th { background: #0b5345; color: #fff; text-align: left; padding: 10px 12px; font-weight: 600; white-space: nowrap; }
+    td { padding: 10px 12px; border-bottom: 1px solid #f1f5f9; }
     tr:hover td { background: #f8fafc; }
-    .badge {
-      display: inline-block;
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
+    td a { color: #1a9e8e; text-decoration: none; }
+    td a:hover { text-decoration: underline; }
+    .badge { display: inline-block; padding: 3px 8px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
     .badge.futura { background: #ecfdf5; color: #065f46; }
     .badge.hoy { background: #fef3c7; color: #92400e; }
     .badge.pasada { background: #f1f5f9; color: #64748b; }
-    .btn-cancel {
-      padding: 6px 14px;
-      background: #fef2f2;
-      color: #991b1b;
-      border: 1px solid #fecaca;
-      border-radius: 8px;
-      font-size: 0.75rem;
-      font-family: inherit;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .btn-cancel:hover { background: #fee2e2; }
+    .badge.cancelada { background: #fef2f2; color: #991b1b; }
+    .name-link { cursor: pointer; font-weight: 600; color: #0b5345; }
+    .name-link:hover { text-decoration: underline; }
+    .actions-cell { display: flex; gap: 4px; flex-wrap: wrap; }
+    .btn-xs { padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; font-family: inherit; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
     .empty { text-align: center; padding: 48px; color: #94a3b8; }
     .loading { text-align: center; padding: 48px; }
-    .spinner {
-      display: inline-block;
-      width: 32px; height: 32px;
-      border: 3px solid #e2e8f0;
-      border-top-color: #1a9e8e;
-      border-radius: 50%;
-      animation: spin 0.6s linear infinite;
-    }
+    .spinner { display: inline-block; width: 32px; height: 32px; border: 3px solid #e2e8f0; border-top-color: #1a9e8e; border-radius: 50%; animation: spin 0.6s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .toast {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      padding: 14px 20px;
-      border-radius: 12px;
-      font-size: 0.85rem;
-      font-weight: 500;
-      color: #fff;
-      display: none;
-      animation: fadeUp 0.3s ease;
-      z-index: 100;
-    }
+    .toast { position: fixed; bottom: 24px; right: 24px; padding: 14px 20px; border-radius: 12px; font-size: 0.85rem; font-weight: 500; color: #fff; display: none; animation: fadeUp 0.3s ease; z-index: 100; }
     .toast.success { background: #065f46; }
     .toast.error { background: #991b1b; }
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.5);
-      backdrop-filter: blur(4px);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-    }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; }
     .modal-overlay.show { display: flex; }
-    .modal-box {
-      background: #fff;
-      border-radius: 24px;
-      padding: 36px 32px 28px;
-      width: 90%;
-      max-width: 360px;
-      text-align: center;
-      animation: fadeUp 0.3s ease-out;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-    }
-    .modal-icon {
-      width: 64px; height: 64px;
-      background: #fef2f2;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 16px;
-    }
-    .modal-box h3 { font-size: 1.1rem; font-weight: 700; color: #1a2a3a; margin-bottom: 8px; }
-    .modal-box p { font-size: 0.85rem; color: #64748b; margin-bottom: 24px; }
-    .modal-actions { display: flex; gap: 10px; }
-    .modal-actions button {
-      flex: 1;
-      padding: 12px;
-      border-radius: 12px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      font-family: inherit;
-      cursor: pointer;
-      border: none;
-      transition: all 0.2s;
-    }
-    .modal-btn-cancel { background: #f1f5f9; color: #64748b; }
-    .modal-btn-cancel:hover { background: #e2e8f0; }
-    .modal-btn-confirm { background: #dc2626; color: #fff; }
-    .modal-btn-confirm:hover { background: #b91c1c; }
+    .modal-box { background: #fff; border-radius: 24px; padding: 32px 28px 24px; width: 90%; max-width: 400px; animation: fadeUp 0.3s ease-out; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+    .modal-box.wide { max-width: 500px; }
+    .modal-box h3 { font-size: 1.1rem; font-weight: 700; color: #1a2a3a; margin-bottom: 16px; text-align: center; }
+    .modal-box label { display: block; font-size: 0.8rem; font-weight: 600; color: #1a2a3a; margin-bottom: 4px; margin-top: 12px; }
+    .modal-box input, .modal-box select { width: 100%; padding: 10px 12px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 0.85rem; font-family: inherit; outline: none; }
+    .modal-box input:focus, .modal-box select:focus { border-color: #1a9e8e; }
+    .modal-box .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+    .modal-box .modal-actions button { flex: 1; padding: 12px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; font-family: inherit; cursor: pointer; border: none; transition: all 0.2s; }
+    .modal-box .patient-info { font-size: 0.82rem; color: #64748b; margin-bottom: 16px; text-align: center; }
+    .modal-box .patient-info strong { color: #1a2a3a; }
     @media (max-width:768px) {
       .container { padding: 16px; }
-      th, td { padding: 8px 10px; font-size: 0.75rem; }
+      th, td { padding: 6px 8px; font-size: 0.7rem; }
       nav { padding: 12px 16px; }
       nav h2 { font-size: 0.9rem; }
       nav .user-email { display: none; }
+      .search-box { width: 140px; }
     }
   </style>
 </head>
@@ -211,49 +93,84 @@
 
   <div class="container">
     <div class="header-bar">
-      <h1>Citas Agendadas</h1>
-      <div class="filtro">
-        <input type="date" id="filtroFecha">
-        <button class="btn-logout" id="btnLimpiar" style="background:#e2e8f0;color:#1a2a3a;">Limpiar</button>
+      <h1>Citas</h1>
+      <div class="header-actions">
+        <input type="text" class="search-box" id="searchBox" placeholder="Buscar nombre, teléfono, email...">
+        <input type="date" id="filtroFecha" style="padding:10px 12px;border:2px solid #e2e8f0;border-radius:10px;font-size:0.85rem;font-family:inherit;outline:none;">
+        <button class="btn-sm btn-primary" id="btnNuevaCita">+ Nueva Cita</button>
+        <button class="btn-sm btn-outline" id="btnExportar">Exportar CSV</button>
       </div>
     </div>
 
-    <div class="stats" id="stats">
-      <div class="stat-card"><div class="num" id="totalCitas">0</div><div class="label">Total próximas</div></div>
+    <div class="filtros-rapidos" id="filtrosRapidos">
+      <button class="filtro-btn active" data-filter="todas">Todas</button>
+      <button class="filtro-btn" data-filter="hoy">Hoy</button>
+      <button class="filtro-btn" data-filter="proximas">Próximas</button>
+      <button class="filtro-btn" data-filter="pasadas">Completadas</button>
+    </div>
+
+    <div class="stats">
+      <div class="stat-card"><div class="num" id="totalCitas">0</div><div class="label">Total</div></div>
       <div class="stat-card"><div class="num" id="citasHoy">0</div><div class="label">Hoy</div></div>
+      <div class="stat-card"><div class="num" id="citasProximas">0</div><div class="label">Próximas</div></div>
     </div>
 
     <div class="table-wrapper">
       <div id="loading" class="loading"><div class="spinner"></div></div>
       <table id="tablaCitas" style="display:none;">
         <thead>
-          <tr>
-            <th>Paciente</th>
-            <th>Teléfono</th>
-            <th>Email</th>
-            <th>Fecha</th>
-            <th>Hora</th>
-            <th>Estado</th>
-            <th>Acción</th>
-          </tr>
+          <tr><th>Paciente</th><th>Teléfono</th><th>Email</th><th>Fecha</th><th>Hora</th><th>Estado</th><th>Acción</th></tr>
         </thead>
         <tbody id="citasBody"></tbody>
       </table>
-      <div id="empty" class="empty" style="display:none;">No hay citas agendadas</div>
+      <div id="empty" class="empty" style="display:none;">No hay citas</div>
     </div>
   </div>
 
   <div class="toast" id="toast"></div>
 
+  <!-- Modal Cancelar -->
   <div class="modal-overlay" id="modalConfirm">
     <div class="modal-box">
-      <div class="modal-icon">🗑️</div>
       <h3>Cancelar cita</h3>
-      <p id="modalTexto">¿Estás segura de cancelar esta cita?</p>
-      <div class="modal-actions">
-        <button class="modal-btn-cancel" id="modalNo">No, mantener</button>
-        <button class="modal-btn-confirm" id="modalSi">Sí, cancelar</button>
-      </div>
+      <p id="modalTexto" style="text-align:center;color:#64748b;font-size:0.85rem;">¿Estás segura?</p>
+      <div class="modal-actions"><button class="modal-btn-cancel" id="modalNo" style="background:#f1f5f9;color:#64748b;">No, mantener</button><button class="modal-btn-confirm" id="modalSi" style="background:#dc2626;color:#fff;">Sí, cancelar</button></div>
+    </div>
+  </div>
+
+  <!-- Modal Reagendar -->
+  <div class="modal-overlay" id="modalReagendar">
+    <div class="modal-box wide">
+      <h3>Reagendar cita</h3>
+      <p id="reagendarPaciente" class="patient-info">Paciente: <strong></strong></p>
+      <label>Nueva fecha</label>
+      <input type="date" id="reagendarFecha">
+      <label>Nuevo horario</label>
+      <select id="reagendarHora"><option value="">Seleccionar...</option></select>
+      <div class="modal-actions"><button id="reagendarNo" style="background:#f1f5f9;color:#64748b;">Cancelar</button><button id="reagendarSi" style="background:#1a9e8e;color:#fff;">Guardar cambios</button></div>
+    </div>
+  </div>
+
+  <!-- Modal Historial -->
+  <div class="modal-overlay" id="modalHistorial">
+    <div class="modal-box wide">
+      <h3 id="historialNombre">Paciente</h3>
+      <div style="max-height:300px;overflow-y:auto;" id="historialBody"></div>
+      <div class="modal-actions" style="margin-top:16px;"><button id="historialCerrar" style="flex:1;padding:12px;border-radius:12px;font-size:0.85rem;font-weight:600;font-family:inherit;cursor:pointer;border:none;background:#f1f5f9;color:#64748b;">Cerrar</button></div>
+    </div>
+  </div>
+
+  <!-- Modal Nueva Cita -->
+  <div class="modal-overlay" id="modalNuevaCita">
+    <div class="modal-box wide">
+      <h3>Agendar cita manual</h3>
+      <label>Nombre</label><input type="text" id="ncNombre" placeholder="Nombre del paciente">
+      <label>Teléfono</label><input type="text" id="ncTelefono" placeholder="099 123 456">
+      <label>Email</label><input type="email" id="ncEmail" placeholder="paciente@email.com">
+      <label>Fecha</label><input type="date" id="ncFecha">
+      <label>Horario</label>
+      <select id="ncHora"><option value="">Seleccionar...</option></select>
+      <div class="modal-actions"><button id="ncCancelar" style="background:#f1f5f9;color:#64748b;">Cancelar</button><button id="ncGuardar" style="background:#1a9e8e;color:#fff;">Agendar</button></div>
     </div>
   </div>
 
@@ -261,13 +178,7 @@
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
     import { getAuth, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 
-    const firebaseConfig = {
-      apiKey: 'AIzaSyCT25mmO3VtQYGr8Cwzj2t-NIF3gsWkTOg',
-      authDomain: 'clinicadelpieisabelaguiar.firebaseapp.com',
-      projectId: 'clinicadelpieisabelaguiar',
-      appId: '1:685381652711:web:859a412d8779b53d49d242',
-    };
-
+    const firebaseConfig = { apiKey: 'AIzaSyCT25mmO3VtQYGr8Cwzj2t-NIF3gsWkTOg', authDomain: 'clinicadelpieisabelaguiar.firebaseapp.com', projectId: 'clinicadelpieisabelaguiar', appId: '1:685381652711:web:859a412d8779b53d49d242' };
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const ALLOWED = ['arteyestilomodas@gmail.com', 'mailmaguirre@gmail.com'];
@@ -281,142 +192,199 @@
     const empty = document.getElementById('empty');
     const totalCitas = document.getElementById('totalCitas');
     const citasHoy = document.getElementById('citasHoy');
+    const citasProximas = document.getElementById('citasProximas');
+    const searchBox = document.getElementById('searchBox');
     const filtroFecha = document.getElementById('filtroFecha');
-    const btnLimpiar = document.getElementById('btnLimpiar');
     const toast = document.getElementById('toast');
+
     const modalConfirm = document.getElementById('modalConfirm');
     const modalTexto = document.getElementById('modalTexto');
     const modalSi = document.getElementById('modalSi');
     const modalNo = document.getElementById('modalNo');
 
+    const modalReagendar = document.getElementById('modalReagendar');
+    const reagendarPaciente = document.getElementById('reagendarPaciente');
+    const reagendarFecha = document.getElementById('reagendarFecha');
+    const reagendarHora = document.getElementById('reagendarHora');
+    const reagendarSi = document.getElementById('reagendarSi');
+    const reagendarNo = document.getElementById('reagendarNo');
+
+    const modalHistorial = document.getElementById('modalHistorial');
+    const historialNombre = document.getElementById('historialNombre');
+    const historialBody = document.getElementById('historialBody');
+    const historialCerrar = document.getElementById('historialCerrar');
+
+    const modalNuevaCita = document.getElementById('modalNuevaCita');
+    const ncNombre = document.getElementById('ncNombre');
+    const ncTelefono = document.getElementById('ncTelefono');
+    const ncEmail = document.getElementById('ncEmail');
+    const ncFecha = document.getElementById('ncFecha');
+    const ncHora = document.getElementById('ncHora');
+    const ncGuardar = document.getElementById('ncGuardar');
+    const ncCancelar = document.getElementById('ncCancelar');
+
     let currentUser = null;
     let allEvents = [];
+    let activeFilter = 'todas';
     let pendingCancelId = null;
     let pendingCancelPaciente = null;
+    let pendingReagendarId = null;
+    let pendingReagendarPaciente = null;
 
-    function showToast(msg, type) {
-      toast.textContent = msg;
-      toast.className = 'toast ' + type;
-      toast.style.display = 'block';
-      setTimeout(() => toast.style.display = 'none', 3000);
-    }
+    function generarSlots() { return ['09:30','10:30','11:30','14:00','15:00','16:00','17:00']; }
+    function llenarSelectHora(sel) { sel.innerHTML = '<option value="">Seleccionar...</option>'; generarSlots().forEach(h => { const o = document.createElement('option'); o.value = h; o.textContent = h; sel.appendChild(o); }); }
+    llenarSelectHora(reagendarHora);
+    llenarSelectHora(ncHora);
+
+    function showToast(msg, type) { toast.textContent = msg; toast.className = 'toast ' + type; toast.style.display = 'block'; setTimeout(() => toast.style.display = 'none', 3000); }
 
     onAuthStateChanged(auth, (user) => {
-      if (!user || !ALLOWED.includes(user.email)) {
-        window.location.href = 'login.html';
-        return;
-      }
+      if (!user || !ALLOWED.includes(user.email)) { window.location.href = 'login.html'; return; }
       currentUser = user;
       userEmail.textContent = user.email;
       cargarCitas();
     });
 
-    btnLogout.addEventListener('click', () => {
-      signOut(auth).then(() => window.location.href = 'login.html');
-    });
+    btnLogout.addEventListener('click', () => signOut(auth).then(() => window.location.href = 'login.html'));
 
     async function cargarCitas() {
-      loading.style.display = 'block';
-      tabla.style.display = 'none';
-      empty.style.display = 'none';
+      loading.style.display = 'block'; tabla.style.display = 'none'; empty.style.display = 'none';
       try {
         const res = await fetch(`${API}/admin/citas`);
         const data = await res.json();
-        if (data.success) {
-          allEvents = data.citas || [];
-          renderCitas();
-        } else {
-          showToast('Error al cargar citas: ' + (data.error || ''), 'error');
-        }
-      } catch (e) {
-        showToast('Error de conexión con el servidor', 'error');
-      }
+        if (data.success) { allEvents = data.citas || []; renderCitas(); }
+        else showToast('Error: ' + (data.error || ''), 'error');
+      } catch (e) { showToast('Error de conexión', 'error'); }
       loading.style.display = 'none';
     }
 
     function renderCitas() {
-      const fechaFiltro = filtroFecha.value;
       let eventos = allEvents;
-      if (fechaFiltro) {
-        eventos = eventos.filter(e => e.fecha === fechaFiltro);
-      }
-
+      const q = searchBox.value.toLowerCase().trim();
+      if (q) eventos = eventos.filter(e => (e.paciente || '').toLowerCase().includes(q) || (e.telefono || '').includes(q) || (e.email || '').toLowerCase().includes(q));
+      const fFecha = filtroFecha.value;
+      if (fFecha) eventos = eventos.filter(e => e.fecha === fFecha);
       const hoy = new Date().toISOString().slice(0, 10);
-      const futuras = eventos.filter(e => e.fecha >= hoy);
+      if (activeFilter === 'hoy') eventos = eventos.filter(e => e.fecha === hoy);
+      else if (activeFilter === 'proximas') eventos = eventos.filter(e => e.fecha > hoy);
+      else if (activeFilter === 'pasadas') eventos = eventos.filter(e => e.fecha < hoy);
+      const total = eventos.length;
       const hoyCount = eventos.filter(e => e.fecha === hoy).length;
-
-      totalCitas.textContent = futuras.length;
-      citasHoy.textContent = hoyCount;
-
-      if (eventos.length === 0) {
-        tabla.style.display = 'none';
-        empty.style.display = 'block';
-        return;
-      }
-
-      tabla.style.display = '';
-      empty.style.display = 'none';
-      tbody.innerHTML = '';
-
+      const proxCount = eventos.filter(e => e.fecha > hoy).length;
+      totalCitas.textContent = total; citasHoy.textContent = hoyCount; citasProximas.textContent = proxCount;
+      if (eventos.length === 0) { tabla.style.display = 'none'; empty.style.display = 'block'; return; }
+      tabla.style.display = ''; empty.style.display = 'none'; tbody.innerHTML = '';
       eventos.sort((a, b) => a.fecha.localeCompare(b.fecha) || a.hora.localeCompare(b.hora));
-
       eventos.forEach(ev => {
         const tr = document.createElement('tr');
         const estado = ev.fecha === hoy ? 'hoy' : (ev.fecha < hoy ? 'pasada' : 'futura');
-        const estadoLabel = ev.fecha === hoy ? 'Hoy' : (ev.fecha < hoy ? 'Pasada' : 'Próxima');
-
+        const estadoLabel = ev.fecha === hoy ? 'Hoy' : (ev.fecha < hoy ? 'Completada' : 'Próxima');
+        const tel = (ev.telefono || '').replace(/\s+/g, '');
         tr.innerHTML = `
-          <td><strong>${ev.paciente}</strong></td>
-          <td>${ev.telefono}</td>
-          <td>${ev.email}</td>
+          <td><span class="name-link" data-paciente="${ev.paciente}" data-email="${ev.email}" data-tel="${tel}">${ev.paciente}</span></td>
+          <td>${tel ? `<a href="https://wa.me/${tel}?text=Hola%20${encodeURIComponent(ev.paciente)},%20te%20escribimos%20de%20Cl%C3%ADnica%20del%20Pie" target="_blank">${ev.telefono}</a>` : ev.telefono}</td>
+          <td>${ev.email ? `<a href="mailto:${ev.email}">${ev.email}</a>` : ev.email}</td>
           <td>${ev.fecha}</td>
           <td>${ev.hora}</td>
           <td><span class="badge ${estado}">${estadoLabel}</span></td>
           <td>
-            ${ev.fecha >= hoy ? `<button class="btn-cancel" data-id="${ev.id}" data-paciente="${ev.paciente}">Cancelar</button>` : ''}
-          </td>
-        `;
+            <div class="actions-cell">
+              ${ev.fecha >= hoy ? `<button class="btn-xs btn-danger" data-id="${ev.id}" data-paciente="${ev.paciente}" data-action="cancel">Cancelar</button><button class="btn-xs btn-primary" data-id="${ev.id}" data-paciente="${ev.paciente}" data-fecha="${ev.fecha}" data-hora="${ev.hora}" data-action="reagendar">Reagendar</button>` : ''}
+            </div>
+          </td>`;
         tbody.appendChild(tr);
       });
-
-      document.querySelectorAll('.btn-cancel').forEach(btn => {
-        btn.addEventListener('click', () => {
-          pendingCancelId = btn.dataset.id;
-          pendingCancelPaciente = btn.dataset.paciente;
-          modalTexto.textContent = `¿Cancelar la cita de ${pendingCancelPaciente}?`;
-          modalConfirm.classList.add('show');
-        });
-      });
-
-      function ejecutarCancelacion() {
-        modalConfirm.classList.remove('show');
-        const btn = document.querySelector(`.btn-cancel[data-id="${pendingCancelId}"]`);
-        if (!btn) return;
-        btn.disabled = true;
-        btn.textContent = '...';
-        fetch(`${API}/admin/citas/${pendingCancelId}`, { method: 'DELETE' })
-          .then(res => res.json())
-          .then(data => {
-            if (data.success) {
-              showToast(`Cita de ${pendingCancelPaciente} cancelada`, 'success');
-              cargarCitas();
-            } else {
-              showToast('Error: ' + (data.error || ''), 'error');
-              if (btn) { btn.disabled = false; btn.textContent = 'Cancelar'; }
-            }
-          })
-          .catch(() => {
-            showToast('Error de conexión', 'error');
-            if (btn) { btn.disabled = false; btn.textContent = 'Cancelar'; }
-          });
-      }
-
-      modalSi.addEventListener('click', ejecutarCancelacion);
-      modalNo.addEventListener('click', () => modalConfirm.classList.remove('show'));
+      document.querySelectorAll('[data-action="cancel"]').forEach(b => b.addEventListener('click', () => {
+        pendingCancelId = b.dataset.id; pendingCancelPaciente = b.dataset.paciente;
+        modalTexto.textContent = `¿Cancelar la cita de ${pendingCancelPaciente}?`; modalConfirm.classList.add('show');
+      }));
+      document.querySelectorAll('[data-action="reagendar"]').forEach(b => b.addEventListener('click', () => {
+        pendingReagendarId = b.dataset.id; pendingReagendarPaciente = b.dataset.paciente;
+        reagendarPaciente.querySelector('strong').textContent = pendingReagendarPaciente;
+        reagendarFecha.value = b.dataset.fecha;
+        reagendarHora.value = b.dataset.hora;
+        modalReagendar.classList.add('show');
+      }));
+      document.querySelectorAll('.name-link').forEach(el => el.addEventListener('click', () => {
+        const nom = el.dataset.paciente; hisNombre = nom;
+        historialNombre.textContent = nom;
+        const pasadas = allEvents.filter(e => e.paciente === nom && e.fecha < new Date().toISOString().slice(0,10));
+        if (pasadas.length === 0) historialBody.innerHTML = '<p style="text-align:center;color:#94a3b8;padding:24px;">Sin historial de citas pasadas</p>';
+        else { let h = '<table style="width:100%;font-size:0.8rem;"><tr><th>Fecha</th><th>Hora</th><th>Estado</th></tr>'; pasadas.sort((a,b) => b.fecha.localeCompare(a.fecha)).forEach(p => { h += `<tr><td>${p.fecha}</td><td>${p.hora}</td><td><span class="badge pasada">Completada</span></td></tr>`; }); h += '</table>'; historialBody.innerHTML = h; }
+        modalHistorial.classList.add('show');
+      }));
     }
 
+    modalSi.addEventListener('click', () => {
+      modalConfirm.classList.remove('show');
+      fetch(`${API}/admin/citas/${pendingCancelId}`, { method: 'DELETE' })
+        .then(r => r.json()).then(d => { if (d.success) { showToast('Cita cancelada', 'success'); cargarCitas(); } else showToast('Error: ' + (d.error || ''), 'error'); });
+    });
+    modalNo.addEventListener('click', () => modalConfirm.classList.remove('show'));
+
+    reagendarSi.addEventListener('click', () => {
+      const f = reagendarFecha.value, h = reagendarHora.value;
+      if (!f || !h) { showToast('Seleccioná fecha y hora', 'error'); return; }
+      const start = new Date(`${f}T${h}:00`); const end = new Date(start.getTime() + 45*60*1000);
+      modalReagendar.classList.remove('show');
+      fetch(`${API}/admin/citas/${pendingReagendarId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ start: { dateTime: start.toISOString(), timeZone: 'America/Montevideo' }, end: { dateTime: end.toISOString(), timeZone: 'America/Montevideo' } })
+      }).then(r => r.json()).then(d => { if (d.success) { showToast('Cita reagendada', 'success'); cargarCitas(); } else showToast('Error: ' + (d.error || ''), 'error'); });
+    });
+    reagendarNo.addEventListener('click', () => modalReagendar.classList.remove('show'));
+
+    historialCerrar.addEventListener('click', () => modalHistorial.classList.remove('show'));
+
+    document.getElementById('btnNuevaCita').addEventListener('click', () => {
+      ncNombre.value = ''; ncTelefono.value = ''; ncEmail.value = ''; ncFecha.value = ''; ncHora.value = '';
+      modalNuevaCita.classList.add('show');
+    });
+    ncCancelar.addEventListener('click', () => modalNuevaCita.classList.remove('show'));
+    ncGuardar.addEventListener('click', async () => {
+      const nom = ncNombre.value.trim(), tel = ncTelefono.value.trim(), email = ncEmail.value.trim(), f = ncFecha.value, h = ncHora.value;
+      if (!nom || !tel || !f || !h) { showToast('Completá nombre, teléfono, fecha y hora', 'error'); return; }
+      const start = new Date(`${f}T${h}:00`); const end = new Date(start.getTime() + 45*60*1000);
+      modalNuevaCita.classList.remove('show');
+      try {
+        const res = await fetch(`${API}/agendar`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            summary: `Cita Podológica: ${nom}`,
+            description: `Paciente: ${nom}\nTeléfono: ${tel}\nEmail: ${email}`,
+            email, start: { dateTime: start.toISOString(), timeZone: 'America/Montevideo' }, end: { dateTime: end.toISOString(), timeZone: 'America/Montevideo' }
+          })
+        });
+        const d = await res.json();
+        if (d.success) { showToast('Cita agendada manualmente', 'success'); cargarCitas(); }
+        else showToast('Error: ' + (d.error || ''), 'error');
+      } catch (e) { showToast('Error de conexión', 'error'); }
+    });
+
+    document.querySelectorAll('.filtro-btn').forEach(b => b.addEventListener('click', () => {
+      document.querySelectorAll('.filtro-btn').forEach(x => x.classList.remove('active'));
+      b.classList.add('active'); activeFilter = b.dataset.filter; renderCitas();
+    }));
+
+    document.getElementById('btnExportar').addEventListener('click', () => {
+      const filas = document.querySelectorAll('#citasBody tr');
+      if (!filas.length) { showToast('No hay citas para exportar', 'error'); return; }
+      let csv = '\uFEFFPaciente,Tel\u00E9fono,Email,Fecha,Hora,Estado\n';
+      filas.forEach(tr => {
+        const celdas = tr.querySelectorAll('td');
+        const row = [];
+        celdas.forEach((td, i) => { if (i < 6) row.push('"' + (td.textContent.trim() || '') + '"'); });
+        csv += row.join(',') + '\n';
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `citas_${new Date().toISOString().slice(0,10)}.csv`; a.click();
+      showToast('CSV descargado', 'success');
+    });
+
+    searchBox.addEventListener('input', renderCitas);
     filtroFecha.addEventListener('change', renderCitas);
-    btnLimpiar.addEventListener('click', () => { filtroFecha.value = ''; renderCitas(); });
+    document.getElementById('btnLimpiar')?.addEventListener('click', () => { filtroFecha.value = ''; renderCitas(); });
   </script>
 </body>
 </html>
