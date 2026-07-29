@@ -403,8 +403,17 @@
       }));
       document.querySelectorAll('[data-action="cancel"]').forEach(b => b.addEventListener('click', () => {
         const id = b.dataset.id, pac = b.dataset.paciente;
-        confirmar('Cancelar cita', `¿Cancelar la cita de ${pac}? Se enviará aviso al paciente.`, '#dc2626', () => {
-          cambiarEstado(id, 'cancelada', null);
+        confirmar('Cancelar cita', `¿Cancelar la cita de ${pac}? Se enviará aviso.`, '#dc2626', async () => {
+          const ev = allEvents.find(e => e.id === id);
+          if (!ev) return;
+          let desc = `Paciente: ${ev.paciente}\nTeléfono: ${ev.telefono || ''}\nEmail: ${ev.email || ''}\nEstado: cancelada`;
+          if (ev.notas) desc += `\nNotas: ${ev.notas}`;
+          try {
+            const r = await fetch(`${API}/admin/citas/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ description: desc }) });
+            const d = await r.json();
+            if (d.success) { showToast('Cita cancelada', 'success'); cargarCitas(); }
+            else showToast('Error: ' + (d.error || ''), 'error');
+          } catch (e) { showToast('Error de conexión', 'error'); }
         });
       }));
       document.querySelectorAll('[data-action="eliminar"]').forEach(b => b.addEventListener('click', () => {
