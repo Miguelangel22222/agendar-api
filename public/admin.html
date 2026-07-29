@@ -150,6 +150,7 @@
       <button class="filtro-btn" data-filter="hoy">Hoy</button>
       <button class="filtro-btn" data-filter="proximas">Próximas</button>
       <button class="filtro-btn" data-filter="pasadas">Completadas</button>
+      <button class="filtro-btn" data-filter="canceladas">Canceladas</button>
     </div>
 
     <div class="table-wrapper">
@@ -341,9 +342,11 @@
       const fFecha = filtroFecha.value;
       if (fFecha) eventos = eventos.filter(e => e.fecha === fFecha);
       const hoy = new Date().toISOString().slice(0, 10);
-      if (activeFilter === 'hoy') eventos = eventos.filter(e => e.fecha === hoy);
-      else if (activeFilter === 'proximas') eventos = eventos.filter(e => e.fecha > hoy);
-      else if (activeFilter === 'pasadas') eventos = eventos.filter(e => e.fecha < hoy);
+      if (activeFilter === 'todas') eventos = eventos.filter(e => e.estado !== 'cancelada');
+      else if (activeFilter === 'hoy') eventos = eventos.filter(e => e.fecha === hoy && e.estado !== 'cancelada');
+      else if (activeFilter === 'proximas') eventos = eventos.filter(e => e.fecha > hoy && e.estado !== 'cancelada');
+      else if (activeFilter === 'pasadas') eventos = eventos.filter(e => e.fecha < hoy && e.estado !== 'cancelada');
+      else if (activeFilter === 'canceladas') eventos = eventos.filter(e => e.estado === 'cancelada');
 
       const total = allEvents.filter(e => !e.esBloqueo).length;
       const hoyCount = eventos.filter(e => e.fecha === hoy).length;
