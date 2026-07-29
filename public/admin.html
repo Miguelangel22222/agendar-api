@@ -367,6 +367,7 @@
         html += `<button class="btn-xs btn-outline" data-id="${ev.id}" data-paciente="${ev.paciente}" data-action="notas">📝 Notas</button>`;
         if (puedeEditar) {
           html += `<button class="btn-xs btn-danger" data-id="${ev.id}" data-paciente="${ev.paciente}" data-action="cancel">Cancelar</button>`;
+          html += `<button class="btn-xs btn-danger" data-id="${ev.id}" data-action="eliminar" style="background:#fef2f2;color:#991b1b;border:1px solid #fecaca;opacity:0.5">Eliminar</button>`;
           html += `<button class="btn-xs btn-primary" data-id="${ev.id}" data-paciente="${ev.paciente}" data-fecha="${ev.fecha}" data-hora="${ev.hora}" data-action="reagendar">Reagendar</button>`;
         }
         html += '</div></td>';
@@ -382,9 +383,14 @@
       }));
       document.querySelectorAll('[data-action="cancel"]').forEach(b => b.addEventListener('click', () => {
         const id = b.dataset.id, pac = b.dataset.paciente;
-        confirmar('Cancelar cita', `¿Cancelar la cita de ${pac}?`, '#dc2626', () => {
-          fetch(`${API}/admin/citas/${id}`, { method: 'DELETE' })
-            .then(r => r.json()).then(d => { if (d.success) { showToast('Cita cancelada', 'success'); cargarCitas(); } else showToast('Error: ' + (d.error || ''), 'error'); });
+        confirmar('Cancelar cita', `¿Cancelar la cita de ${pac}? Se enviará aviso al paciente.`, '#dc2626', () => {
+          cambiarEstado(id, 'cancelada', null);
+        });
+      }));
+      document.querySelectorAll('[data-action="eliminar"]').forEach(b => b.addEventListener('click', () => {
+        confirmar('Eliminar permanentemente', '¿Eliminar del calendario? No se puede deshacer.', '#dc2626', () => {
+          fetch(`${API}/admin/citas/${b.dataset.id}`, { method: 'DELETE' })
+            .then(r => r.json()).then(d => { if (d.success) { showToast('Eliminada', 'success'); cargarCitas(); } else showToast('Error: ' + (d.error || ''), 'error'); });
         });
       }));
       document.querySelectorAll('[data-action="reagendar"]').forEach(b => b.addEventListener('click', () => {

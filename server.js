@@ -293,6 +293,24 @@ app.put(['/admin/citas/:eventId', '/api/admin/citas/:eventId'], async (req, res)
       }).catch(e => console.log('Error email isabel reagendar:', e.message));
     }
 
+    const newDesc = req.body.description || '';
+    if (newDesc.includes('Estado: cancelada') && process.env.RESEND_API_KEY) {
+      if (emailPaciente) {
+        resend.emails.send({
+          from: 'Clinica del Pie Isabel Aguiar <onboarding@resend.dev>',
+          to: emailPaciente,
+          subject: 'Cita cancelada - Clínica del Pie Isabel Aguiar',
+          html: `<div style="font-family:sans-serif;max-width:600px"><h2 style="color:#991b1b">Cita cancelada</h2><p>Hola ${paciente}, tu cita del <strong>${fechaHoraVieja}</strong> fue cancelada.</p><p>Si querés agendar un nuevo turno, podés hacerlo desde nuestra web.</p><p style="color:#64748b;font-size:0.85rem">Clínica del Pie Isabel Aguiar</p></div>`,
+        }).catch(e => console.log('Error email cancel PUT paciente:', e.message));
+      }
+      resend.emails.send({
+        from: 'Clinica del Pie Isabel Aguiar <onboarding@resend.dev>',
+        to: process.env.GMAIL_USER,
+        subject: `Cita cancelada - ${paciente}`,
+        html: `<div style="font-family:sans-serif;max-width:600px"><h2 style="color:#991b1b">Cita cancelada</h2><p><strong>Paciente:</strong> ${paciente}</p><p><strong>Email:</strong> ${emailPaciente}</p><p><strong>Fecha:</strong> ${fechaHoraVieja}</p><p><a href="https://clinicadelpieisabelaguiar.web.app/admin.html" style="color:#1a9e8e">Ver panel admin</a></p></div>`,
+      }).catch(e => console.log('Error email isabel cancel PUT:', e.message));
+    }
+
     res.status(200).json({ success: true, data: response.data });
   } catch (error) {
     console.error('Error al reagendar cita:', error.response ? error.response.data : error.message);
