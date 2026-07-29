@@ -125,14 +125,20 @@ app.get(['/admin/citas', '/api/admin/citas'], async (req, res) => {
       orderBy: 'startTime',
     });
 
-    const citas = (response.data.items || []).map(event => {
+    const citas = (response.data.items || []).filter(event => {
+      const s = event.summary || '';
+      return !s.startsWith('[BLOQUEADO]');
+    }).map(event => {
       const desc = event.description || '';
       const paciente = (desc.match(/Paciente:\s*(.+)/) || [])[1] || event.summary || 'Sin nombre';
       const telefono = (desc.match(/Teléfono:\s*(.+)/) || [])[1] || '';
       const email = (desc.match(/Email:\s*(.+)/) || [])[1] || '';
+      const estado = (desc.match(/Estado:\s*(.+)/) || [])[1] || '';
+      const notas = (desc.match(/Notas:\s*(.+)/) || [])[1] || '';
       const start = new Date(event.start.dateTime || event.start.date);
       const fecha = start.toISOString().slice(0, 10);
       const hora = start.toTimeString().slice(0, 5);
+      const esBloqueo = (event.summary || '').startsWith('[BLOQUEADO]');
 
       return {
         id: event.id,
@@ -141,6 +147,9 @@ app.get(['/admin/citas', '/api/admin/citas'], async (req, res) => {
         email,
         fecha,
         hora,
+        estado,
+        notas,
+        esBloqueo,
         summary: event.summary,
       };
     });
@@ -158,6 +167,17 @@ app.delete(['/admin/citas/:eventId', '/api/admin/citas/:eventId'], async (req, r
     const { calendar } = getAuthAndCalendar();
     const calendarId = process.env.CALENDAR_ID || 'primary';
 
+    const existing = await calendar.events.get({
+      calendarId,
+      eventId: req.params.eventId,
+    });
+
+    const desc = existing.data.description || '';
+    const paciente = (desc.match(/Paciente:\s*(.+)/) || [])[1] || existing.data.summary || 'Paciente';
+    const emailPaciente = (desc.match(/Email:\s*(.+)/) || [])[1] || '';
+    const startOld = existing.data.start?.dateTime || existing.data.start?.date || '';
+    const fechaHoraVieja = startOld ? new Date(startOld).toLocaleString('es-UY', { timeZone: 'America/Montevideo' }) : '';
+
     try {
       await calendar.events.delete({
         calendarId,
@@ -171,6 +191,35 @@ app.delete(['/admin/citas/:eventId', '/api/admin/citas/:eventId'], async (req, r
       }
     }
 
+    if (process.env.RESEND_API_KEY) {
+      if (emailPaciente) {
+        resend.emails.send({
+          from: 'Clinica del Pie Isabel Aguiar <onboarding@resend.dev>',
+          to: emailPaciente,
+          subject: 'Cita cancelada - Clínica del Pie Isabel Aguiar',
+          html: `<div style="font-family:sans-serif;max-width:600px">
+            <h2 style="color:#991b1b">Cita cancelada</h2>
+            <p>Hola ${paciente}, tu cita del <strong>${fechaHoraVieja}</strong> fue cancelada.</p>
+            <p>Si querés agendar un nuevo turno, podés hacerlo desde nuestra web.</p>
+            <p style="color:#64748b;font-size:0.85rem">Clínica del Pie Isabel Aguiar</p>
+          </div>`,
+        }).catch(e => console.log('Error email cancelar paciente:', e.message));
+      }
+
+      resend.emails.send({
+        from: 'Clinica del Pie Isabel Aguiar <onboarding@resend.dev>',
+        to: process.env.GMAIL_USER,
+        subject: `Cita cancelada - ${paciente}`,
+        html: `<div style="font-family:sans-serif;max-width:600px">
+          <h2 style="color:#991b1b">Cita cancelada</h2>
+          <p><strong>Paciente:</strong> ${paciente}</p>
+          <p><strong>Email:</strong> ${emailPaciente}</p>
+          <p><strong>Fecha:</strong> ${fechaHoraVieja}</p>
+          <p><a href="https://clinicadelpieisabelaguiar.web.app/admin.html" style="color:#1a9e8e">Ver panel admin</a></p>
+        </div>`,
+      }).catch(e => console.log('Error email isabel cancelar:', e.message));
+    }
+
     res.status(200).json({ success: true, message: 'Cita cancelada' });
   } catch (error) {
     console.error('Error al cancelar cita:', error.response ? error.response.data : error.message);
@@ -178,7 +227,7 @@ app.delete(['/admin/citas/:eventId', '/api/admin/citas/:eventId'], async (req, r
   }
 });
 
-// ADMIN: reagendar cita
+// ADMIN: reagendar cita o actualizar datos
 app.put(['/admin/citas/:eventId', '/api/admin/citas/:eventId'], async (req, res) => {
   try {
     const { calendar } = getAuthAndCalendar();
@@ -194,22 +243,27 @@ app.put(['/admin/citas/:eventId', '/api/admin/citas/:eventId'], async (req, res)
     const emailPaciente = (desc.match(/Email:\s*(.+)/) || [])[1] || '';
     const startOld = existing.data.start?.dateTime || existing.data.start?.date || '';
 
+    const updateBody = {
+      summary: existing.data.summary,
+      description: req.body.description !== undefined ? req.body.description : existing.data.description,
+      start: existing.data.start,
+      end: existing.data.end,
+    };
+
+    if (req.body.start) updateBody.start = req.body.start;
+    if (req.body.end) updateBody.end = req.body.end;
+
     const response = await calendar.events.update({
       calendarId,
       eventId: req.params.eventId,
-      requestBody: {
-        summary: existing.data.summary,
-        description: existing.data.description,
-        start: req.body.start,
-        end: req.body.end,
-      },
+      requestBody: updateBody,
     });
 
     const startNew = req.body.start?.dateTime || '';
     const fechaHoraNueva = startNew ? new Date(startNew).toLocaleString('es-UY', { timeZone: 'America/Montevideo' }) : '';
     const fechaHoraVieja = startOld ? new Date(startOld).toLocaleString('es-UY', { timeZone: 'America/Montevideo' }) : '';
 
-    if (emailPaciente && process.env.RESEND_API_KEY) {
+    if (req.body.start && emailPaciente && process.env.RESEND_API_KEY) {
       resend.emails.send({
         from: 'Clinica del Pie Isabel Aguiar <onboarding@resend.dev>',
         to: emailPaciente,
