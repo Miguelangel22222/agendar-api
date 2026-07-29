@@ -110,6 +110,7 @@
   </style>
 </head>
 <body>
+<script>document.body.style.display='none'</script>
   <div class="auth-loading" id="authLoading">
     <div class="spinner"></div>
     <span style="color:#64748b;font-size:0.9rem">Verificando acceso...</span>
@@ -310,6 +311,7 @@
     onAuthStateChanged(auth, (user) => {
       if (!user || !ALLOWED.includes(user.email)) { window.location.href = 'login.html'; return; }
       currentUser = user;
+      document.body.style.display = '';
       userEmail.textContent = user.email;
       document.getElementById('authLoading').classList.add('auth-hidden');
       document.querySelector('nav').classList.remove('auth-hidden');
