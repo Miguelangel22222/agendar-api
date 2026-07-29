@@ -300,5 +300,70 @@ app.put(['/admin/citas/:eventId', '/api/admin/citas/:eventId'], async (req, res)
   }
 });
 
+// ADMIN: listar bloqueos
+app.get(['/admin/bloqueados', '/api/admin/bloqueados'], async (req, res) => {
+  try {
+    const { calendar } = getAuthAndCalendar();
+    const calendarId = process.env.CALENDAR_ID || 'primary';
+    const now = new Date();
+    const response = await calendar.events.list({
+      calendarId,
+      timeMin: new Date(now.getFullYear(), 0, 1).toISOString(),
+      timeMax: new Date(now.getFullYear() + 1, 11, 31).toISOString(),
+      singleEvents: true,
+      orderBy: 'startTime',
+    });
+    const bloqueos = (response.data.items || []).filter(e => (e.summary || '').startsWith('[BLOQUEADO]')).map(e => ({
+      id: e.id,
+      summary: e.summary,
+      fecha: e.start.date || '',
+      inicio: e.start.dateTime || '',
+      fin: e.end.dateTime || '',
+    }));
+    res.status(200).json({ success: true, bloqueos });
+  } catch (error) {
+    console.error('Error al listar bloqueos:', error.message);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ADMIN: crear bloqueo
+app.post(['/admin/bloquear', '/api/admin/bloquear'], async (req, res) => {
+  try {
+    const { calendar } = getAuthAndCalendar();
+    const calendarId = process.env.CALENDAR_ID || 'primary';
+    const { fecha, inicio, fin, motivo } = req.body;
+    const eventBody = {
+      summary: `[BLOQUEADO] ${motivo || 'Sin motivo'}`,
+      description: `Bloqueado por administración.\nMotivo: ${motivo || ''}`,
+    };
+    if (inicio && fin) {
+      eventBody.start = { dateTime: new Date(`${fecha}T${inicio}:00`).toISOString(), timeZone: 'America/Montevideo' };
+      eventBody.end = { dateTime: new Date(`${fecha}T${fin}:00`).toISOString(), timeZone: 'America/Montevideo' };
+    } else {
+      eventBody.start = { date: fecha };
+      eventBody.end = { date: fecha };
+    }
+    const response = await calendar.events.insert({ calendarId, requestBody: eventBody });
+    res.status(200).json({ success: true, data: response.data });
+  } catch (error) {
+    console.error('Error al bloquear:', error.message);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ADMIN: eliminar bloqueo
+app.delete(['/admin/bloquear/:eventId', '/api/admin/bloquear/:eventId'], async (req, res) => {
+  try {
+    const { calendar } = getAuthAndCalendar();
+    const calendarId = process.env.CALENDAR_ID || 'primary';
+    await calendar.events.delete({ calendarId, eventId: req.params.eventId });
+    res.status(200).json({ success: true, message: 'Bloqueo eliminado' });
+  } catch (error) {
+    console.error('Error al eliminar bloqueo:', error.message);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => console.log(`Servidor corriendo en el puerto ${PORT}`));

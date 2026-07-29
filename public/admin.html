@@ -10,16 +10,17 @@
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
     body { font-family: 'Inter', sans-serif; background: #f1f5f9; color: #1a2a3a; min-height: 100vh; }
     nav { background: #0b5345; color: #fff; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
-    nav h2 { font-size: 1.1rem; font-weight: 700; }
+    nav h2 a { color:#fff; text-decoration:none; }
     nav .nav-actions { display: flex; align-items: center; gap: 16px; }
     nav .user-email { font-size: 0.8rem; opacity: 0.8; }
-    nav .btn-logout { background: rgba(255,255,255,0.15); color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-size: 0.8rem; font-family: inherit; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    nav .btn-logout { background: rgba(255,255,255,0.15); color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-size: 0.8rem; font-family: inherit; font-weight: 600; cursor: pointer; }
     nav .btn-logout:hover { background: rgba(255,255,255,0.25); }
-    .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+    nav a.nav-link { color:rgba(255,255,255,0.7); font-size:0.8rem; text-decoration:none; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 24px; }
     .header-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
     .header-bar h1 { font-size: 1.3rem; font-weight: 800; color: #0b5345; }
     .header-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .search-box { padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 0.85rem; font-family: inherit; outline: none; width: 220px; }
+    .search-box { padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 0.85rem; font-family: inherit; outline: none; width: 200px; }
     .search-box:focus { border-color: #1a9e8e; }
     .btn-sm { padding: 8px 16px; border-radius: 8px; font-size: 0.8rem; font-family: inherit; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
     .btn-primary { background: #1a9e8e; color: #fff; }
@@ -28,30 +29,42 @@
     .btn-outline:hover { border-color: #1a9e8e; }
     .btn-danger { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
     .btn-danger:hover { background: #fee2e2; }
+    .btn-success { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+    .btn-success:hover { background: #d1fae5; }
+    .btn-warning { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+    .btn-warning:hover { background: #fef3c7; }
+    .btn-block { background: #f5f3ff; color: #5b21b6; border: 1px solid #ddd6fe; }
+    .btn-block:hover { background: #ede9fe; }
+    .btn-xs { padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; font-family: inherit; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
     .filtros-rapidos { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
     .filtro-btn { padding: 6px 14px; border-radius: 20px; font-size: 0.78rem; font-family: inherit; font-weight: 600; cursor: pointer; border: 2px solid #e2e8f0; background: #fff; color: #64748b; transition: all 0.2s; }
     .filtro-btn.active { background: #0b5345; color: #fff; border-color: #0b5345; }
     .filtro-btn:hover:not(.active) { border-color: #1a9e8e; }
-    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-bottom: 20px; }
     .stat-card { background: #fff; padding: 16px; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
     .stat-card .num { font-size: 1.6rem; font-weight: 800; color: #0b5345; }
     .stat-card .label { font-size: 0.75rem; color: #64748b; margin-top: 4px; }
+    .stat-card.danger .num { color: #991b1b; }
+    .stat-card.success .num { color: #065f46; }
     .table-wrapper { background: #fff; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
-    th { background: #0b5345; color: #fff; text-align: left; padding: 10px 12px; font-weight: 600; white-space: nowrap; }
-    td { padding: 10px 12px; border-bottom: 1px solid #f1f5f9; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+    th { background: #0b5345; color: #fff; text-align: left; padding: 10px 10px; font-weight: 600; white-space: nowrap; }
+    td { padding: 8px 10px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
     tr:hover td { background: #f8fafc; }
     td a { color: #1a9e8e; text-decoration: none; }
     td a:hover { text-decoration: underline; }
-    .badge { display: inline-block; padding: 3px 8px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
+    .badge { display: inline-block; padding: 3px 8px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; white-space: nowrap; }
     .badge.futura { background: #ecfdf5; color: #065f46; }
     .badge.hoy { background: #fef3c7; color: #92400e; }
     .badge.pasada { background: #f1f5f9; color: #64748b; }
     .badge.cancelada { background: #fef2f2; color: #991b1b; }
+    .badge.completada { background: #d1fae5; color: #065f46; }
+    .badge.noasistio { background: #fef3c7; color: #92400e; }
     .name-link { cursor: pointer; font-weight: 600; color: #0b5345; }
     .name-link:hover { text-decoration: underline; }
-    .actions-cell { display: flex; gap: 4px; flex-wrap: wrap; }
-    .btn-xs { padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; font-family: inherit; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
+    .actions-cell { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
+    .wa-icon { display: inline-flex; align-items: center; color: #25d366; }
+    .wa-icon svg { width:16px; height:16px; }
     .empty { text-align: center; padding: 48px; color: #94a3b8; }
     .loading { text-align: center; padding: 48px; }
     .spinner { display: inline-block; width: 32px; height: 32px; border: 3px solid #e2e8f0; border-top-color: #1a9e8e; border-radius: 50%; animation: spin 0.6s linear infinite; }
@@ -62,45 +75,58 @@
     @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; }
     .modal-overlay.show { display: flex; }
-    .modal-box { background: #fff; border-radius: 24px; padding: 32px 28px 24px; width: 90%; max-width: 400px; animation: fadeUp 0.3s ease-out; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
-    .modal-box.wide { max-width: 500px; }
+    .modal-box { background: #fff; border-radius: 24px; padding: 28px 24px 24px; width: 90%; max-width: 420px; animation: fadeUp 0.3s ease-out; box-shadow: 0 20px 60px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; }
+    .modal-box.wide { max-width: 520px; }
     .modal-box h3 { font-size: 1.1rem; font-weight: 700; color: #1a2a3a; margin-bottom: 16px; text-align: center; }
     .modal-box label { display: block; font-size: 0.8rem; font-weight: 600; color: #1a2a3a; margin-bottom: 4px; margin-top: 12px; }
-    .modal-box input, .modal-box select { width: 100%; padding: 10px 12px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 0.85rem; font-family: inherit; outline: none; }
-    .modal-box input:focus, .modal-box select:focus { border-color: #1a9e8e; }
+    .modal-box input, .modal-box select, .modal-box textarea { width: 100%; padding: 10px 12px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 0.85rem; font-family: inherit; outline: none; }
+    .modal-box input:focus, .modal-box select:focus, .modal-box textarea:focus { border-color: #1a9e8e; }
+    .modal-box textarea { min-height: 80px; resize: vertical; }
     .modal-box .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
     .modal-box .modal-actions button { flex: 1; padding: 12px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; font-family: inherit; cursor: pointer; border: none; transition: all 0.2s; }
     .modal-box .patient-info { font-size: 0.82rem; color: #64748b; margin-bottom: 16px; text-align: center; }
     .modal-box .patient-info strong { color: #1a2a3a; }
+    .bloqueo-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9; font-size: 0.85rem; }
+    .bloqueo-item:last-child { border-bottom: none; }
     @media (max-width:768px) {
       .container { padding: 16px; }
-      th, td { padding: 6px 8px; font-size: 0.7rem; }
+      th, td { padding: 6px 6px; font-size: 0.65rem; }
       nav { padding: 12px 16px; }
       nav h2 { font-size: 0.9rem; }
       nav .user-email { display: none; }
-      .search-box { width: 140px; }
+      .search-box { width: 120px; }
+      .btn-xs { font-size: 0.6rem; padding: 3px 6px; }
     }
   </style>
 </head>
 <body>
-<nav>
-      <h2>🦶 <a href="/" style="color:#fff;text-decoration:none">Admin — Clínica del Pie</a></h2>
-      <div class="nav-actions">
-        <a href="/" style="color:rgba(255,255,255,0.7);font-size:0.8rem;text-decoration:none">← Volver al inicio</a>
-        <span class="user-email" id="userEmail"></span>
-        <button class="btn-logout" id="btnLogout">Salir</button>
-      </div>
-    </nav>
+  <nav>
+    <h2><a href="/">🦶 Admin — Clínica del Pie</a></h2>
+    <div class="nav-actions">
+      <a href="/" class="nav-link">← Volver al inicio</a>
+      <span class="user-email" id="userEmail"></span>
+      <button class="btn-logout" id="btnLogout">Salir</button>
+    </div>
+  </nav>
 
   <div class="container">
     <div class="header-bar">
       <h1>Citas</h1>
       <div class="header-actions">
-        <input type="text" class="search-box" id="searchBox" placeholder="Buscar nombre, teléfono, email...">
+        <input type="text" class="search-box" id="searchBox" placeholder="Buscar...">
         <input type="date" id="filtroFecha" style="padding:10px 12px;border:2px solid #e2e8f0;border-radius:10px;font-size:0.85rem;font-family:inherit;outline:none;">
-        <button class="btn-sm btn-primary" id="btnNuevaCita">+ Nueva Cita</button>
-        <button class="btn-sm btn-outline" id="btnExportar">Exportar CSV</button>
+        <button class="btn-sm btn-primary" id="btnNuevaCita">+ Nueva</button>
+        <button class="btn-sm btn-block" id="btnBloquear">Bloquear</button>
+        <button class="btn-sm btn-outline" id="btnExportar">CSV</button>
       </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat-card"><div class="num" id="totalCitas">0</div><div class="label">Total</div></div>
+      <div class="stat-card success"><div class="num" id="citasHoy">0</div><div class="label">Hoy</div></div>
+      <div class="stat-card"><div class="num" id="citasProximas">0</div><div class="label">Próximas</div></div>
+      <div class="stat-card danger"><div class="num" id="citasCanceladas">0</div><div class="label">Canceladas</div></div>
+      <div class="stat-card success"><div class="num" id="citasAtendidasHoy">0</div><div class="label">Atendidas hoy</div></div>
     </div>
 
     <div class="filtros-rapidos" id="filtrosRapidos">
@@ -110,17 +136,11 @@
       <button class="filtro-btn" data-filter="pasadas">Completadas</button>
     </div>
 
-    <div class="stats">
-      <div class="stat-card"><div class="num" id="totalCitas">0</div><div class="label">Total</div></div>
-      <div class="stat-card"><div class="num" id="citasHoy">0</div><div class="label">Hoy</div></div>
-      <div class="stat-card"><div class="num" id="citasProximas">0</div><div class="label">Próximas</div></div>
-    </div>
-
     <div class="table-wrapper">
       <div id="loading" class="loading"><div class="spinner"></div></div>
       <table id="tablaCitas" style="display:none;">
         <thead>
-          <tr><th>Paciente</th><th>Teléfono</th><th>Email</th><th>Fecha</th><th>Hora</th><th>Estado</th><th>Acción</th></tr>
+          <tr><th>Paciente</th><th>Contacto</th><th>Fecha</th><th>Hora</th><th>Estado</th><th>Acción</th></tr>
         </thead>
         <tbody id="citasBody"></tbody>
       </table>
@@ -130,25 +150,23 @@
 
   <div class="toast" id="toast"></div>
 
-  <!-- Modal Cancelar -->
+  <!-- Modal Confirmar -->
   <div class="modal-overlay" id="modalConfirm">
     <div class="modal-box">
-      <h3>Cancelar cita</h3>
-      <p id="modalTexto" style="text-align:center;color:#64748b;font-size:0.85rem;">¿Estás segura?</p>
-      <div class="modal-actions"><button class="modal-btn-cancel" id="modalNo" style="background:#f1f5f9;color:#64748b;">No, mantener</button><button class="modal-btn-confirm" id="modalSi" style="background:#dc2626;color:#fff;">Sí, cancelar</button></div>
+      <h3 id="modalTitulo">Confirmar</h3>
+      <p id="modalTexto" style="text-align:center;color:#64748b;font-size:0.85rem;"></p>
+      <div class="modal-actions"><button id="modalNo" style="background:#f1f5f9;color:#64748b;">Cancelar</button><button id="modalSi" style="background:#dc2626;color:#fff;">Confirmar</button></div>
     </div>
   </div>
 
-  <!-- Modal Reagendar -->
-  <div class="modal-overlay" id="modalReagendar">
+  <!-- Modal Notas -->
+  <div class="modal-overlay" id="modalNotas">
     <div class="modal-box wide">
-      <h3>Reagendar cita</h3>
-      <p id="reagendarPaciente" class="patient-info">Paciente: <strong></strong></p>
-      <label>Nueva fecha</label>
-      <input type="date" id="reagendarFecha">
-      <label>Nuevo horario</label>
-      <select id="reagendarHora"><option value="">Seleccionar...</option></select>
-      <div class="modal-actions"><button id="reagendarNo" style="background:#f1f5f9;color:#64748b;">Cancelar</button><button id="reagendarSi" style="background:#1a9e8e;color:#fff;">Guardar cambios</button></div>
+      <h3>Notas del paciente</h3>
+      <p id="notasPaciente" class="patient-info">Paciente: <strong></strong></p>
+      <label>Observaciones</label>
+      <textarea id="notasTexto" placeholder="Escribí observaciones sobre el tratamiento..."></textarea>
+      <div class="modal-actions"><button id="notasCerrar" style="background:#f1f5f9;color:#64748b;">Cancelar</button><button id="notasGuardar" style="background:#1a9e8e;color:#fff;">Guardar notas</button></div>
     </div>
   </div>
 
@@ -169,9 +187,24 @@
       <label>Teléfono</label><input type="text" id="ncTelefono" placeholder="099 123 456">
       <label>Email</label><input type="email" id="ncEmail" placeholder="paciente@email.com">
       <label>Fecha</label><input type="date" id="ncFecha">
-      <label>Horario</label>
-      <select id="ncHora"><option value="">Seleccionar...</option></select>
+      <label>Horario</label><select id="ncHora"><option value="">Seleccionar...</option></select>
       <div class="modal-actions"><button id="ncCancelar" style="background:#f1f5f9;color:#64748b;">Cancelar</button><button id="ncGuardar" style="background:#1a9e8e;color:#fff;">Agendar</button></div>
+    </div>
+  </div>
+
+  <!-- Modal Bloquear -->
+  <div class="modal-overlay" id="modalBloquear">
+    <div class="modal-box wide">
+      <h3>Bloquear horarios</h3>
+      <label>Fecha</label><input type="date" id="blFecha">
+      <label>Desde</label><select id="blDesde"><option value="">Todo el día</option></select>
+      <label>Hasta</label><select id="blHasta"><option value="">Todo el día</option></select>
+      <label>Motivo</label><input type="text" id="blMotivo" placeholder="Ej: Feriado, capacitación...">
+      <div class="modal-actions"><button id="blCerrar" style="background:#f1f5f9;color:#64748b;">Cerrar</button><button id="blGuardar" style="background:#5b21b6;color:#fff;">Bloquear</button></div>
+      <div style="margin-top:16px;border-top:1px solid #e2e8f0;padding-top:12px;">
+        <h4 style="font-size:0.85rem;color:#1a2a3a;margin-bottom:8px;">Bloqueos existentes</h4>
+        <div id="bloqueosLista"></div>
+      </div>
     </div>
   </div>
 
@@ -194,21 +227,23 @@
     const totalCitas = document.getElementById('totalCitas');
     const citasHoy = document.getElementById('citasHoy');
     const citasProximas = document.getElementById('citasProximas');
+    const citasCanceladas = document.getElementById('citasCanceladas');
+    const citasAtendidasHoy = document.getElementById('citasAtendidasHoy');
     const searchBox = document.getElementById('searchBox');
     const filtroFecha = document.getElementById('filtroFecha');
     const toast = document.getElementById('toast');
 
     const modalConfirm = document.getElementById('modalConfirm');
+    const modalTitulo = document.getElementById('modalTitulo');
     const modalTexto = document.getElementById('modalTexto');
     const modalSi = document.getElementById('modalSi');
     const modalNo = document.getElementById('modalNo');
 
-    const modalReagendar = document.getElementById('modalReagendar');
-    const reagendarPaciente = document.getElementById('reagendarPaciente');
-    const reagendarFecha = document.getElementById('reagendarFecha');
-    const reagendarHora = document.getElementById('reagendarHora');
-    const reagendarSi = document.getElementById('reagendarSi');
-    const reagendarNo = document.getElementById('reagendarNo');
+    const modalNotas = document.getElementById('modalNotas');
+    const notasPaciente = document.getElementById('notasPaciente');
+    const notasTexto = document.getElementById('notasTexto');
+    const notasGuardar = document.getElementById('notasGuardar');
+    const notasCerrar = document.getElementById('notasCerrar');
 
     const modalHistorial = document.getElementById('modalHistorial');
     const historialNombre = document.getElementById('historialNombre');
@@ -224,20 +259,38 @@
     const ncGuardar = document.getElementById('ncGuardar');
     const ncCancelar = document.getElementById('ncCancelar');
 
+    const modalBloquear = document.getElementById('modalBloquear');
+    const blFecha = document.getElementById('blFecha');
+    const blDesde = document.getElementById('blDesde');
+    const blHasta = document.getElementById('blHasta');
+    const blMotivo = document.getElementById('blMotivo');
+    const blGuardar = document.getElementById('blGuardar');
+    const blCerrar = document.getElementById('blCerrar');
+    const bloqueosLista = document.getElementById('bloqueosLista');
+
     let currentUser = null;
     let allEvents = [];
     let activeFilter = 'todas';
-    let pendingCancelId = null;
-    let pendingCancelPaciente = null;
-    let pendingReagendarId = null;
-    let pendingReagendarPaciente = null;
+    let pendingConfirmCb = null;
+    let pendingNotasId = null;
+    let pendingNotasPaciente = null;
+    let hisNombre = '';
 
     function generarSlots() { return ['09:30','10:30','11:30','14:00','15:00','16:00','17:00']; }
     function llenarSelectHora(sel) { sel.innerHTML = '<option value="">Seleccionar...</option>'; generarSlots().forEach(h => { const o = document.createElement('option'); o.value = h; o.textContent = h; sel.appendChild(o); }); }
-    llenarSelectHora(reagendarHora);
     llenarSelectHora(ncHora);
+    llenarSelectHora(blDesde);
+    (function() { generarSlots().forEach(h => { const o = document.createElement('option'); o.value = h; o.textContent = h; blHasta.appendChild(o); }); })();
 
     function showToast(msg, type) { toast.textContent = msg; toast.className = 'toast ' + type; toast.style.display = 'block'; setTimeout(() => toast.style.display = 'none', 3000); }
+
+    function confirmar(titulo, texto, color, cb) {
+      modalTitulo.textContent = titulo;
+      modalTexto.textContent = texto;
+      modalSi.style.background = color || '#dc2626';
+      pendingConfirmCb = cb;
+      modalConfirm.classList.add('show');
+    }
 
     onAuthStateChanged(auth, (user) => {
       if (!user || !ALLOWED.includes(user.email)) { window.location.href = 'login.html'; return; }
@@ -247,6 +300,8 @@
     });
 
     btnLogout.addEventListener('click', () => signOut(auth).then(() => window.location.href = 'login.html'));
+    modalNo.addEventListener('click', () => { modalConfirm.classList.remove('show'); pendingConfirmCb = null; });
+    modalSi.addEventListener('click', () => { modalConfirm.classList.remove('show'); if (pendingConfirmCb) pendingConfirmCb(); pendingConfirmCb = null; });
 
     async function cargarCitas() {
       loading.style.display = 'block'; tabla.style.display = 'none'; empty.style.display = 'none';
@@ -260,7 +315,7 @@
     }
 
     function renderCitas() {
-      let eventos = allEvents;
+      let eventos = allEvents.filter(e => !e.esBloqueo);
       const q = searchBox.value.toLowerCase().trim();
       if (q) eventos = eventos.filter(e => (e.paciente || '').toLowerCase().includes(q) || (e.telefono || '').includes(q) || (e.email || '').toLowerCase().includes(q));
       const fFecha = filtroFecha.value;
@@ -269,35 +324,68 @@
       if (activeFilter === 'hoy') eventos = eventos.filter(e => e.fecha === hoy);
       else if (activeFilter === 'proximas') eventos = eventos.filter(e => e.fecha > hoy);
       else if (activeFilter === 'pasadas') eventos = eventos.filter(e => e.fecha < hoy);
-      const total = eventos.length;
+
+      const total = allEvents.filter(e => !e.esBloqueo).length;
       const hoyCount = eventos.filter(e => e.fecha === hoy).length;
       const proxCount = eventos.filter(e => e.fecha > hoy).length;
+      const cancelCount = allEvents.filter(e => !e.esBloqueo && e.estado === 'cancelada').length;
+      const atendHoyCount = allEvents.filter(e => !e.esBloqueo && e.fecha === hoy && e.estado === 'completada').length;
       totalCitas.textContent = total; citasHoy.textContent = hoyCount; citasProximas.textContent = proxCount;
+      citasCanceladas.textContent = cancelCount; citasAtendidasHoy.textContent = atendHoyCount;
+
       if (eventos.length === 0) { tabla.style.display = 'none'; empty.style.display = 'block'; return; }
       tabla.style.display = ''; empty.style.display = 'none'; tbody.innerHTML = '';
       eventos.sort((a, b) => a.fecha.localeCompare(b.fecha) || a.hora.localeCompare(b.hora));
+
       eventos.forEach(ev => {
         const tr = document.createElement('tr');
-        const estado = ev.fecha === hoy ? 'hoy' : (ev.fecha < hoy ? 'pasada' : 'futura');
-        const estadoLabel = ev.fecha === hoy ? 'Hoy' : (ev.fecha < hoy ? 'Completada' : 'Próxima');
+        const estadoFinal = ev.estado || (ev.fecha === hoy ? 'hoy' : (ev.fecha < hoy ? 'pasada' : 'futura'));
+        const badgeClass = estadoFinal === 'cancelada' ? 'cancelada' : (estadoFinal === 'completada' ? 'completada' : (estadoFinal === 'noasistio' ? 'noasistio' : (estadoFinal === 'hoy' ? 'hoy' : (estadoFinal === 'pasada' ? 'pasada' : 'futura'))));
+        const estadoLabel = estadoFinal === 'cancelada' ? 'Cancelada' : (estadoFinal === 'completada' ? 'Completada' : (estadoFinal === 'noasistio' ? 'No asistió' : (estadoFinal === 'hoy' ? 'Hoy' : (estadoFinal === 'pasada' ? 'Completada' : 'Próxima'))));
         const tel = (ev.telefono || '').replace(/\s+/g, '');
-        tr.innerHTML = `
-          <td><span class="name-link" data-paciente="${ev.paciente}" data-email="${ev.email}" data-tel="${tel}">${ev.paciente}</span></td>
-          <td>${tel ? `<a href="https://wa.me/${tel}?text=Hola%20${encodeURIComponent(ev.paciente)},%20te%20escribimos%20de%20Cl%C3%ADnica%20del%20Pie" target="_blank">${ev.telefono}</a>` : ev.telefono}</td>
-          <td>${ev.email ? `<a href="mailto:${ev.email}">${ev.email}</a>` : ev.email}</td>
-          <td>${ev.fecha}</td>
-          <td>${ev.hora}</td>
-          <td><span class="badge ${estado}">${estadoLabel}</span></td>
-          <td>
-            <div class="actions-cell">
-              ${ev.fecha >= hoy ? `<button class="btn-xs btn-danger" data-id="${ev.id}" data-paciente="${ev.paciente}" data-action="cancel">Cancelar</button><button class="btn-xs btn-primary" data-id="${ev.id}" data-paciente="${ev.paciente}" data-fecha="${ev.fecha}" data-hora="${ev.hora}" data-action="reagendar">Reagendar</button>` : ''}
-            </div>
-          </td>`;
+        const waLink = tel ? `https://wa.me/${tel}` : '#';
+
+        let html = `<td><span class="name-link" data-paciente="${ev.paciente}" data-email="${ev.email}" data-tel="${tel}">${ev.paciente}</span></td>`;
+        if (tel) {
+          html += `<td><a href="${waLink}" target="_blank" class="wa-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></a> ${ev.telefono}${ev.email ? ` · <a href="mailto:${ev.email}">${ev.email}</a>` : ''}</td>`;
+        } else {
+          html += `<td>${ev.email ? `<a href="mailto:${ev.email}">${ev.email}</a>` : ''}</td>`;
+        }
+        html += `<td>${ev.fecha}</td><td>${ev.hora}</td>`;
+        html += `<td><span class="badge ${badgeClass}">${estadoLabel}</span></td>`;
+
+        const puedeEditar = ev.fecha >= hoy;
+        html += '<td><div class="actions-cell">';
+        if (puedeEditar || ev.estado === 'hoy') {
+          html += `<button class="btn-xs btn-success" data-id="${ev.id}" data-action="atendido">Atendido</button>`;
+          html += `<button class="btn-xs btn-warning" data-id="${ev.id}" data-action="ausente">Ausente</button>`;
+        }
+        if (tel) {
+          const msg = `Hola ${ev.paciente}, te recordamos tu cita en Clínica del Pie el día ${ev.fecha} a las ${ev.hora}.`;
+          html += `<a href="https://wa.me/${tel}?text=${encodeURIComponent(msg)}" target="_blank" class="btn-xs btn-primary" style="text-decoration:none;display:inline-flex;align-items:center;gap:4px"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg> Recordar</a>`;
+        }
+        html += `<button class="btn-xs btn-outline" data-id="${ev.id}" data-paciente="${ev.paciente}" data-action="notas">📝 Notas</button>`;
+        if (puedeEditar) {
+          html += `<button class="btn-xs btn-danger" data-id="${ev.id}" data-paciente="${ev.paciente}" data-action="cancel">Cancelar</button>`;
+          html += `<button class="btn-xs btn-primary" data-id="${ev.id}" data-paciente="${ev.paciente}" data-fecha="${ev.fecha}" data-hora="${ev.hora}" data-action="reagendar">Reagendar</button>`;
+        }
+        html += '</div></td>';
+        tr.innerHTML = html;
         tbody.appendChild(tr);
       });
+
+      document.querySelectorAll('[data-action="atendido"]').forEach(b => b.addEventListener('click', () => {
+        cambiarEstado(b.dataset.id, 'completada', '¿Marcar como atendida?');
+      }));
+      document.querySelectorAll('[data-action="ausente"]').forEach(b => b.addEventListener('click', () => {
+        cambiarEstado(b.dataset.id, 'noasistio', '¿Marcar como no asistió?');
+      }));
       document.querySelectorAll('[data-action="cancel"]').forEach(b => b.addEventListener('click', () => {
-        pendingCancelId = b.dataset.id; pendingCancelPaciente = b.dataset.paciente;
-        modalTexto.textContent = `¿Cancelar la cita de ${pendingCancelPaciente}?`; modalConfirm.classList.add('show');
+        const id = b.dataset.id, pac = b.dataset.paciente;
+        confirmar('Cancelar cita', `¿Cancelar la cita de ${pac}?`, '#dc2626', () => {
+          fetch(`${API}/admin/citas/${id}`, { method: 'DELETE' })
+            .then(r => r.json()).then(d => { if (d.success) { showToast('Cita cancelada', 'success'); cargarCitas(); } else showToast('Error: ' + (d.error || ''), 'error'); });
+        });
       }));
       document.querySelectorAll('[data-action="reagendar"]').forEach(b => b.addEventListener('click', () => {
         pendingReagendarId = b.dataset.id; pendingReagendarPaciente = b.dataset.paciente;
@@ -306,35 +394,60 @@
         reagendarHora.value = b.dataset.hora;
         modalReagendar.classList.add('show');
       }));
+      document.querySelectorAll('[data-action="notas"]').forEach(b => b.addEventListener('click', () => {
+        pendingNotasId = b.dataset.id; pendingNotasPaciente = b.dataset.paciente;
+        notasPaciente.querySelector('strong').textContent = pendingNotasPaciente;
+        const ev = allEvents.find(e => e.id === b.dataset.id);
+        notasTexto.value = ev && ev.notas ? ev.notas : '';
+        modalNotas.classList.add('show');
+      }));
       document.querySelectorAll('.name-link').forEach(el => el.addEventListener('click', () => {
         const nom = el.dataset.paciente; hisNombre = nom;
         historialNombre.textContent = nom;
         const pasadas = allEvents.filter(e => e.paciente === nom && e.fecha < new Date().toISOString().slice(0,10));
         if (pasadas.length === 0) historialBody.innerHTML = '<p style="text-align:center;color:#94a3b8;padding:24px;">Sin historial de citas pasadas</p>';
-        else { let h = '<table style="width:100%;font-size:0.8rem;"><tr><th>Fecha</th><th>Hora</th><th>Estado</th></tr>'; pasadas.sort((a,b) => b.fecha.localeCompare(a.fecha)).forEach(p => { h += `<tr><td>${p.fecha}</td><td>${p.hora}</td><td><span class="badge pasada">Completada</span></td></tr>`; }); h += '</table>'; historialBody.innerHTML = h; }
+        else { let h = '<table style="width:100%;font-size:0.8rem;"><tr><th>Fecha</th><th>Hora</th><th>Estado</th><th>Notas</th></tr>'; pasadas.sort((a,b) => b.fecha.localeCompare(a.fecha)).forEach(p => { h += `<tr><td>${p.fecha}</td><td>${p.hora}</td><td><span class="badge ${p.estado === 'completada' ? 'completada' : (p.estado === 'noasistio' ? 'noasistio' : 'pasada')}">${p.estado === 'completada' ? 'Completada' : (p.estado === 'noasistio' ? 'No asistió' : 'Completada')}</span></td><td style="font-size:0.75rem;color:#64748b">${p.notas || '-'}</td></tr>`; }); h += '</table>'; historialBody.innerHTML = h; }
         modalHistorial.classList.add('show');
       }));
     }
 
-    modalSi.addEventListener('click', () => {
-      modalConfirm.classList.remove('show');
-      fetch(`${API}/admin/citas/${pendingCancelId}`, { method: 'DELETE' })
-        .then(r => r.json()).then(d => { if (d.success) { showToast('Cita cancelada', 'success'); cargarCitas(); } else showToast('Error: ' + (d.error || ''), 'error'); });
-    });
-    modalNo.addEventListener('click', () => modalConfirm.classList.remove('show'));
+    function cambiarEstado(id, estado, msg) {
+      confirmar('Cambiar estado', msg, '#1a9e8e', async () => {
+        const ev = allEvents.find(e => e.id === id);
+        if (!ev) return;
+        let desc = `Paciente: ${ev.paciente}\nTeléfono: ${ev.telefono || ''}\nEmail: ${ev.email || ''}\nEstado: ${estado}`;
+        if (ev.notas) desc += `\nNotas: ${ev.notas}`;
+        try {
+          const r = await fetch(`${API}/admin/citas/${id}`, {
+            method: 'PUT', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ description: desc }),
+          });
+          const d = await r.json();
+          if (d.success) { showToast('Estado actualizado', 'success'); cargarCitas(); }
+          else showToast('Error: ' + (d.error || ''), 'error');
+        } catch (e) { showToast('Error de conexión', 'error'); }
+      });
+    }
 
-    reagendarSi.addEventListener('click', () => {
-      const f = reagendarFecha.value, h = reagendarHora.value;
-      if (!f || !h) { showToast('Seleccioná fecha y hora', 'error'); return; }
-      const start = new Date(`${f}T${h}:00`); const end = new Date(start.getTime() + 45*60*1000);
-      modalReagendar.classList.remove('show');
-      fetch(`${API}/admin/citas/${pendingReagendarId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ start: { dateTime: start.toISOString(), timeZone: 'America/Montevideo' }, end: { dateTime: end.toISOString(), timeZone: 'America/Montevideo' } })
-      }).then(r => r.json()).then(d => { if (d.success) { showToast('Cita reagendada', 'success'); cargarCitas(); } else showToast('Error: ' + (d.error || ''), 'error'); });
+    modalNotas.addEventListener('click', (e) => { if (e.target === modalNotas) modalNotas.classList.remove('show'); });
+    notasCerrar.addEventListener('click', () => modalNotas.classList.remove('show'));
+    notasGuardar.addEventListener('click', async () => {
+      const texto = notasTexto.value.trim();
+      const ev = allEvents.find(e => e.id === pendingNotasId);
+      if (!ev) return;
+      let desc = `Paciente: ${ev.paciente}\nTeléfono: ${ev.telefono || ''}\nEmail: ${ev.email || ''}`;
+      if (ev.estado) desc += `\nEstado: ${ev.estado}`;
+      if (texto) desc += `\nNotas: ${texto}`;
+      try {
+        const r = await fetch(`${API}/admin/citas/${pendingNotasId}`, {
+          method: 'PUT', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ description: desc }),
+        });
+        const d = await r.json();
+        if (d.success) { showToast('Notas guardadas', 'success'); modalNotas.classList.remove('show'); cargarCitas(); }
+        else showToast('Error: ' + (d.error || ''), 'error');
+      } catch (e) { showToast('Error de conexión', 'error'); }
     });
-    reagendarNo.addEventListener('click', () => modalReagendar.classList.remove('show'));
 
     historialCerrar.addEventListener('click', () => modalHistorial.classList.remove('show'));
 
@@ -371,12 +484,18 @@
     document.getElementById('btnExportar').addEventListener('click', () => {
       const filas = document.querySelectorAll('#citasBody tr');
       if (!filas.length) { showToast('No hay citas para exportar', 'error'); return; }
-      let csv = '\uFEFFPaciente,Tel\u00E9fono,Email,Fecha,Hora,Estado\n';
+      let csv = '\uFEFFPaciente,Tel\u00E9fono,Email,Fecha,Hora,Estado,Notas\n';
       filas.forEach(tr => {
         const celdas = tr.querySelectorAll('td');
-        const row = [];
-        celdas.forEach((td, i) => { if (i < 6) row.push('"' + (td.textContent.trim() || '') + '"'); });
-        csv += row.join(',') + '\n';
+        if (celdas.length >= 6) {
+          csv += '"' + (celdas[0].textContent.trim() || '') + '",';
+          csv += '"' + (celdas[1].textContent.trim() || '') + '",';
+          csv += '"' + (celdas[2].textContent.trim() || '') + '",';
+          csv += '"' + (celdas[3].textContent.trim() || '') + '",';
+          csv += '"' + (celdas[4].textContent.trim() || '') + '",';
+          csv += '"' + (celdas[5].textContent.trim() || '') + '"';
+          csv += ',""\n';
+        }
       });
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `citas_${new Date().toISOString().slice(0,10)}.csv`; a.click();
@@ -385,7 +504,72 @@
 
     searchBox.addEventListener('input', renderCitas);
     filtroFecha.addEventListener('change', renderCitas);
-    document.getElementById('btnLimpiar')?.addEventListener('click', () => { filtroFecha.value = ''; renderCitas(); });
+
+    /* ---- BLOQUEAR ---- */
+    document.getElementById('btnBloquear').addEventListener('click', () => {
+      blFecha.value = ''; blDesde.value = ''; blHasta.value = ''; blMotivo.value = '';
+      cargarBloqueos();
+      modalBloquear.classList.add('show');
+    });
+    blCerrar.addEventListener('click', () => modalBloquear.classList.remove('show'));
+
+    async function cargarBloqueos() {
+      try {
+        const r = await fetch(`${API}/admin/bloqueados`);
+        const d = await r.json();
+        if (d.success && d.bloqueos) {
+          bloqueosLista.innerHTML = d.bloqueos.map(b => {
+            const txt = b.inicio ? `${b.fecha} ${b.inicio.slice(11,16)}-${b.fin.slice(11,16)}` : b.fecha;
+            return `<div class="bloqueo-item"><span>${txt} — ${b.summary.replace('[BLOQUEADO] ','')}</span><button class="btn-xs btn-danger" data-id="${b.id}">Eliminar</button></div>`;
+          }).join('');
+          document.querySelectorAll('#bloqueosLista .btn-xs').forEach(btn => btn.addEventListener('click', () => {
+            const id = btn.dataset.id;
+            confirmar('Eliminar bloqueo', '¿Eliminar este bloqueo?', '#dc2626', async () => {
+              await fetch(`${API}/admin/bloquear/${id}`, { method: 'DELETE' });
+              cargarBloqueos(); showToast('Bloqueo eliminado', 'success');
+            });
+          }));
+        } else bloqueosLista.innerHTML = '<p style="color:#94a3b8;text-align:center">Sin bloqueos</p>';
+      } catch (e) { bloqueosLista.innerHTML = '<p style="color:#94a3b8;text-align:center">Error al cargar</p>'; }
+    }
+
+    blGuardar.addEventListener('click', async () => {
+      const fecha = blFecha.value, desde = blDesde.value, hasta = blHasta.value, motivo = blMotivo.value.trim();
+      if (!fecha) { showToast('Seleccioná una fecha', 'error'); return; }
+      const body = { fecha, motivo: motivo || 'Bloqueado' };
+      if (desde && hasta) { body.inicio = desde; body.fin = hasta; }
+      try {
+        const r = await fetch(`${API}/admin/bloquear`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+        });
+        const d = await r.json();
+        if (d.success) { showToast('Horario bloqueado', 'success'); cargarBloqueos(); }
+        else showToast('Error: ' + (d.error || ''), 'error');
+      } catch (e) { showToast('Error de conexión', 'error'); }
+    });
+
+    /* ---- REAGENDAR ---- */
+    const modalReagendar = document.getElementById('modalReagendar');
+    const reagendarPaciente = document.getElementById('reagendarPaciente');
+    const reagendarFecha = document.getElementById('reagendarFecha');
+    const reagendarHora = document.getElementById('reagendarHora');
+    const reagendarSi = document.getElementById('reagendarSi');
+    const reagendarNo = document.getElementById('reagendarNo');
+    let pendingReagendarId = null;
+    let pendingReagendarPaciente = null;
+    llenarSelectHora(reagendarHora);
+
+    reagendarSi.addEventListener('click', () => {
+      const f = reagendarFecha.value, h = reagendarHora.value;
+      if (!f || !h) { showToast('Seleccioná fecha y hora', 'error'); return; }
+      const start = new Date(`${f}T${h}:00`); const end = new Date(start.getTime() + 45*60*1000);
+      modalReagendar.classList.remove('show');
+      fetch(`${API}/admin/citas/${pendingReagendarId}`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ start: { dateTime: start.toISOString(), timeZone: 'America/Montevideo' }, end: { dateTime: end.toISOString(), timeZone: 'America/Montevideo' } })
+      }).then(r => r.json()).then(d => { if (d.success) { showToast('Cita reagendada', 'success'); cargarCitas(); } else showToast('Error: ' + (d.error || ''), 'error'); });
+    });
+    reagendarNo.addEventListener('click', () => modalReagendar.classList.remove('show'));
   </script>
 </body>
 </html>
