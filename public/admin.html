@@ -204,6 +204,8 @@
         <div class="stats-chart"><h3>📈 Asistencia</h3><div id="chartAsistencia" style="font-size:0.9rem"></div></div>
         <div class="stats-chart"><h3>⏰ Horarios más pedidos</h3><div id="chartHoras"></div></div>
       </div>
+      <div class="stats-chart"><h3>💰 Ingresos del año</h3><div id="chartPagos" style="font-size:0.9rem"></div></div>
+      </div>
     </div>
   </div>
     </div>
@@ -265,6 +267,18 @@
       <h3 id="modalTitulo">Confirmar</h3>
       <p id="modalTexto" style="text-align:center;color:#64748b;font-size:0.85rem;"></p>
       <div class="modal-actions"><button id="modalNo" style="background:#f1f5f9;color:#64748b;">Cancelar</button><button id="modalSi" style="background:#dc2626;color:#fff;">Confirmar</button></div>
+    </div>
+  </div>
+
+  <!-- Modal Pago -->
+  <div class="modal-overlay" id="modalPago">
+    <div class="modal-box wide">
+      <h3>💰 Registrar pago</h3>
+      <p id="pagoPaciente" class="patient-info">Paciente: <strong></strong></p>
+      <label>Monto ($)</label><input type="number" id="pagoMonto" placeholder="0" step="1" min="0">
+      <label>Método de pago</label>
+      <select id="pagoMetodo"><option value="Efectivo">Efectivo</option><option value="Transferencia">Transferencia</option><option value="Débito">Débito</option><option value="Crédito">Crédito</option></select>
+      <div class="modal-actions"><button id="pagoCerrar" style="background:#f1f5f9;color:#64748b;">Cancelar</button><button id="pagoGuardar" style="background:#1a9e8e;color:#fff;">Guardar pago</button></div>
     </div>
   </div>
 
@@ -521,6 +535,7 @@
         }
         html += `<button class="btn-xs btn-outline" data-id="${ev.id}" data-paciente="${ev.paciente}" data-action="notas">📝 Notas</button>`;
         html += `<button class="btn-xs btn-outline" data-id="${ev.id}" data-paciente="${ev.paciente}" data-telefono="${ev.telefono}" data-email="${ev.email}" data-fecha="${ev.fecha}" data-hora="${ev.hora}" data-action="editar">✏️ Editar</button>`;
+        html += `<button class="btn-xs btn-outline" data-id="${ev.id}" data-paciente="${ev.paciente}" data-monto="${ev.monto || ''}" data-metodo="${ev.metodo_pago || ''}" data-action="pago">💰 Pago</button>`;
         if (puedeEditar) {
           html += `<button class="btn-xs btn-danger" data-id="${ev.id}" data-paciente="${ev.paciente}" data-action="cancel">Cancelar</button>`;
           html += `<button class="btn-xs btn-danger mobile-hide" data-id="${ev.id}" data-action="eliminar" style="background:#fef2f2;color:#991b1b;border:1px solid #fecaca;opacity:0.5">Eliminar</button>`;
@@ -573,7 +588,7 @@
         historialNombre.textContent = nom;
         const pasadas = allEvents.filter(e => e.paciente === nom && e.fecha < new Date().toISOString().slice(0,10));
         if (pasadas.length === 0) historialBody.innerHTML = '<p style="text-align:center;color:#94a3b8;padding:24px;">Sin historial de citas pasadas</p>';
-        else { let h = '<table style="width:100%;font-size:0.8rem;"><tr><th>Fecha</th><th>Hora</th><th>Estado</th><th>Notas</th></tr>'; pasadas.sort((a,b) => b.fecha.localeCompare(a.fecha)).forEach(p => { h += `<tr><td>${p.fecha}</td><td>${p.hora}</td><td><span class="badge ${p.estado === 'completada' ? 'completada' : (p.estado === 'noasistio' ? 'noasistio' : 'pasada')}">${p.estado === 'completada' ? 'Completada' : (p.estado === 'noasistio' ? 'No asistió' : 'Completada')}</span></td><td style="font-size:0.75rem;color:#64748b">${p.notas || '-'}</td></tr>`; }); h += '</table>'; historialBody.innerHTML = h; }
+        else { let h = '<table style="width:100%;font-size:0.8rem;"><tr><th>Fecha</th><th>Hora</th><th>Estado</th><th>Notas</th><th>Pago</th></tr>'; pasadas.sort((a,b) => b.fecha.localeCompare(a.fecha)).forEach(p => { const pagoTxt = p.monto ? `$${p.monto} (${p.metodo_pago || '-'})` : '-'; h += `<tr><td>${p.fecha}</td><td>${p.hora}</td><td><span class="badge ${p.estado === 'completada' ? 'completada' : (p.estado === 'noasistio' ? 'noasistio' : 'pasada')}">${p.estado === 'completada' ? 'Completada' : (p.estado === 'noasistio' ? 'No asistió' : 'Completada')}</span></td><td style="font-size:0.75rem;color:#64748b">${p.notas || '-'}</td><td style="font-size:0.75rem;color:#065f46;font-weight:600">${pagoTxt}</td></tr>`; }); h += '</table>'; historialBody.innerHTML = h; }
         modalHistorial.classList.add('show');
       }));
       document.querySelectorAll('[data-action="editar"]').forEach(b => b.addEventListener('click', () => {
@@ -764,6 +779,34 @@
       } catch (e) { showToast('Error de conexión', 'error'); }
     });
 
+    /* ---- PAGOS ---- */
+    const modalPago = document.getElementById('modalPago');
+    const pagoPaciente = document.getElementById('pagoPaciente');
+    const pagoMonto = document.getElementById('pagoMonto');
+    const pagoMetodo = document.getElementById('pagoMetodo');
+    const pagoGuardar = document.getElementById('pagoGuardar');
+    const pagoCerrar = document.getElementById('pagoCerrar');
+    let pendingPagoId = null;
+    document.querySelectorAll('[data-action="pago"]').forEach(b => b.addEventListener('click', () => {
+      pendingPagoId = b.dataset.id;
+      pagoPaciente.querySelector('strong').textContent = b.dataset.paciente;
+      pagoMonto.value = b.dataset.monto || '';
+      pagoMetodo.value = b.dataset.metodo || 'Efectivo';
+      modalPago.classList.add('show');
+    }));
+    pagoCerrar.addEventListener('click', () => modalPago.classList.remove('show'));
+    pagoGuardar.addEventListener('click', async () => {
+      const monto = parseFloat(pagoMonto.value);
+      if (isNaN(monto) || monto < 0) { showToast('Ingresá un monto válido', 'error'); return; }
+      modalPago.classList.remove('show');
+      try {
+        const r = await fetch(`${API}/admin/citas/${pendingPagoId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ monto, metodo_pago: pagoMetodo.value, pago_date: new Date().toISOString().slice(0,10) }) });
+        const d = await r.json();
+        if (d.success) { showToast('Pago registrado', 'success'); cargarCitas(); }
+        else showToast('Error: ' + (d.error || ''), 'error');
+      } catch (e) { showToast('Error de conexión', 'error'); }
+    });
+
     reagendarSi.addEventListener('click', () => {
       const f = reagendarFecha.value, h = reagendarHora.value;
       if (!f || !h) { showToast('Seleccioná fecha y hora', 'error'); return; }
@@ -864,11 +907,12 @@
         document.getElementById('historialNombre').textContent = `${nom} (${pasadas.length} visitas)`;
         if (pasadas.length === 0) document.getElementById('historialBody').innerHTML = '<p style="text-align:center;color:#94a3b8;padding:24px;">Sin historial</p>';
         else {
-          let h = '<table style="width:100%;font-size:0.8rem;"><tr><th>Fecha</th><th>Hora</th><th>Estado</th><th>Notas</th></tr>';
+          let h = '<table style="width:100%;font-size:0.8rem;"><tr><th>Fecha</th><th>Hora</th><th>Estado</th><th>Notas</th><th>Pago</th></tr>';
           pasadas.sort((a,b) => b.fecha.localeCompare(a.fecha)).forEach(p => {
             const cls = p.estado === 'completada' ? 'completada' : (p.estado === 'noasistio' ? 'noasistio' : (p.estado === 'cancelada' ? 'cancelada' : 'pasada'));
             const lbl = p.estado === 'completada' ? 'Completada' : (p.estado === 'noasistio' ? 'No asistió' : (p.estado === 'cancelada' ? 'Cancelada' : 'Completada'));
-            h += `<tr><td>${p.fecha}</td><td>${p.hora}</td><td><span class="badge ${cls}">${lbl}</span></td><td style="font-size:0.75rem;color:#64748b">${p.notas || '-'}</td></tr>`;
+            const pagoTxt = p.monto ? `$${p.monto} (${p.metodo_pago || '-'})` : '-';
+            h += `<tr><td>${p.fecha}</td><td>${p.hora}</td><td><span class="badge ${cls}">${lbl}</span></td><td style="font-size:0.75rem;color:#64748b">${p.notas || '-'}</td><td style="font-size:0.75rem;color:#065f46;font-weight:600">${pagoTxt}</td></tr>`;
           });
           h += '</table>';
           document.getElementById('historialBody').innerHTML = h;
@@ -940,6 +984,10 @@
       document.getElementById('chartHoras').innerHTML = horasArr.length ? horasArr.map(([h,c]) =>
         `<div style="display:flex;align-items:center;gap:8px;margin:4px 0;font-size:0.8rem"><span style="min-width:50px;font-weight:600">${h}</span><div style="flex:1;height:20px;background:#f1f5f9;border-radius:10px;overflow:hidden"><div style="height:100%;width:${c/Math.max(...Object.values(horas))*100}%;background:#1a9e8e;border-radius:10px"></div></div><span>${c}</span></div>`
       ).join('') : '<p style="color:#94a3b8">Sin datos</p>';
+      const pagosMes = Array(12).fill(0);
+      let totalPagos = 0;
+      citasYear.forEach(e => { const m = e.monto ? parseFloat(e.monto) : 0; pagosMes[parseInt(e.fecha.slice(5,7)) - 1] += m; totalPagos += m; });
+      document.getElementById('chartPagos').innerHTML = `<div style="display:flex;flex-wrap:wrap;gap:8px">${pagosMes.map((v,i) => v > 0 ? `<div style="min-width:60px;padding:8px;background:#f0fdfa;border-radius:8px;text-align:center;border:1px solid #a7f3d0"><div style="font-size:0.7rem;color:#64748b">${nomMeses[i]}</div><div style="font-weight:700;color:#065f46">$${v.toLocaleString()}</div></div>` : '').join('')}</div><div style="margin-top:12px;font-weight:700;color:#0b5345">Total: $${totalPagos.toLocaleString()}</div>`;
     }
   </script>
 </body>
