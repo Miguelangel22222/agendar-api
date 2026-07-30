@@ -590,12 +590,12 @@
         reagendarHora.value = b.dataset.hora;
         modalReagendar.classList.add('show');
       }));
-      document.querySelectorAll('[data-action="notas"]').forEach(b => b.addEventListener('click', () => {
+      document.querySelectorAll('[data-action="notas"]').forEach(b => b.addEventListener('click', async () => {
         pendingNotasId = b.dataset.id; pendingNotasPaciente = b.dataset.paciente;
         notasPaciente.querySelector('strong').textContent = pendingNotasPaciente;
         const ev = allEvents.find(e => e.id === b.dataset.id);
         notasTexto.value = ev && ev.notas ? ev.notas : '';
-        cargarTratButtons();
+        await cargarTratButtons();
         modalNotas.classList.add('show');
       }));
       document.querySelectorAll('.name-link').forEach(el => el.addEventListener('click', () => {
@@ -627,9 +627,6 @@
         reciboArea.style.display = 'none';
         pagoGuardar.textContent = '💾 Guardar';
         pagoGuardar.disabled = false;
-        modalPago.classList.add('show');
-        pagoMonto.value = b.dataset.monto || '';
-        pagoMetodo.value = b.dataset.metodo || 'Efectivo';
         modalPago.classList.add('show');
       }));
     }
@@ -983,22 +980,28 @@
 
     /* ---- TRATAMIENTOS ---- */
     /* ---- TRATAMIENTOS DINÁMICOS ---- */
-    async function cargarTratButtons() {
+    let tratamientosList = [];
+    async function cargarTratamientosData() {
       try {
         const r = await fetch(`${API}/admin/tratamientos`);
         const d = await r.json();
-        if (!d.success || !d.tratamientos) return;
-        document.getElementById('tratButtons').innerHTML = d.tratamientos.map(t =>
-          `<button class="btn-trat" data-trat="${t.nombre} - " data-monto="${t.monto || 0}">${t.nombre}</button>`
-        ).join('');
-        document.querySelectorAll('#tratButtons .btn-trat').forEach(b => b.addEventListener('click', () => {
-          document.getElementById('notasTexto').value += b.dataset.trat;
-          document.getElementById('notasTexto').focus();
-          if (!window._pendingTratMontos) window._pendingTratMontos = {};
-          window._pendingTratMontos[pendingNotasId] = parseFloat(b.dataset.monto) || 0;
-        }));
+        if (d.success && d.tratamientos) tratamientosList = d.tratamientos;
       } catch (e) {}
     }
+    function cargarTratButtons() {
+      if (!tratamientosList.length) { document.getElementById('tratButtons').innerHTML = '<p style="color:#94a3b8;font-size:0.75rem">Sin tratamientos — agregá en 🏥 Tratamientos</p>'; return; }
+      document.getElementById('tratButtons').innerHTML = tratamientosList.map(t =>
+        `<button class="btn-trat" data-id="t-${t.id}" data-trat="${t.nombre} - " data-monto="${t.monto || 0}">${t.nombre}</button>`
+      ).join('');
+      document.querySelectorAll('#tratButtons .btn-trat').forEach(b => b.addEventListener('click', () => {
+        document.getElementById('notasTexto').value += b.dataset.trat;
+        document.getElementById('notasTexto').focus();
+        if (!window._pendingTratMontos) window._pendingTratMontos = {};
+        window._pendingTratMontos[pendingNotasId] = parseFloat(b.dataset.monto) || 0;
+      }));
+    }
+    // Cargar al inicio y cada vez que se abre el modal de tratamientos
+    cargarTratamientosData();
 
     /* ---- ESTADISTICAS ---- */
     let statsYear = new Date().getFullYear();
