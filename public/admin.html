@@ -496,6 +496,15 @@
         else { let h = '<table style="width:100%;font-size:0.8rem;"><tr><th>Fecha</th><th>Hora</th><th>Estado</th><th>Notas</th></tr>'; pasadas.sort((a,b) => b.fecha.localeCompare(a.fecha)).forEach(p => { h += `<tr><td>${p.fecha}</td><td>${p.hora}</td><td><span class="badge ${p.estado === 'completada' ? 'completada' : (p.estado === 'noasistio' ? 'noasistio' : 'pasada')}">${p.estado === 'completada' ? 'Completada' : (p.estado === 'noasistio' ? 'No asistió' : 'Completada')}</span></td><td style="font-size:0.75rem;color:#64748b">${p.notas || '-'}</td></tr>`; }); h += '</table>'; historialBody.innerHTML = h; }
         modalHistorial.classList.add('show');
       }));
+      document.querySelectorAll('[data-action="editar"]').forEach(b => b.addEventListener('click', () => {
+        pendingEditId = b.dataset.id;
+        edNombre.value = b.dataset.paciente;
+        edTelefono.value = b.dataset.telefono;
+        edEmail.value = b.dataset.email;
+        edFecha.value = b.dataset.fecha;
+        edHora.value = b.dataset.hora;
+        modalEditar.classList.add('show');
+      }));
     }
 
     function cambiarEstado(id, estado, msg) {
@@ -653,16 +662,6 @@
     const edCancelar = document.getElementById('edCancelar');
     llenarSelectHora(edHora);
     let pendingEditId = null;
-
-    document.querySelectorAll('[data-action="editar"]').forEach(b => b.addEventListener('click', () => {
-      pendingEditId = b.dataset.id;
-      edNombre.value = b.dataset.paciente;
-      edTelefono.value = b.dataset.telefono;
-      edEmail.value = b.dataset.email;
-      edFecha.value = b.dataset.fecha;
-      edHora.value = b.dataset.hora;
-      modalEditar.classList.add('show');
-    }));
     edCancelar.addEventListener('click', () => modalEditar.classList.remove('show'));
     edGuardar.addEventListener('click', async () => {
       const body = {};
