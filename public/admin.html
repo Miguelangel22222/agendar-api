@@ -92,6 +92,23 @@
     .auth-loading { position:fixed; inset:0; background:#f1f5f9; z-index:9999; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:16px; }
     .auth-loading .spinner { width:48px; height:48px; border-width:4px; }
     .auth-hidden { display:none !important; }
+    .cal-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+    .cal-nav button { background:#0b5345; color:#fff; border:none; padding:8px 16px; border-radius:8px; font-size:0.85rem; font-family:inherit; font-weight:600; cursor:pointer; }
+    .cal-nav button:hover { background:#0e6b58; }
+    .cal-nav h3 { font-size:1.1rem; color:#0b5345; }
+    .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+    .cal-header { text-align:center; font-weight:600; font-size:0.75rem; color:#64748b; padding:8px 0; }
+    .cal-day { background:#fff; border-radius:8px; padding:4px; min-height:80px; border:1px solid #f1f5f9; font-size:0.7rem; cursor:pointer; overflow:hidden; }
+    .cal-day:hover { border-color:#1a9e8e; background:#f0fdfa; }
+    .cal-day .day-num { font-weight:700; font-size:0.8rem; color:#1a2a3a; margin-bottom:2px; padding:2px 4px; }
+    .cal-day.other-month .day-num { color:#cbd5e1; }
+    .cal-day.today { border-color:#1a9e8e; background:#f0fdfa; }
+    .cal-day .cal-event { padding:2px 4px; border-radius:4px; font-size:0.6rem; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#fff; cursor:pointer; }
+    .cal-event.pendiente { background:#1a9e8e; }
+    .cal-event.completada { background:#065f46; }
+    .cal-event.noasistio { background:#d97706; }
+    .cal-event.cancelada { background:#dc2626; }
+    #calendarioView { display:none; margin-top:16px; }
     @media (max-width:768px) {
       .container { padding: 12px; }
       th, td { padding: 4px 4px; font-size: 0.6rem; }
@@ -135,6 +152,7 @@
         <button class="btn-sm btn-primary" id="btnNuevaCita">+ Nueva</button>
         <button class="btn-sm btn-block" id="btnBloquear">Bloquear</button>
         <button class="btn-sm btn-outline" id="btnExportar">CSV</button>
+        <button class="btn-sm btn-outline" id="btnToggleView">📅 Calendario</button>
       </div>
     </div>
 
@@ -163,6 +181,15 @@
         <tbody id="citasBody"></tbody>
       </table>
       <div id="empty" class="empty" style="display:none;">No hay citas</div>
+    </div>
+
+    <div id="calendarioView">
+      <div class="cal-nav">
+        <button id="calPrev">←</button>
+        <h3 id="calTitle"></h3>
+        <button id="calNext">→</button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
     </div>
   </div>
 
@@ -669,6 +696,50 @@
       }).then(r => r.json()).then(d => { if (d.success) { showToast('Cita reagendada', 'success'); cargarCitas(); } else showToast('Error: ' + (d.error || ''), 'error'); });
     });
     reagendarNo.addEventListener('click', () => modalReagendar.classList.remove('show'));
+
+    /* ---- CALENDARIO ---- */
+    let calDate = new Date();
+    let calViewList = false;
+    document.getElementById('btnToggleView').addEventListener('click', () => {
+      calViewList = !calViewList;
+      document.getElementById('btnToggleView').textContent = calViewList ? '📋 Lista' : '📅 Calendario';
+      document.getElementById('calendarioView').style.display = calViewList ? 'block' : 'none';
+      document.querySelector('.table-wrapper').style.display = calViewList ? 'none' : 'block';
+      document.getElementById('filtrosRapidos').style.display = calViewList ? 'none' : 'flex';
+      if (calViewList) renderCalendario();
+    });
+    function renderCalendario() {
+      const year = calDate.getFullYear(), month = calDate.getMonth();
+      document.getElementById('calTitle').textContent = new Date(year, month).toLocaleString('es', { month: 'long', year: 'numeric' });
+      const firstDow = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const daysInPrev = new Date(year, month, 0).getDate();
+      const diasSem = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+      let html = diasSem.map(d => `<div class="cal-header">${d}</div>`).join('');
+      for (let i = firstDow - 1; i >= 0; i--) html += `<div class="cal-day other-month"><div class="day-num">${daysInPrev - i}</div></div>`;
+      const hoy = new Date().toISOString().slice(0, 10);
+      for (let d = 1; d <= daysInMonth; d++) {
+        const fecha = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const evs = allEvents.filter(e => e.fecha === fecha && !e.esBloqueo);
+        const cls = fecha === hoy ? ' today' : '';
+        html += `<div class="cal-day${cls}" data-fecha="${fecha}"><div class="day-num">${d}</div>`;
+        evs.slice(0, 3).forEach(e => {
+          const est = e.estado || 'pendiente';
+          html += `<div class="cal-event ${est}" title="${e.paciente} ${e.hora}">${e.hora} ${e.paciente}</div>`;
+        });
+        if (evs.length > 3) html += `<div style="font-size:0.6rem;color:#64748b">+${evs.length-3} más</div>`;
+        html += '</div>';
+      }
+      const totalCells = firstDow + daysInMonth;
+      const rem = 7 - (totalCells % 7);
+      if (rem < 7) for (let i = 1; i <= rem; i++) html += `<div class="cal-day other-month"><div class="day-num">${i}</div></div>`;
+      document.getElementById('calGrid').innerHTML = html;
+      document.querySelectorAll('#calGrid .cal-day').forEach(el => {
+        if (el.dataset.fecha) el.addEventListener('click', () => { document.getElementById('filtroFecha').value = el.dataset.fecha; document.getElementById('btnToggleView').click(); renderCitas(); });
+      });
+    }
+    document.getElementById('calPrev').addEventListener('click', () => { calDate.setMonth(calDate.getMonth() - 1); renderCalendario(); });
+    document.getElementById('calNext').addEventListener('click', () => { calDate.setMonth(calDate.getMonth() + 1); renderCalendario(); });
   </script>
 </body>
 </html>
