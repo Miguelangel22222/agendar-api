@@ -25,7 +25,6 @@ app.use(express.json());
 
 const FERIADOS = [
   { mes: '01', dia: '01', nombre: 'Año Nuevo' },
-  { mes: '03', dia: '04', nombre: 'Carnaval' },
   { mes: '05', dia: '01', nombre: 'Día del Trabajador' },
   { mes: '08', dia: '25', nombre: 'Declaratoria de la Independencia' },
   { mes: '12', dia: '25', nombre: 'Navidad' },
