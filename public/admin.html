@@ -772,6 +772,7 @@
       if (viewPacientes) renderPacientes();
     });
     function renderPacientes() {
+      document.getElementById('pacLoading').style.display = 'none';
       const q = document.getElementById('pacSearch').value.toLowerCase().trim();
       const map = {};
       allEvents.forEach(e => {
