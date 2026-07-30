@@ -223,6 +223,7 @@
         <button class="btn-sm btn-outline" id="btnPacientes">👥 Pacientes</button>
         <button class="btn-sm btn-outline" id="btnStats">📊 Stats</button>
         <button class="btn-sm btn-outline" id="btnTratamientos">🏥 Tratamientos</button>
+        <button class="btn-sm btn-outline" id="btnAyuda">❓ Ayuda</button>
 </div>
     </div>
 
@@ -347,6 +348,58 @@
         <button id="tratGuardar" style="padding:10px 20px;border-radius:10px;font-size:0.85rem;font-weight:600;font-family:inherit;cursor:pointer;border:none;background:#1a9e8e;color:#fff;height:42px">Agregar</button>
       </div>
       <div class="modal-actions"><button id="tratCerrar" style="flex:1;padding:12px;border-radius:12px;font-size:0.85rem;font-weight:600;font-family:inherit;cursor:pointer;border:none;background:#f1f5f9;color:#64748b;">Cerrar</button></div>
+    </div>
+  </div>
+
+  <!-- Modal Ayuda -->
+  <div class="modal-overlay" id="modalAyuda">
+    <div class="modal-box wide" style="max-width:600px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <h3 style="margin:0">❓ Ayuda — Panel Admin</h3>
+        <button id="ayudaCerrarX" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:#64748b;padding:0;line-height:1">✕</button>
+      </div>
+      <div style="font-size:0.8rem;line-height:1.6;max-height:60vh;overflow-y:auto;padding-right:4px">
+        <p><strong>🔐 Acceso:</strong> Logueate con Google desde <strong>arteyestilomodas@gmail.com</strong></p>
+
+        <hr style="border:none;border-top:1px solid #e2e8f0;margin:12px 0">
+
+        <p><strong>📝 Tratamientos realizados</strong></p>
+        <p>1. Abrí <strong>🏥 Tratamientos</strong> y agregá los servicios que ofrecés con su precio (ej: Pedicuría $800, Masajes $500)</p>
+        <p>2. En una cita, click <strong>🦶 Tratam.</strong> → aparecen los botones de los tratamientos</p>
+        <p>3. Click en cada tratamiento realizado → se agrega al texto. Click <strong>Guardar</strong></p>
+        <p><strong>💰 Para cobrar:</strong> click <strong>Pago</strong> → los tratamientos ya cargan con sus precios. Podés agregar más líneas o duplicar. El total se calcula solo. Click <strong>👁️ Ver Factura</strong> → <strong>🖨️ Imprimir</strong></p>
+
+        <hr style="border:none;border-top:1px solid #e2e8f0;margin:12px 0">
+
+        <p><strong>🚫 Bloquear feriados y días no laborables</strong></p>
+        <p>Los feriados fijos (Año Nuevo, 1/5, 25/8, Navidad) se bloquean solos.</p>
+        <p><strong>Feriados que cambian</strong> (Carnaval, etc.):</p>
+        <p>Click <strong>Bloquear</strong> → abrí <strong>➕ Agregar feriado móvil</strong> → poné fecha y nombre → <strong>+</strong></p>
+        <p><strong>Otros días</strong> (vacaciones, etc.): Click <strong>Bloquear</strong> → fecha, motivo → <strong>Bloquear</strong></p>
+        <p>Para eliminar un bloqueo: click <strong>Eliminar</strong> al lado en la lista.</p>
+
+        <hr style="border:none;border-top:1px solid #e2e8f0;margin:12px 0">
+
+        <p><strong>📋 Botones de cada cita</strong></p>
+        <p><strong>🦶 Tratam.</strong> — registrar tratamientos realizados</p>
+        <p><strong>💰 Pago</strong> — registrar cobro y generar factura</p>
+        <p><strong>📱 WhatsApp</strong> — abre chat con el paciente</p>
+        <p><strong>🔔 Recordatorio</strong> — envía email de recordatorio</p>
+        <p><strong>✅ Atendido / Ausente / Cancelar</strong> — cambiar estado</p>
+        <p><strong>📅 Reagendar</strong> — cambiar fecha y hora</p>
+        <p><strong>✏️ Editar</strong> — modificar datos</p>
+        <p><strong>🗑️ Eliminar</strong> — borrar cita</p>
+
+        <hr style="border:none;border-top:1px solid #e2e8f0;margin:12px 0">
+
+        <p><strong>👥 Grupos</strong> (barra izquierda)</p>
+        <p>Para escuelas o grupos con horario fijo: creá el grupo, agregá alumnos, y usá <strong>📋 Cargar hoy</strong> para crear citas individuales.</p>
+
+        <hr style="border:none;border-top:1px solid #e2e8f0;margin:12px 0">
+
+        <p><strong>📊 Stats</strong> — estadísticas del año: pacientes, ingresos, tratamientos más comunes, días concurridos.</p>
+      </div>
+      <div class="modal-actions"><button id="ayudaCerrar" style="flex:1;padding:12px;border-radius:12px;font-size:0.85rem;font-weight:600;font-family:inherit;cursor:pointer;border:none;background:#1a9e8e;color:#fff;">Entendido</button></div>
     </div>
   </div>
 
@@ -1270,6 +1323,10 @@
     /* ---- TRATAMIENTOS ---- */
     const modalTrat = document.getElementById('modalTratamientos');
     document.getElementById('btnTratamientos').addEventListener('click', () => { modalTrat.classList.add('show'); cargarTratamientos(); });
+    document.getElementById('btnAyuda').addEventListener('click', () => document.getElementById('modalAyuda').classList.add('show'));
+    document.getElementById('ayudaCerrar').addEventListener('click', () => document.getElementById('modalAyuda').classList.remove('show'));
+    document.getElementById('ayudaCerrarX').addEventListener('click', () => document.getElementById('modalAyuda').classList.remove('show'));
+    document.getElementById('modalAyuda').addEventListener('click', (e) => { if (e.target === document.getElementById('modalAyuda')) document.getElementById('modalAyuda').classList.remove('show'); });
     document.getElementById('tratCerrar').addEventListener('click', () => modalTrat.classList.remove('show'));
     async function cargarTratamientos() {
       try {
