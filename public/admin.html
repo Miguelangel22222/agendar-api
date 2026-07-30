@@ -280,6 +280,7 @@
       <h3>💰 Registrar pago</h3>
       <p id="pagoPaciente" class="patient-info">Paciente: <strong></strong></p>
       <label style="margin-bottom:4px">Desglose</label>
+      <div id="pagoTratButtons" style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px"></div>
       <div id="pagoDesglose" style="margin-bottom:4px"></div>
       <button id="pagoAddLine" style="font-size:0.75rem;padding:4px 10px;border-radius:6px;border:1px dashed #475569;background:transparent;color:#94a3b8;cursor:pointer;margin-bottom:12px;font-family:inherit">+ Agregar línea</button>
       <div style="display:flex;justify-content:space-between;font-weight:700;font-size:1rem;margin-bottom:12px;padding-top:8px;border-top:1px solid #334155">
@@ -658,6 +659,7 @@
         }
         // if still empty, show one empty row
         if (!populated) addPagoRow('', '');
+        loadPagoTratButtons();
         reciboArea.style.display = 'none';
         pagoGuardar.textContent = '💾 Guardar';
         pagoGuardar.disabled = false;
@@ -852,6 +854,7 @@
     const pagoImprimir = document.getElementById('pagoImprimir');
     const pagoVerFactura = document.getElementById('pagoVerFactura');
     const pagoDesglose = document.getElementById('pagoDesglose');
+    const pagoTratButtons = document.getElementById('pagoTratButtons');
     const pagoAddLine = document.getElementById('pagoAddLine');
     const pagoTotal = document.getElementById('pagoTotal');
     const reciboArea = document.getElementById('reciboArea');
@@ -894,6 +897,16 @@
         <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Método:</span>${metodo}</div>
         <div style="border-top:1px dashed #aaa;padding-top:8px;margin-top:8px;text-align:center;font-size:10px;color:#666">Emitido: ${f}<br>¡Gracias por su visita!</div>
       </div>`;
+    }
+    function loadPagoTratButtons() {
+      const list = tratamientosList.length ? tratamientosList : [];
+      if (!list.length) { pagoTratButtons.innerHTML = ''; return; }
+      pagoTratButtons.innerHTML = list.map(t =>
+        `<button class="btn-trat" data-nombre="${t.nombre}" data-monto="${t.monto || 0}">${t.nombre}</button>`
+      ).join('');
+      pagoTratButtons.querySelectorAll('.btn-trat').forEach(b => b.addEventListener('click', () => {
+        addPagoRow(b.dataset.nombre, parseFloat(b.dataset.monto) || 0);
+      }));
     }
     pagoCerrar.addEventListener('click', () => { modalPago.classList.remove('show'); reciboArea.style.display = 'none'; });
     pagoAddLine.addEventListener('click', () => addPagoRow('', ''));
