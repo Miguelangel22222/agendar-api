@@ -600,6 +600,13 @@
         edHora.value = b.dataset.hora;
         modalEditar.classList.add('show');
       }));
+      document.querySelectorAll('[data-action="pago"]').forEach(b => b.addEventListener('click', () => {
+        pendingPagoId = b.dataset.id;
+        pagoPaciente.querySelector('strong').textContent = b.dataset.paciente;
+        pagoMonto.value = b.dataset.monto || '';
+        pagoMetodo.value = b.dataset.metodo || 'Efectivo';
+        modalPago.classList.add('show');
+      }));
     }
 
     function cambiarEstado(id, estado, msg) {
@@ -787,13 +794,6 @@
     const pagoGuardar = document.getElementById('pagoGuardar');
     const pagoCerrar = document.getElementById('pagoCerrar');
     let pendingPagoId = null;
-    document.querySelectorAll('[data-action="pago"]').forEach(b => b.addEventListener('click', () => {
-      pendingPagoId = b.dataset.id;
-      pagoPaciente.querySelector('strong').textContent = b.dataset.paciente;
-      pagoMonto.value = b.dataset.monto || '';
-      pagoMetodo.value = b.dataset.metodo || 'Efectivo';
-      modalPago.classList.add('show');
-    }));
     pagoCerrar.addEventListener('click', () => modalPago.classList.remove('show'));
     pagoGuardar.addEventListener('click', async () => {
       const monto = parseFloat(pagoMonto.value);
