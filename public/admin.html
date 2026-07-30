@@ -645,7 +645,7 @@
           if (notas) {
             const parts = notas.split(' - ').map(s => s.trim()).filter(Boolean);
             parts.forEach(p => {
-              const found = tratamientosList.find(t => t.nombre.toLowerCase() === p.toLowerCase());
+              const found = tratamientosList.find(t => t.nombre.trim().toLowerCase() === p.toLowerCase());
               if (found) addPagoRow(found.nombre, found.monto || 0);
               else addPagoRow(p, '');
             });
@@ -1079,7 +1079,9 @@
           if (!window._pendingTratData) window._pendingTratData = {};
           if (!window._pendingTratData[pendingNotasId]) window._pendingTratData[pendingNotasId] = [];
           const name = b.dataset.trat.replace(/[-\s]+$/g, '').trim();
-          const monto = parseFloat(b.dataset.monto) || 0;
+          // look up monto from cached tratamientosList (more reliable than dataset)
+          const found = tratamientosList.find(t => t.nombre.trim().toLowerCase() === name.toLowerCase());
+          const monto = found ? (found.monto || 0) : (parseFloat(b.dataset.monto) || 0);
           window._pendingTratData[pendingNotasId].push({ name, monto });
         }));
       }).catch(() => {
