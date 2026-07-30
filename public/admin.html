@@ -226,6 +226,17 @@
     </div>
   </div>
 
+  <!-- Modal Reagendar -->
+  <div class="modal-overlay" id="modalReagendar">
+    <div class="modal-box wide">
+      <h3>Reagendar cita</h3>
+      <p id="reagendarPaciente" class="patient-info">Paciente: <strong></strong></p>
+      <label>Nueva fecha</label><input type="date" id="reagendarFecha">
+      <label>Nuevo horario</label><select id="reagendarHora"><option value="">Seleccionar...</option></select>
+      <div class="modal-actions"><button id="reagendarNo" style="background:#f1f5f9;color:#64748b;">Cancelar</button><button id="reagendarSi" style="background:#1a9e8e;color:#fff;">Reagendar</button></div>
+    </div>
+  </div>
+
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
     import { getAuth, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';

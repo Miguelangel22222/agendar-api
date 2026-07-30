@@ -111,12 +111,13 @@ app.post(['/agendar', '/api/agendar', '/db/agendar', '/api/db/agendar'], async (
 app.get(['/admin/citas', '/api/admin/citas', '/db/admin/citas', '/api/db/admin/citas'], async (req, res) => {
   if (requireDb(req, res)) return;
   try {
-    const snap = await db.collection('citas').orderBy('fecha', 'asc').orderBy('hora', 'asc').get();
+    const snap = await db.collection('citas').get();
     const citas = [];
     snap.forEach(doc => {
       const d = doc.data();
       citas.push({ id: doc.id, ...d, createdAt: d.createdAt ? d.createdAt.toMillis() : null });
     });
+    citas.sort((a, b) => a.fecha.localeCompare(b.fecha) || a.hora.localeCompare(b.hora));
     res.json({ success: true, citas });
   } catch (e) {
     console.error('Error listar citas:', e.message);
