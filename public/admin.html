@@ -394,6 +394,14 @@
       <label>Desde</label><select id="blDesde"><option value="">Todo el día</option></select>
       <label>Hasta</label><select id="blHasta"><option value="">Todo el día</option></select>
       <label>Motivo</label><input type="text" id="blMotivo" placeholder="Ej: Feriado, capacitación...">
+      <details style="margin-top:10px;font-size:0.8rem">
+        <summary style="cursor:pointer;color:#1a9e8e;font-weight:600">➕ Agregar feriado móvil</summary>
+        <div style="display:flex;gap:6px;margin-top:6px;align-items:end">
+          <div style="flex:1"><label style="font-size:0.72rem">Fecha</label><input type="date" id="blFeriadoFecha" style="font-size:0.78rem"></div>
+          <div style="flex:1"><label style="font-size:0.72rem">Nombre</label><input type="text" id="blFeriadoNombre" placeholder="Ej: Carnaval" style="font-size:0.78rem"></div>
+          <button id="blAgregarFeriado" class="btn-xs btn-primary" style="margin-bottom:1px">+</button>
+        </div>
+      </details>
       <div class="modal-actions"><button id="blCerrar" style="background:#f1f5f9;color:#64748b;">Cerrar</button><button id="blGuardar" style="background:#5b21b6;color:#fff;">Bloquear</button></div>
       <div style="margin-top:16px;border-top:1px solid #e2e8f0;padding-top:12px;">
         <h4 style="font-size:0.85rem;color:#1a2a3a;margin-bottom:8px;">Bloqueos existentes</h4>
@@ -805,6 +813,15 @@
     blCerrar.addEventListener('click', () => modalBloquear.classList.remove('show'));
     document.getElementById('blCerrarX').addEventListener('click', () => modalBloquear.classList.remove('show'));
     modalBloquear.addEventListener('click', (e) => { if (e.target === modalBloquear) modalBloquear.classList.remove('show'); });
+    document.getElementById('blAgregarFeriado').addEventListener('click', async () => {
+      const fecha = document.getElementById('blFeriadoFecha').value;
+      const nombre = document.getElementById('blFeriadoNombre').value.trim();
+      if (!fecha || !nombre) { showToast('Completá fecha y nombre', 'error'); return; }
+      await fetch(`${API}/admin/bloquear`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fecha, motivo: `Feriado: ${nombre}` }) });
+      document.getElementById('blFeriadoFecha').value = '';
+      document.getElementById('blFeriadoNombre').value = '';
+      cargarBloqueos(); showToast('Feriado agregado', 'success');
+    });
 
     async function cargarBloqueos() {
       try {
