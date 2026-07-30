@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agendar Cita - Clínica del Pie</title>
+  <link rel="icon" type="image/png" href="imagenes/logo.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#0b5345,#0e6b58);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+    .card{background:#fff;border-radius:24px;padding:40px 32px;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.2)}
+    .card h1{font-size:1.3rem;font-weight:800;color:#0b5345;margin-bottom:4px;text-align:center}
+    .card p.sub{font-size:0.85rem;color:#64748b;text-align:center;margin-bottom:24px}
+    label{display:block;font-size:0.8rem;font-weight:600;color:#1a2a3a;margin-top:16px;margin-bottom:4px}
+    input,select{width:100%;padding:12px 14px;border:2px solid #e2e8f0;border-radius:12px;font-size:0.9rem;font-family:inherit;outline:none;transition:border-color 0.2s}
+    input:focus,select:focus{border-color:#1a9e8e}
+    .btn{width:100%;padding:14px;border:none;border-radius:12px;font-size:1rem;font-weight:700;font-family:inherit;cursor:pointer;transition:all 0.2s;margin-top:20px}
+    .btn-primary{background:#1a9e8e;color:#fff}
+    .btn-primary:hover{background:#0e6b58;transform:translateY(-2px)}
+    .btn-primary:disabled{background:#94a3b8;cursor:not-allowed;transform:none}
+    .slots{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px}
+    .slot{padding:10px;border:2px solid #e2e8f0;border-radius:10px;text-align:center;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s;background:#fff;color:#1a2a3a}
+    .slot:hover{border-color:#1a9e8e;background:#f0fdfa}
+    .slot.selected{background:#1a9e8e;color:#fff;border-color:#1a9e8e}
+    .slot.ocupado{background:#f1f5f9;color:#94a3b8;border-color:#e2e8f0;cursor:not-allowed}
+    .slot.pasado{background:#f1f5f9;color:#94a3b8;border-color:#e2e8f0;cursor:not-allowed}
+    .loading{text-align:center;padding:20px}
+    .spinner{display:inline-block;width:24px;height:24px;border:3px solid #e2e8f0;border-top-color:#1a9e8e;border-radius:50%;animation:spin 0.6s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .success-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:1000;align-items:center;justify-content:center}
+    .success-overlay.show{display:flex}
+    .success-box{background:#fff;border-radius:24px;padding:40px 32px;max-width:360px;width:90%;text-align:center;animation:fadeUp 0.3s}
+    .success-box .check{width:64px;height:64px;background:#d1fae5;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+    .success-box .check svg{width:32px;height:32px;color:#065f46}
+    .success-box h2{color:#065f46;font-size:1.2rem;font-weight:700}
+    .success-box p{color:#64748b;font-size:0.85rem;margin-top:8px}
+    .success-box .btn{background:#1a9e8e;color:#fff}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .error-msg{color:#991b1b;font-size:0.8rem;text-align:center;margin-top:8px}
+    @media(max-width:480px){.card{padding:24px 16px}.slots{grid-template-columns:repeat(3,1fr)}}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🦶 Agendar Cita</h1>
+    <p class="sub">Clínica del Pie Isabel Aguiar</p>
+
+    <label>Nombre completo</label>
+    <input type="text" id="nombre" placeholder="Ej: María Pérez">
+
+    <label>Teléfono</label>
+    <input type="text" id="telefono" placeholder="099 123 456">
+
+    <label>Email (opcional)</label>
+    <input type="email" id="email" placeholder="correo@ejemplo.com">
+
+    <label>Fecha</label>
+    <input type="date" id="fecha">
+
+    <label>Horario disponible</label>
+    <div id="slotsContainer" class="loading"><div class="spinner"></div></div>
+    <div id="errorMsg" class="error-msg"></div>
+
+    <button class="btn btn-primary" id="btnAgendar" disabled>Agendar Cita</button>
+  </div>
+
+  <div class="success-overlay" id="successOverlay">
+    <div class="success-box">
+      <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <h2>¡Cita agendada!</h2>
+      <p id="successText">Tu turno fue reservado correctamente.</p>
+      <button class="btn" onclick="location.reload()">Aceptar</button>
+    </div>
+  </div>
+
+  <script>
+    const API = 'https://agendar-api-tatn.onrender.com/api/db';
+    const SLOTS = ['09:30','10:30','11:30','14:00','15:00','16:00','17:00'];
+    const FERIADOS = ['01-01','03-04','01-05','25-08','25-12'];
+
+    const nombre = document.getElementById('nombre');
+    const telefono = document.getElementById('telefono');
+    const email = document.getElementById('email');
+    const fechaInput = document.getElementById('fecha');
+    const slotsContainer = document.getElementById('slotsContainer');
+    const errorMsg = document.getElementById('errorMsg');
+    const btnAgendar = document.getElementById('btnAgendar');
+    const successOverlay = document.getElementById('successOverlay');
+    const successText = document.getElementById('successText');
+
+    let selectedSlot = null;
+    let ocupados = [];
+
+    function hoy() { return new Date().toISOString().slice(0,10); }
+    function esFeriado(f) {
+      const m = f.slice(5,10);
+      return FERIADOS.includes(m) || (m === '03-03' && f >= '2026-03-03');
+    }
+    function esFinde(f) { const d = new Date(f+'T12:00:00'); return d.getDay() === 0 || d.getDay() === 6; }
+    function esPasado(f, h) {
+      const ahora = new Date();
+      const fHora = new Date(f + 'T' + h + ':00');
+      return fHora < ahora;
+    }
+
+    fechaInput.min = hoy();
+    fechaInput.value = hoy();
+    fechaInput.addEventListener('change', cargarSlots);
+
+    async function cargarSlots() {
+      selectedSlot = null;
+      btnAgendar.disabled = true;
+      const f = fechaInput.value;
+      if (!f) { slotsContainer.innerHTML = '<p style="color:#94a3b8;font-size:0.85rem">Seleccioná una fecha</p>'; return; }
+      if (esFinde(f)) { slotsContainer.innerHTML = '<p style="color:#991b1b;font-size:0.85rem">Solo atención de lunes a viernes</p>'; return; }
+      if (esFeriado(f)) { slotsContainer.innerHTML = '<p style="color:#991b1b;font-size:0.85rem">Feriado — sin atención</p>'; return; }
+
+      slotsContainer.innerHTML = '<div class="spinner"></div>';
+      try {
+        const r = await fetch(`${API}/ocupados?fecha=${f}`);
+        const d = await r.json();
+        ocupados = d.ocupados || [];
+        renderSlots(f);
+      } catch (e) {
+        slotsContainer.innerHTML = '<p style="color:#991b1b;font-size:0.85rem">Error al cargar horarios</p>';
+      }
+    }
+
+    function renderSlots(f) {
+      const horasOcupadas = ocupados.map(o => o.inicio.slice(11,16));
+      slotsContainer.innerHTML = '<div class="slots">' + SLOTS.map(h => {
+        const ocup = horasOcupadas.includes(h);
+        const pasado = esPasado(f, h);
+        const cls = ocup ? 'ocupado' : (pasado ? 'pasado' : '');
+        return `<div class="slot ${cls}" data-hora="${h}" onclick="${ocup || pasado ? '' : "selectSlot('"+h+"')"}">${h}</div>`;
+      }).join('') + '</div>';
+    }
+
+    window.selectSlot = function(h) {
+      document.querySelectorAll('.slot').forEach(s => s.classList.remove('selected'));
+      document.querySelector(`.slot[data-hora="${h}"]`).classList.add('selected');
+      selectedSlot = h;
+      btnAgendar.disabled = !(nombre.value.trim() && telefono.value.trim() && selectedSlot);
+    };
+
+    function validarForm() {
+      btnAgendar.disabled = !(nombre.value.trim() && telefono.value.trim() && selectedSlot);
+    }
+    nombre.addEventListener('input', validarForm);
+    telefono.addEventListener('input', validarForm);
+
+    btnAgendar.addEventListener('click', async () => {
+      btnAgendar.disabled = true;
+      btnAgendar.textContent = 'Agendando...';
+      errorMsg.textContent = '';
+      try {
+        const r = await fetch(`${API}/agendar`, {
+          method: 'POST', headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({
+            paciente: nombre.value.trim(),
+            telefono: telefono.value.trim(),
+            email: email.value.trim(),
+            fecha: fechaInput.value,
+            hora: selectedSlot,
+          }),
+        });
+        const d = await r.json();
+        if (d.success) {
+          successText.textContent = `Tu turno para el ${fechaInput.value} a las ${selectedSlot} fue reservado.`;
+          successOverlay.classList.add('show');
+        } else {
+          errorMsg.textContent = d.error || 'Error al agendar';
+          btnAgendar.disabled = false;
+          btnAgendar.textContent = 'Agendar Cita';
+        }
+      } catch (e) {
+        errorMsg.textContent = 'Error de conexión';
+        btnAgendar.disabled = false;
+        btnAgendar.textContent = 'Agendar Cita';
+      }
+    });
+
+    cargarSlots();
+  </script>
+</body>
+</html>

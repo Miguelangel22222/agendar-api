@@ -2,6 +2,22 @@ const express = require('express');
 const cors = require('cors');
 const { google } = require('googleapis');
 const { Resend } = require('resend');
+const admin = require('firebase-admin');
+
+let db = null;
+try {
+  const sa = process.env.FIREBASE_SERVICE_ACCOUNT;
+  if (sa) {
+    const cred = JSON.parse(sa);
+    admin.initializeApp({ credential: admin.credential.cert(cred) });
+    db = admin.firestore();
+    console.log('Firestore iniciado');
+  } else {
+    console.log('FIREBASE_SERVICE_ACCOUNT no configurado, Firestore no disponible');
+  }
+} catch (e) {
+  console.log('Error iniciando Firestore:', e.message);
+}
 
 const app = express();
 app.use(cors());
@@ -380,6 +396,124 @@ app.delete(['/admin/bloquear/:eventId', '/api/admin/bloquear/:eventId'], async (
   } catch (error) {
     console.error('Error al eliminar bloqueo:', error.message);
     res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ==================== FIRESTORE ENDPOINTS (prefijo /api/db/) ====================
+function requireDb(req, res) {
+  if (!db) return res.status(503).json({ success: false, error: 'Firestore no disponible' });
+  return null;
+}
+
+app.get(['/db/ocupados', '/api/db/ocupados'], async (req, res) => {
+  if (requireDb(req, res)) return;
+  try {
+    const { fecha } = req.query;
+    if (!fecha) return res.status(400).json({ error: 'Falta ?fecha=YYYY-MM-DD' });
+    const snap = await db.collection('citas').where('fecha', '==', fecha).where('estado', '!=', 'cancelada').get();
+    const ocupados = [];
+    snap.forEach(doc => {
+      const d = doc.data();
+      ocupados.push({ inicio: `${fecha}T${d.hora}:00`, fin: `${fecha}T${d.hora_fin}:00` });
+    });
+    res.json({ ocupados });
+  } catch (e) {
+    console.error('Error db ocupados:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post(['/db/agendar', '/api/db/agendar'], async (req, res) => {
+  if (requireDb(req, res)) return;
+  try {
+    const { paciente, telefono, email, fecha, hora } = req.body;
+    if (!paciente || !telefono || !fecha || !hora) return res.status(400).json({ error: 'Faltan datos' });
+    const [hh, mm] = hora.split(':');
+    const totalMin = parseInt(hh) * 60 + parseInt(mm) + 45;
+    const hhFin = String(Math.floor(totalMin / 60)).padStart(2, '0');
+    const mmFin = String(totalMin % 60).padStart(2, '0');
+    const docRef = await db.collection('citas').add({
+      paciente, telefono, email: email || '', fecha, hora, hora_fin: `${hhFin}:${mmFin}`,
+      estado: 'pendiente', notas: '', createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+    res.json({ success: true, id: docRef.id });
+  } catch (e) {
+    console.error('Error db agendar:', e.message);
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
+app.get(['/db/admin/citas', '/api/db/admin/citas'], async (req, res) => {
+  if (requireDb(req, res)) return;
+  try {
+    const snap = await db.collection('citas').orderBy('fecha', 'asc').orderBy('hora', 'asc').get();
+    const citas = [];
+    snap.forEach(doc => {
+      const d = doc.data();
+      citas.push({ id: doc.id, ...d, createdAt: d.createdAt ? d.createdAt.toMillis() : null });
+    });
+    res.json({ success: true, citas });
+  } catch (e) {
+    console.error('Error db listar:', e.message);
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
+app.put(['/db/admin/citas/:id', '/api/db/admin/citas/:id'], async (req, res) => {
+  if (requireDb(req, res)) return;
+  try {
+    await db.collection('citas').doc(req.params.id).update(req.body);
+    res.json({ success: true });
+  } catch (e) {
+    console.error('Error db update:', e.message);
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
+app.delete(['/db/admin/citas/:id', '/api/db/admin/citas/:id'], async (req, res) => {
+  if (requireDb(req, res)) return;
+  try {
+    await db.collection('citas').doc(req.params.id).delete();
+    res.json({ success: true, message: 'Cita eliminada' });
+  } catch (e) {
+    console.error('Error db delete:', e.message);
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
+app.post(['/db/admin/bloquear', '/api/db/admin/bloquear'], async (req, res) => {
+  if (requireDb(req, res)) return;
+  try {
+    const { fecha, inicio, fin, motivo } = req.body;
+    await db.collection('bloqueos').add({ fecha, inicio: inicio || '', fin: fin || '', motivo: motivo || 'Bloqueado', createdAt: admin.firestore.FieldValue.serverTimestamp() });
+    res.json({ success: true });
+  } catch (e) {
+    console.error('Error db bloquear:', e.message);
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
+app.get(['/db/admin/bloqueados', '/api/db/admin/bloqueados'], async (req, res) => {
+  if (requireDb(req, res)) return;
+  try {
+    const snap = await db.collection('bloqueos').orderBy('fecha', 'asc').get();
+    const bloqueos = [];
+    snap.forEach(doc => bloqueos.push({ id: doc.id, ...doc.data() }));
+    res.json({ success: true, bloqueos });
+  } catch (e) {
+    console.error('Error db bloqueos:', e.message);
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
+app.delete(['/db/admin/bloquear/:id', '/api/db/admin/bloquear/:id'], async (req, res) => {
+  if (requireDb(req, res)) return;
+  try {
+    await db.collection('bloqueos').doc(req.params.id).delete();
+    res.json({ success: true });
+  } catch (e) {
+    console.error('Error db eliminar bloqueo:', e.message);
+    res.status(500).json({ success: false, error: e.message });
   }
 });
 
