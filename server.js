@@ -198,14 +198,15 @@ app.put(['/admin/citas/:id', '/api/admin/citas/:id', '/db/admin/citas/:id', '/ap
       const nomPac = data.paciente || 'Paciente';
       const emailPac = data.email || '';
 
-      if (process.env.RESEND_API_KEY && emailPac) {
-        resend.emails.send({
-          from: 'Clinica del Pie Isabel Aguiar <onboarding@resend.dev>',
-          to: emailPac,
-          subject: 'Cita reagendada - Clínica del Pie Isabel Aguiar',
-          html: `<div style="font-family:sans-serif;max-width:600px"><h2 style="color:#0b5345">Cita reagendada</h2><p>Hola ${nomPac}, tu cita fue reprogramada.</p><p><strong>Anterior:</strong> ${feVieja}</p><p><strong>Nueva fecha y hora:</strong> ${feNueva}</p><p><strong>Dirección:</strong> Galería — Montevideo</p><p style="color:#64748b;font-size:0.85rem">Si necesitas cancelar o reprogramar, comunicate al teléfono de la clínica.</p></div>`,
-        }).catch(e => console.log('Error email reagendar paciente:', e.message));
-
+      if (process.env.RESEND_API_KEY) {
+        if (emailPac) {
+          resend.emails.send({
+            from: 'Clinica del Pie Isabel Aguiar <onboarding@resend.dev>',
+            to: emailPac,
+            subject: 'Cita reagendada - Clínica del Pie Isabel Aguiar',
+            html: `<div style="font-family:sans-serif;max-width:600px"><h2 style="color:#0b5345">Cita reagendada</h2><p>Hola ${nomPac}, tu cita fue reprogramada.</p><p><strong>Anterior:</strong> ${feVieja}</p><p><strong>Nueva fecha y hora:</strong> ${feNueva}</p><p><strong>Dirección:</strong> Galería — Montevideo</p><p style="color:#64748b;font-size:0.85rem">Si necesitas cancelar o reprogramar, comunicate al teléfono de la clínica.</p></div>`,
+          }).catch(e => console.log('Error email reagendar paciente:', e.message));
+        }
         resend.emails.send({
           from: 'Clinica del Pie Isabel Aguiar <onboarding@resend.dev>',
           to: process.env.GMAIL_USER,
