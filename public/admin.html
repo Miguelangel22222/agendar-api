@@ -386,7 +386,10 @@
   <!-- Modal Bloquear -->
   <div class="modal-overlay" id="modalBloquear">
     <div class="modal-box wide">
-      <h3>Bloquear horarios</h3>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <h3 style="margin:0">Bloquear horarios</h3>
+        <button id="blCerrarX" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:#64748b;padding:0;line-height:1">✕</button>
+      </div>
       <label>Fecha</label><input type="date" id="blFecha">
       <label>Desde</label><select id="blDesde"><option value="">Todo el día</option></select>
       <label>Hasta</label><select id="blHasta"><option value="">Todo el día</option></select>
@@ -800,6 +803,7 @@
       modalBloquear.classList.add('show');
     });
     blCerrar.addEventListener('click', () => modalBloquear.classList.remove('show'));
+    document.getElementById('blCerrarX').addEventListener('click', () => modalBloquear.classList.remove('show'));
     modalBloquear.addEventListener('click', (e) => { if (e.target === modalBloquear) modalBloquear.classList.remove('show'); });
 
     async function cargarBloqueos() {
