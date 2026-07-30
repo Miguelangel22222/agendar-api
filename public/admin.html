@@ -621,7 +621,8 @@
         pendingPagoFecha = b.dataset.fecha;
         pendingPagoHora = b.dataset.hora;
         pagoPaciente.querySelector('strong').textContent = pendingPagoNombre;
-        pagoMonto.value = b.dataset.monto || (window._pendingTratMonto ? window._pendingTratMonto : '');
+        pagoMonto.value = b.dataset.monto || (window._pendingTratMontos && window._pendingTratMontos[b.dataset.id] ? window._pendingTratMontos[b.dataset.id] : '');
+        delete (window._pendingTratMontos || {})[b.dataset.id];
         pagoMetodo.value = b.dataset.metodo || 'Efectivo';
         reciboArea.style.display = 'none';
         pagoGuardar.textContent = '💾 Guardar';
@@ -993,7 +994,8 @@
         document.querySelectorAll('#tratButtons .btn-trat').forEach(b => b.addEventListener('click', () => {
           document.getElementById('notasTexto').value += b.dataset.trat;
           document.getElementById('notasTexto').focus();
-          window._pendingTratMonto = parseFloat(b.dataset.monto) || 0;
+          if (!window._pendingTratMontos) window._pendingTratMontos = {};
+          window._pendingTratMontos[pendingNotasId] = parseFloat(b.dataset.monto) || 0;
         }));
       } catch (e) {}
     }
