@@ -629,17 +629,36 @@
         pendingPagoFecha = b.dataset.fecha;
         pendingPagoHora = b.dataset.hora;
         pagoPaciente.querySelector('strong').textContent = pendingPagoNombre;
-        // populate desglose
         pagoDesglose.innerHTML = '';
+        // populate from _pendingTratData (set by treatment buttons in Notas)
+        let populated = false;
         const tratData = (window._pendingTratData || {})[b.dataset.id] || [];
-        tratData.forEach(t => addPagoRow(t.name, t.monto));
+        if (tratData.length) {
+          tratData.forEach(t => addPagoRow(t.name, t.monto));
+          populated = true;
+        }
+        delete (window._pendingTratData || {})[b.dataset.id];
+        // fallback: parse notas text for treatment names
+        if (!populated) {
+          const ev = allEvents.find(e => e.id === b.dataset.id);
+          const notas = ev && ev.notas ? ev.notas : '';
+          if (notas) {
+            const parts = notas.split(' - ').map(s => s.trim()).filter(Boolean);
+            parts.forEach(p => {
+              const found = tratamientosList.find(t => t.nombre.toLowerCase() === p.toLowerCase());
+              if (found) addPagoRow(found.nombre, found.monto || 0);
+              else addPagoRow(p, '');
+            });
+            if (pagoDesglose.children.length) populated = true;
+          }
+        }
         // if no treatment data but has existing monto, show one row
-        if (tratData.length === 0 && b.dataset.monto) {
+        if (!populated && b.dataset.monto) {
           addPagoRow('Prestación', b.dataset.monto);
+          populated = true;
         }
         // if still empty, show one empty row
-        if (pagoDesglose.children.length === 0) addPagoRow('', '');
-        delete (window._pendingTratData || {})[b.dataset.id];
+        if (!populated) addPagoRow('', '');
         reciboArea.style.display = 'none';
         pagoGuardar.textContent = '💾 Guardar';
         pagoGuardar.disabled = false;
@@ -885,9 +904,7 @@
       const desglose = [];
       pagoDesglose.querySelectorAll('.dg-name').forEach((el, i) => {
         const montoInput = pagoDesglose.querySelectorAll('.dg-monto')[i];
-        if (el.value || (montoInput && parseFloat(montoInput.value))) {
-          desglose.push({ nombre: el.value, monto: parseFloat(montoInput ? montoInput.value : 0) || 0 });
-        }
+        desglose.push({ nombre: el.value || 'Prestación', monto: parseFloat(montoInput ? montoInput.value : 0) || 0 });
       });
       if (desglose.length === 0) { showToast('Agregá al menos un tratamiento', 'error'); return; }
       reciboContenido.innerHTML = generarRecibo(nom, desglose, metodo, pendingPagoFecha, pendingPagoHora);
