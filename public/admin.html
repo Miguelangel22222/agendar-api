@@ -226,6 +226,19 @@
     </div>
   </div>
 
+  <!-- Modal Editar Paciente -->
+  <div class="modal-overlay" id="modalEditar">
+    <div class="modal-box wide">
+      <h3>Editar datos del paciente</h3>
+      <label>Nombre</label><input type="text" id="edNombre">
+      <label>Teléfono</label><input type="text" id="edTelefono">
+      <label>Email</label><input type="email" id="edEmail">
+      <label>Fecha</label><input type="date" id="edFecha">
+      <label>Horario</label><select id="edHora"><option value="">Seleccionar...</option></select>
+      <div class="modal-actions"><button id="edCancelar" style="background:#f1f5f9;color:#64748b;">Cancelar</button><button id="edGuardar" style="background:#1a9e8e;color:#fff;">Guardar</button></div>
+    </div>
+  </div>
+
   <!-- Modal Reagendar -->
   <div class="modal-overlay" id="modalReagendar">
     <div class="modal-box wide">
@@ -400,6 +413,7 @@
           html += `<a href="https://wa.me/${tel}?text=${encodeURIComponent(msg)}" target="_blank" class="btn-xs btn-primary" style="text-decoration:none;display:inline-flex;align-items:center;gap:4px"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg> Recordar</a>`;
         }
         html += `<button class="btn-xs btn-outline" data-id="${ev.id}" data-paciente="${ev.paciente}" data-action="notas">📝 Notas</button>`;
+        html += `<button class="btn-xs btn-outline" data-id="${ev.id}" data-paciente="${ev.paciente}" data-telefono="${ev.telefono}" data-email="${ev.email}" data-fecha="${ev.fecha}" data-hora="${ev.hora}" data-action="editar">✏️ Editar</button>`;
         if (puedeEditar) {
           html += `<button class="btn-xs btn-danger" data-id="${ev.id}" data-paciente="${ev.paciente}" data-action="cancel">Cancelar</button>`;
           html += `<button class="btn-xs btn-danger mobile-hide" data-id="${ev.id}" data-action="eliminar" style="background:#fef2f2;color:#991b1b;border:1px solid #fecaca;opacity:0.5">Eliminar</button>`;
@@ -600,6 +614,49 @@
     let pendingReagendarId = null;
     let pendingReagendarPaciente = null;
     llenarSelectHora(reagendarHora);
+
+    /* ---- EDITAR ---- */
+    const modalEditar = document.getElementById('modalEditar');
+    const edNombre = document.getElementById('edNombre');
+    const edTelefono = document.getElementById('edTelefono');
+    const edEmail = document.getElementById('edEmail');
+    const edFecha = document.getElementById('edFecha');
+    const edHora = document.getElementById('edHora');
+    const edGuardar = document.getElementById('edGuardar');
+    const edCancelar = document.getElementById('edCancelar');
+    llenarSelectHora(edHora);
+    let pendingEditId = null;
+
+    document.querySelectorAll('[data-action="editar"]').forEach(b => b.addEventListener('click', () => {
+      pendingEditId = b.dataset.id;
+      edNombre.value = b.dataset.paciente;
+      edTelefono.value = b.dataset.telefono;
+      edEmail.value = b.dataset.email;
+      edFecha.value = b.dataset.fecha;
+      edHora.value = b.dataset.hora;
+      modalEditar.classList.add('show');
+    }));
+    edCancelar.addEventListener('click', () => modalEditar.classList.remove('show'));
+    edGuardar.addEventListener('click', async () => {
+      const body = {};
+      if (edNombre.value.trim()) body.paciente = edNombre.value.trim();
+      if (edTelefono.value.trim()) body.telefono = edTelefono.value.trim();
+      body.email = edEmail.value.trim();
+      if (edFecha.value) body.fecha = edFecha.value;
+      if (edHora.value) {
+        body.hora = edHora.value;
+        const [hh, mm] = edHora.value.split(':');
+        const totalMin = parseInt(hh) * 60 + parseInt(mm) + 45;
+        body.hora_fin = String(Math.floor(totalMin / 60)).padStart(2, '0') + ':' + String(totalMin % 60).padStart(2, '0');
+      }
+      modalEditar.classList.remove('show');
+      try {
+        const r = await fetch(`${API}/admin/citas/${pendingEditId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        const d = await r.json();
+        if (d.success) { showToast('Datos actualizados', 'success'); cargarCitas(); }
+        else showToast('Error: ' + (d.error || ''), 'error');
+      } catch (e) { showToast('Error de conexión', 'error'); }
+    });
 
     reagendarSi.addEventListener('click', () => {
       const f = reagendarFecha.value, h = reagendarHora.value;
