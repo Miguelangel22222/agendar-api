@@ -360,5 +360,54 @@ app.delete(['/admin/bloquear/:id', '/api/admin/bloquear/:id', '/db/admin/bloquea
   }
 });
 
+// ========== TRATAMIENTOS ==========
+app.get(['/admin/tratamientos', '/api/admin/tratamientos'], async (req, res) => {
+  if (requireDb(req, res)) return;
+  try {
+    const snap = await db.collection('tratamientos').orderBy('nombre', 'asc').get();
+    const trat = [];
+    snap.forEach(doc => trat.push({ id: doc.id, ...doc.data() }));
+    res.json({ success: true, tratamientos: trat });
+  } catch (e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
+app.post(['/admin/tratamientos', '/api/admin/tratamientos'], async (req, res) => {
+  if (requireDb(req, res)) return;
+  try {
+    const { nombre, monto } = req.body;
+    if (!nombre) return res.status(400).json({ error: 'Falta nombre' });
+    const docRef = await db.collection('tratamientos').add({ nombre: nombre.trim(), monto: parseFloat(monto) || 0, createdAt: FieldValue.serverTimestamp() });
+    res.json({ success: true, id: docRef.id });
+  } catch (e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
+app.put(['/admin/tratamientos/:id', '/api/admin/tratamientos/:id'], async (req, res) => {
+  if (requireDb(req, res)) return;
+  try {
+    const { nombre, monto } = req.body;
+    const updates = {};
+    if (nombre !== undefined) updates.nombre = nombre.trim();
+    if (monto !== undefined) updates.monto = parseFloat(monto);
+    await db.collection('tratamientos').doc(req.params.id).update(updates);
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
+app.delete(['/admin/tratamientos/:id', '/api/admin/tratamientos/:id'], async (req, res) => {
+  if (requireDb(req, res)) return;
+  try {
+    await db.collection('tratamientos').doc(req.params.id).delete();
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => console.log(`Servidor corriendo en el puerto ${PORT}`));

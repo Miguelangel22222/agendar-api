@@ -192,6 +192,7 @@
         <button class="btn-sm btn-outline" id="btnToggleView">📅 Calendario</button>
         <button class="btn-sm btn-outline" id="btnPacientes">👥 Pacientes</button>
         <button class="btn-sm btn-outline" id="btnStats">📊 Stats</button>
+        <button class="btn-sm btn-outline" id="btnTratamientos">🏥 Tratamientos</button>
 </div>
     </div>
 
@@ -287,6 +288,20 @@
         <button id="pagoImprimir" style="flex:1;padding:12px;border-radius:12px;font-size:0.85rem;font-weight:600;font-family:inherit;cursor:pointer;border:none;background:#0b5345;color:#fff;">🖨️ Imprimir</button>
         <button id="pagoGuardar" style="flex:1;padding:12px;border-radius:12px;font-size:0.85rem;font-weight:600;font-family:inherit;cursor:pointer;border:none;background:#1a9e8e;color:#fff;">💾 Guardar</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Modal Tratamientos -->
+  <div class="modal-overlay" id="modalTratamientos">
+    <div class="modal-box wide">
+      <h3>🏥 Tratamientos</h3>
+      <div id="tratLista" style="max-height:250px;overflow-y:auto;margin-bottom:12px"></div>
+      <div style="display:flex;gap:8px;align-items:end;flex-wrap:wrap">
+        <div style="flex:2;min-width:140px"><label>Nombre</label><input type="text" id="tratNombre" placeholder="Ej: Pedicuría técnica"></div>
+        <div style="flex:1;min-width:80px"><label>Monto ($)</label><input type="number" id="tratMonto" placeholder="0" step="1" min="0"></div>
+        <button id="tratGuardar" style="padding:10px 20px;border-radius:10px;font-size:0.85rem;font-weight:600;font-family:inherit;cursor:pointer;border:none;background:#1a9e8e;color:#fff;height:42px">Agregar</button>
+      </div>
+      <div class="modal-actions"><button id="tratCerrar" style="flex:1;padding:12px;border-radius:12px;font-size:0.85rem;font-weight:600;font-family:inherit;cursor:pointer;border:none;background:#f1f5f9;color:#64748b;">Cerrar</button></div>
     </div>
   </div>
 
@@ -1040,6 +1055,57 @@
       citasYear.forEach(e => { const m = e.monto ? parseFloat(e.monto) : 0; pagosMes[parseInt(e.fecha.slice(5,7)) - 1] += m; totalPagos += m; });
       document.getElementById('chartPagos').innerHTML = `<div style="display:flex;flex-wrap:wrap;gap:8px">${pagosMes.map((v,i) => v > 0 ? `<div style="min-width:60px;padding:8px;background:#f0fdfa;border-radius:8px;text-align:center;border:1px solid #a7f3d0"><div style="font-size:0.7rem;color:#64748b">${nomMeses[i]}</div><div style="font-weight:700;color:#065f46">$${v.toLocaleString()}</div></div>` : '').join('')}</div><div style="margin-top:12px;font-weight:700;color:#0b5345">Total: $${totalPagos.toLocaleString()}</div>`;
     }
+
+    /* ---- TRATAMIENTOS ---- */
+    const modalTrat = document.getElementById('modalTratamientos');
+    document.getElementById('btnTratamientos').addEventListener('click', () => { modalTrat.classList.add('show'); cargarTratamientos(); });
+    document.getElementById('tratCerrar').addEventListener('click', () => modalTrat.classList.remove('show'));
+    async function cargarTratamientos() {
+      try {
+        const r = await fetch(`${API}/admin/tratamientos`);
+        const d = await r.json();
+        if (!d.success) { document.getElementById('tratLista').innerHTML = '<p style="color:#94a3b8">Error</p>'; return; }
+        if (!d.tratamientos || d.tratamientos.length === 0) { document.getElementById('tratLista').innerHTML = '<p style="color:#94a3b8;text-align:center">Sin tratamientos</p>'; return; }
+        document.getElementById('tratLista').innerHTML = d.tratamientos.map(t =>
+          `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f1f5f9">
+            <span><strong>${t.nombre}</strong> <span style="color:#065f46;font-weight:600">$${t.monto || 0}</span></span>
+            <div style="display:flex;gap:4px">
+              <button class="btn-xs btn-primary" data-id="${t.id}" data-nombre="${t.nombre}" data-monto="${t.monto || 0}" data-action="editar-trat">✏️</button>
+              <button class="btn-xs btn-danger" data-id="${t.id}" data-action="eliminar-trat">🗑️</button>
+            </div>
+          </div>`
+        ).join('');
+        document.querySelectorAll('[data-action="editar-trat"]').forEach(b => b.addEventListener('click', () => {
+          document.getElementById('tratNombre').value = b.dataset.nombre;
+          document.getElementById('tratMonto').value = b.dataset.monto;
+          pendingTratId = b.dataset.id;
+          document.getElementById('tratGuardar').textContent = 'Actualizar';
+        }));
+        document.querySelectorAll('[data-action="eliminar-trat"]').forEach(b => b.addEventListener('click', () => {
+          confirmar('Eliminar tratamiento', '¿Eliminar este tratamiento?', '#dc2626', async () => {
+            await fetch(`${API}/admin/tratamientos/${b.dataset.id}`, { method: 'DELETE' });
+            cargarTratamientos();
+          });
+        }));
+      } catch (e) { document.getElementById('tratLista').innerHTML = '<p style="color:#94a3b8">Error</p>'; }
+    }
+    document.getElementById('tratGuardar').addEventListener('click', async () => {
+      const nom = document.getElementById('tratNombre').value.trim();
+      const monto = parseFloat(document.getElementById('tratMonto').value) || 0;
+      if (!nom) { showToast('Ingresá un nombre', 'error'); return; }
+      if (pendingTratId) {
+        await fetch(`${API}/admin/tratamientos/${pendingTratId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nombre: nom, monto }) });
+        pendingTratId = null;
+      } else {
+        await fetch(`${API}/admin/tratamientos`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nombre: nom, monto }) });
+      }
+      document.getElementById('tratNombre').value = '';
+      document.getElementById('tratMonto').value = '';
+      document.getElementById('tratGuardar').textContent = 'Agregar';
+      cargarTratamientos();
+      showToast('Tratamiento guardado', 'success');
+    });
+    let pendingTratId = null;
   </script>
 </body>
 </html>
