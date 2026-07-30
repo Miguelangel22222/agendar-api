@@ -20,6 +20,8 @@
     body.dark .cal-day.today { border-color: #7fdbd0; background: #1a3a3a; }
     body.dark .modal-box h3 { color: #e2e8f0; }
     body.dark .modal-box input, body.dark .modal-box select, body.dark .modal-box textarea, body.dark .search-box, body.dark input[type="date"] { background: #334155; border-color: #475569; color: #e2e8f0; }
+    body.dark .dg-name, body.dark .dg-monto { background: #334155; border-color: #475569 !important; color: #e2e8f0; }
+    .dg-name, .dg-monto { border: 2px solid #e2e8f0; }
     body.dark .btn-outline { background: #334155; color: #e2e8f0; border-color: #475569; }
     body.dark .filtro-btn { background: #334155; color: #94a3b8; border-color: #475569; }
     body.dark .filtro-btn.active { background: #7fdbd0; color: #0f172a; border-color: #7fdbd0; }
@@ -277,15 +279,21 @@
     <div class="modal-box wide">
       <h3>💰 Registrar pago</h3>
       <p id="pagoPaciente" class="patient-info">Paciente: <strong></strong></p>
-      <label>Monto ($)</label><input type="number" id="pagoMonto" placeholder="0" step="1" min="0">
+      <label style="margin-bottom:4px">Desglose</label>
+      <div id="pagoDesglose" style="margin-bottom:4px"></div>
+      <button id="pagoAddLine" style="font-size:0.75rem;padding:4px 10px;border-radius:6px;border:1px dashed #475569;background:transparent;color:#94a3b8;cursor:pointer;margin-bottom:12px;font-family:inherit">+ Agregar línea</button>
+      <div style="display:flex;justify-content:space-between;font-weight:700;font-size:1rem;margin-bottom:12px;padding-top:8px;border-top:1px solid #334155">
+        <span>Total:</span><span id="pagoTotal">$0</span>
+      </div>
       <label>Método de pago</label>
       <select id="pagoMetodo"><option value="Efectivo">Efectivo</option><option value="Transferencia">Transferencia</option><option value="Débito">Débito</option><option value="Crédito">Crédito</option></select>
       <div style="margin-top:16px;border-top:2px dashed #e2e8f0;padding-top:12px;display:none" id="reciboArea">
         <div style="text-align:center;font-size:0.8rem" id="reciboContenido"></div>
+        <button id="pagoImprimir" style="width:100%;padding:12px;border-radius:12px;font-size:0.85rem;font-weight:600;font-family:inherit;cursor:pointer;border:none;background:#0b5345;color:#fff;margin-top:12px">🖨️ Imprimir</button>
       </div>
       <div class="modal-actions" style="gap:6px">
         <button id="pagoCerrar" style="flex:1;padding:12px;border-radius:12px;font-size:0.85rem;font-weight:600;font-family:inherit;cursor:pointer;border:none;background:#f1f5f9;color:#64748b;">Cancelar</button>
-        <button id="pagoImprimir" style="flex:1;padding:12px;border-radius:12px;font-size:0.85rem;font-weight:600;font-family:inherit;cursor:pointer;border:none;background:#0b5345;color:#fff;">🖨️ Imprimir</button>
+        <button id="pagoVerFactura" style="flex:1;padding:12px;border-radius:12px;font-size:0.85rem;font-weight:600;font-family:inherit;cursor:pointer;border:none;background:#0b5345;color:#fff;">👁️ Ver Factura</button>
         <button id="pagoGuardar" style="flex:1;padding:12px;border-radius:12px;font-size:0.85rem;font-weight:600;font-family:inherit;cursor:pointer;border:none;background:#1a9e8e;color:#fff;">💾 Guardar</button>
       </div>
     </div>
@@ -621,9 +629,17 @@
         pendingPagoFecha = b.dataset.fecha;
         pendingPagoHora = b.dataset.hora;
         pagoPaciente.querySelector('strong').textContent = pendingPagoNombre;
-        pagoMonto.value = b.dataset.monto || (window._pendingTratMontos && window._pendingTratMontos[b.dataset.id] ? window._pendingTratMontos[b.dataset.id] : '');
-        delete (window._pendingTratMontos || {})[b.dataset.id];
-        pagoMetodo.value = b.dataset.metodo || 'Efectivo';
+        // populate desglose
+        pagoDesglose.innerHTML = '';
+        const tratData = (window._pendingTratData || {})[b.dataset.id] || [];
+        tratData.forEach(t => addPagoRow(t.name, t.monto));
+        // if no treatment data but has existing monto, show one row
+        if (tratData.length === 0 && b.dataset.monto) {
+          addPagoRow('Prestación', b.dataset.monto);
+        }
+        // if still empty, show one empty row
+        if (pagoDesglose.children.length === 0) addPagoRow('', '');
+        delete (window._pendingTratData || {})[b.dataset.id];
         reciboArea.style.display = 'none';
         pagoGuardar.textContent = '💾 Guardar';
         pagoGuardar.disabled = false;
@@ -816,14 +832,38 @@
     const pagoGuardar = document.getElementById('pagoGuardar');
     const pagoCerrar = document.getElementById('pagoCerrar');
     const pagoImprimir = document.getElementById('pagoImprimir');
+    const pagoVerFactura = document.getElementById('pagoVerFactura');
+    const pagoDesglose = document.getElementById('pagoDesglose');
+    const pagoAddLine = document.getElementById('pagoAddLine');
+    const pagoTotal = document.getElementById('pagoTotal');
     const reciboArea = document.getElementById('reciboArea');
     const reciboContenido = document.getElementById('reciboContenido');
     let pendingPagoId = null;
     let pendingPagoNombre = '';
     let pendingPagoFecha = '';
     let pendingPagoHora = '';
-    function generarRecibo(nom, monto, metodo, fecha, hora) {
+    function calcPagoTotal() {
+      let t = 0;
+      pagoDesglose.querySelectorAll('.dg-monto').forEach(i => { const v = parseFloat(i.value); if (!isNaN(v) && v>0) t += v; });
+      pagoTotal.textContent = '$' + t;
+      return t;
+    }
+    function addPagoRow(nombre, monto) {
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;gap:6px;margin-bottom:4px;align-items:center';
+      row.innerHTML = `<input type="text" class="dg-name" value="${nombre.replace(/"/g,'&quot;')}" style="flex:2;padding:7px 10px;border-radius:8px;font-size:0.8rem;font-family:inherit;outline:none" placeholder="Tratamiento"><input type="number" class="dg-monto" value="${monto}" style="flex:1;width:80px;padding:7px 10px;border-radius:8px;font-size:0.8rem;font-family:inherit;outline:none" placeholder="0" step="1" min="0"><button class="dg-remove" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:1.1rem;padding:2px;line-height:1">✕</button>`;
+      row.querySelector('.dg-monto').addEventListener('input', calcPagoTotal);
+      row.querySelector('.dg-remove').addEventListener('click', () => { row.remove(); calcPagoTotal(); });
+      pagoDesglose.appendChild(row);
+      calcPagoTotal();
+    }
+    function generarRecibo(nom, desglose, metodo, fecha, hora) {
       const f = new Date().toLocaleString('es-UY', { timeZone: 'America/Montevideo' });
+      const total = desglose.reduce((s, d) => s + (d.monto || 0), 0);
+      let itemsHtml = '';
+      desglose.forEach(d => {
+        if (d.nombre || d.monto) itemsHtml += `<div style="display:flex;justify-content:space-between;margin-bottom:2px"><span>${d.nombre || 'Prestación'}</span><span>$${d.monto || 0}</span></div>`;
+      });
       return `<div style="font-family:monospace;font-size:12px;line-height:1.6">
         <div style="text-align:center;font-weight:700;font-size:14px;margin-bottom:4px">🦶 Clínica del Pie</div>
         <div style="text-align:center;font-size:11px;margin-bottom:8px">Isabel Aguiar</div>
@@ -831,29 +871,45 @@
           <div><strong>${nom}</strong></div>
           <div>${fecha} ${hora}</div>
         </div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Monto:</span><strong>$${monto}</strong></div>
+        <div style="border-bottom:1px dashed #aaa;padding-bottom:6px;margin-bottom:6px">${itemsHtml}</div>
+        <div style="display:flex;justify-content:space-between;font-weight:700;margin-bottom:4px"><span>Total:</span><span>$${total}</span></div>
         <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Método:</span>${metodo}</div>
         <div style="border-top:1px dashed #aaa;padding-top:8px;margin-top:8px;text-align:center;font-size:10px;color:#666">Emitido: ${f}<br>¡Gracias por su visita!</div>
       </div>`;
     }
     pagoCerrar.addEventListener('click', () => { modalPago.classList.remove('show'); reciboArea.style.display = 'none'; });
-    pagoImprimir.addEventListener('click', () => {
-      const nom = pagoPaciente.querySelector('strong').textContent;
-      const monto = pagoMonto.value || '0';
+    pagoAddLine.addEventListener('click', () => addPagoRow('', ''));
+    pagoVerFactura.addEventListener('click', () => {
+      const nom = pendingPagoNombre;
       const metodo = pagoMetodo.value;
-      reciboContenido.innerHTML = generarRecibo(nom, monto, metodo, pendingPagoFecha, pendingPagoHora);
+      const desglose = [];
+      pagoDesglose.querySelectorAll('.dg-name').forEach((el, i) => {
+        const montoInput = pagoDesglose.querySelectorAll('.dg-monto')[i];
+        if (el.value || (montoInput && parseFloat(montoInput.value))) {
+          desglose.push({ nombre: el.value, monto: parseFloat(montoInput ? montoInput.value : 0) || 0 });
+        }
+      });
+      if (desglose.length === 0) { showToast('Agregá al menos un tratamiento', 'error'); return; }
+      reciboContenido.innerHTML = generarRecibo(nom, desglose, metodo, pendingPagoFecha, pendingPagoHora);
       reciboArea.style.display = 'block';
-      setTimeout(() => window.print(), 300);
+    });
+    pagoImprimir.addEventListener('click', () => {
+      window.print();
     });
     pagoGuardar.addEventListener('click', async () => {
-      const monto = parseFloat(pagoMonto.value);
-      if (isNaN(monto) || monto < 0) { showToast('Ingresá un monto válido', 'error'); return; }
+      const desglose = []; let total = 0;
+      pagoDesglose.querySelectorAll('.dg-name').forEach((el, i) => {
+        const mInput = pagoDesglose.querySelectorAll('.dg-monto')[i];
+        const m = parseFloat(mInput ? mInput.value : 0) || 0;
+        if (el.value || m) { desglose.push({ nombre: el.value, monto: m }); total += m; }
+      });
+      if (total <= 0) { showToast('Ingresá al menos un tratamiento con monto', 'error'); return; }
       const metodo = pagoMetodo.value;
       try {
-        const r = await fetch(`${API}/admin/citas/${pendingPagoId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ monto, metodo_pago: metodo, pago_date: new Date().toISOString().slice(0,10) }) });
+        const r = await fetch(`${API}/admin/citas/${pendingPagoId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ monto: total, metodo_pago: metodo, pago_date: new Date().toISOString().slice(0,10) }) });
         const d = await r.json();
         if (d.success) {
-          reciboContenido.innerHTML = generarRecibo(pendingPagoNombre, monto, metodo, pendingPagoFecha, pendingPagoHora);
+          reciboContenido.innerHTML = generarRecibo(pendingPagoNombre, desglose, metodo, pendingPagoFecha, pendingPagoHora);
           reciboArea.style.display = 'block';
           pagoGuardar.textContent = '✅ Guardado';
           pagoGuardar.disabled = true;
@@ -996,8 +1052,11 @@
       document.querySelectorAll('#tratButtons .btn-trat').forEach(b => b.addEventListener('click', () => {
         document.getElementById('notasTexto').value += b.dataset.trat;
         document.getElementById('notasTexto').focus();
-        if (!window._pendingTratMontos) window._pendingTratMontos = {};
-        window._pendingTratMontos[pendingNotasId] = parseFloat(b.dataset.monto) || 0;
+        if (!window._pendingTratData) window._pendingTratData = {};
+        if (!window._pendingTratData[pendingNotasId]) window._pendingTratData[pendingNotasId] = [];
+        const name = b.dataset.trat.replace(/[-\s]+$/g, '').trim();
+        const monto = parseFloat(b.dataset.monto) || 0;
+        window._pendingTratData[pendingNotasId].push({ name, monto });
       }));
     }
     // Cargar al inicio y cada vez que se abre el modal de tratamientos
@@ -1093,6 +1152,7 @@
           confirmar('Eliminar tratamiento', '¿Eliminar este tratamiento?', '#dc2626', async () => {
             await fetch(`${API}/admin/tratamientos/${b.dataset.id}`, { method: 'DELETE' });
             cargarTratamientos();
+            cargarTratamientosData();
           });
         }));
       } catch (e) { document.getElementById('tratLista').innerHTML = '<p style="color:#94a3b8">Error</p>'; }
@@ -1111,6 +1171,7 @@
       document.getElementById('tratMonto').value = '';
       document.getElementById('tratGuardar').textContent = 'Agregar';
       cargarTratamientos();
+      cargarTratamientosData();
       showToast('Tratamiento guardado', 'success');
     });
     let pendingTratId = null;
