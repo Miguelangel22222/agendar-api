@@ -112,6 +112,20 @@
     #pacientesView { display:none; }
     .paciente-row { cursor:pointer; }
     .paciente-row:hover td { background:#f0fdfa; }
+    .btn-trat { padding:5px 10px; border-radius:6px; font-size:0.7rem; font-family:inherit; font-weight:600; cursor:pointer; border:1px solid #e2e8f0; background:#f8fafc; color:#1a2a3a; transition:all 0.2s; }
+    .btn-trat:hover { background:#1a9e8e; color:#fff; border-color:#1a9e8e; }
+    #statsView { display:none; }
+    .stats-chart { background:#fff; border-radius:14px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.06); margin-bottom:16px; }
+    .stats-chart h3 { font-size:0.95rem; color:#0b5345; margin-bottom:12px; }
+    .bar-chart { display:flex; align-items:end; gap:6px; height:160px; padding:0 8px; }
+    .bar { flex:1; background:#1a9e8e; border-radius:6px 6px 0 0; min-width:20px; position:relative; transition:height 0.3s; cursor:pointer; }
+    .bar:hover { opacity:0.8; }
+    .bar .bar-label { position:absolute; bottom:-20px; left:50%; transform:translateX(-50%); font-size:0.65rem; color:#64748b; white-space:nowrap; }
+    .bar .bar-val { position:absolute; top:-18px; left:50%; transform:translateX(-50%); font-size:0.7rem; font-weight:700; color:#1a2a3a; }
+    .pie-sample { display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+    .pie-legend { font-size:0.8rem; }
+    .pie-legend span { display:inline-flex; align-items:center; gap:6px; margin-right:12px; }
+    .pie-dot { width:10px; height:10px; border-radius:50%; display:inline-block; }
     @media (max-width:768px) {
       .container { padding: 12px; }
       th, td { padding: 4px 4px; font-size: 0.6rem; }
@@ -157,9 +171,22 @@
         <button class="btn-sm btn-outline" id="btnExportar">CSV</button>
         <button class="btn-sm btn-outline" id="btnToggleView">📅 Calendario</button>
         <button class="btn-sm btn-outline" id="btnPacientes">👥 Pacientes</button>
+        <button class="btn-sm btn-outline" id="btnStats">📊 Stats</button>
+</div>
+    </div>
+
+    <div id="statsView">
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px">
+        <select id="statsYear" style="padding:8px;border:2px solid #e2e8f0;border-radius:8px;font-family:inherit;font-size:0.85rem"></select>
+        <button class="btn-sm btn-outline" id="btnStatsRefresh">Actualizar</button>
+      </div>
+      <div class="stats-chart"><h3>📊 Pacientes por mes</h3><div class="bar-chart" id="chartMeses"></div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="stats-chart"><h3>📈 Asistencia</h3><div id="chartAsistencia" style="font-size:0.9rem"></div></div>
+        <div class="stats-chart"><h3>⏰ Horarios más pedidos</h3><div id="chartHoras"></div></div>
       </div>
     </div>
-      </div>
+  </div>
     </div>
 
     <div class="stats">
@@ -229,6 +256,16 @@
       <p id="notasPaciente" class="patient-info">Paciente: <strong></strong></p>
       <label>Observaciones</label>
       <textarea id="notasTexto" placeholder="Escribí observaciones sobre el tratamiento..."></textarea>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px">
+        <button class="btn-trat" data-trat="Onicocriptosis (uña encarnada) - ">🔩 Onicocriptosis</button>
+        <button class="btn-trat" data-trat="Callos - ">🦶 Callos</button>
+        <button class="btn-trat" data-trat="Heloma (callo duro) - ">🔴 Heloma</button>
+        <button class="btn-trat" data-trat="Verruga plantar - ">🌱 Verruga</button>
+        <button class="btn-trat" data-trat="Control de rutina - ">✅ Control</button>
+        <button class="btn-trat" data-trat="Pedicuría técnica - ">💅 Pedicuría</button>
+        <button class="btn-trat" data-trat="Hongos (onicomicosis) - ">🍄 Hongos</button>
+        <button class="btn-trat" data-trat="Miopatías (uña gruesa) - ">🦷 Miopatías</button>
+      </div>
       <div class="modal-actions"><button id="notasCerrar" style="background:#f1f5f9;color:#64748b;">Cancelar</button><button id="notasGuardar" style="background:#1a9e8e;color:#fff;">Guardar notas</button></div>
     </div>
   </div>
@@ -815,6 +852,70 @@
       }));
     }
     document.getElementById('pacSearch').addEventListener('input', renderPacientes);
+
+    /* ---- TRATAMIENTOS ---- */
+    document.querySelectorAll('.btn-trat').forEach(b => b.addEventListener('click', () => {
+      const ta = document.getElementById('notasTexto');
+      ta.value += b.dataset.trat;
+      ta.focus();
+    }));
+
+    /* ---- ESTADISTICAS ---- */
+    let statsYear = new Date().getFullYear();
+    const selYear = document.getElementById('statsYear');
+    for (let y = statsYear - 3; y <= statsYear + 1; y++) { const o = document.createElement('option'); o.value = y; o.textContent = y; if (y === statsYear) o.selected = true; selYear.appendChild(o); }
+    document.getElementById('btnStatsRefresh').addEventListener('click', renderStats);
+    document.getElementById('btnStats').addEventListener('click', () => {
+      const v = document.getElementById('statsView');
+      v.style.display = v.style.display === 'none' ? 'block' : 'none';
+      document.querySelector('.table-wrapper').style.display = v.style.display === 'block' ? 'none' : '';
+      document.getElementById('calendarioView').style.display = 'none';
+      document.getElementById('pacientesView').style.display = 'none';
+      document.getElementById('filtrosRapidos').style.display = 'none';
+      document.getElementById('btnPacientes').textContent = '👥 Pacientes';
+      document.getElementById('btnToggleView').textContent = '📅 Calendario';
+      document.getElementById('viewTitle').textContent = v.style.display === 'block' ? 'Estadísticas' : 'Citas';
+      if (v.style.display === 'block') renderStats();
+    });
+    function renderStats() {
+      const year = parseInt(document.getElementById('statsYear').value);
+      const citasYear = allEvents.filter(e => e.fecha && e.fecha.startsWith(String(year)) && !e.esBloqueo);
+      const meses = Array(12).fill(0);
+      const completadas = Array(12).fill(0);
+      const canceladas = Array(12).fill(0);
+      const horas = {};
+      citasYear.forEach(e => {
+        const m = parseInt(e.fecha.slice(5,7)) - 1;
+        meses[m]++;
+        if (e.estado === 'completada') completadas[m]++;
+        if (e.estado === 'cancelada') canceladas[m]++;
+        const hh = e.hora.slice(0,5);
+        horas[hh] = (horas[hh] || 0) + 1;
+      });
+      const maxMeses = Math.max(...meses, 1);
+      const nomMeses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+      document.getElementById('chartMeses').innerHTML = meses.map((v,i) => {
+        const pct = (v / maxMeses * 100) || 2;
+        return `<div class="bar" style="height:${pct}%" title="${nomMeses[i]}: ${v}"><div class="bar-val">${v}</div><div class="bar-label">${nomMeses[i]}</div></div>`;
+      }).join('');
+      const totalC = citasYear.length;
+      const comp = citasYear.filter(e => e.estado === 'completada').length;
+      const canc = citasYear.filter(e => e.estado === 'cancelada').length;
+      const noas = citasYear.filter(e => e.estado === 'noasistio').length;
+      const pend = totalC - comp - canc - noas;
+      document.getElementById('chartAsistencia').innerHTML = `
+        <div class="pie-sample">
+          <div><div class="pie-dot" style="background:#065f46"></div> Completadas: ${comp}</div>
+          <div><div class="pie-dot" style="background:#dc2626"></div> Canceladas: ${canc}</div>
+          <div><div class="pie-dot" style="background:#d97706"></div> No asistió: ${noas}</div>
+          <div><div class="pie-dot" style="background:#94a3b8"></div> Pendientes: ${pend}</div>
+          <div style="font-weight:700;color:#0b5345">Total: ${totalC} citas</div>
+        </div>`;
+      const horasArr = Object.entries(horas).sort((a,b) => b[1] - a[1]);
+      document.getElementById('chartHoras').innerHTML = horasArr.length ? horasArr.map(([h,c]) =>
+        `<div style="display:flex;align-items:center;gap:8px;margin:4px 0;font-size:0.8rem"><span style="min-width:50px;font-weight:600">${h}</span><div style="flex:1;height:20px;background:#f1f5f9;border-radius:10px;overflow:hidden"><div style="height:100%;width:${c/Math.max(...Object.values(horas))*100}%;background:#1a9e8e;border-radius:10px"></div></div><span>${c}</span></div>`
+      ).join('') : '<p style="color:#94a3b8">Sin datos</p>';
+    }
   </script>
 </body>
 </html>
