@@ -452,7 +452,7 @@
       document.getElementById('btnTheme').textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
       localStorage.setItem('adminTheme', document.body.classList.contains('dark') ? 'dark' : 'light');
     });
-    if (localStorage.getItem('adminTheme') === 'dark') { document.body.classList.add('dark'); document.getElementById('btnTheme').textContent = '☀️'; }
+    if (localStorage.getItem('adminTheme') !== 'light') { document.body.classList.add('dark'); document.getElementById('btnTheme').textContent = '☀️'; }
     modalNo.addEventListener('click', () => { modalConfirm.classList.remove('show'); pendingConfirmCb = null; });
     modalSi.addEventListener('click', () => { modalConfirm.classList.remove('show'); if (pendingConfirmCb) pendingConfirmCb(); pendingConfirmCb = null; });
 
