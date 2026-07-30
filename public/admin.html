@@ -1044,8 +1044,14 @@
         if (d.success && d.tratamientos) tratamientosList = d.tratamientos;
       } catch (e) {}
     }
-    function cargarTratButtons() {
-      if (!tratamientosList.length) { document.getElementById('tratButtons').innerHTML = '<p style="color:#94a3b8;font-size:0.75rem">Sin tratamientos — agregá en 🏥 Tratamientos</p>'; return; }
+    async function cargarTratButtons() {
+      if (!tratamientosList.length) {
+        await cargarTratamientosData();
+      }
+      if (!tratamientosList.length) {
+        document.getElementById('tratButtons').innerHTML = '<p style="color:#94a3b8;font-size:0.75rem">Sin tratamientos — agregá en 🏥 Tratamientos</p>';
+        return;
+      }
       document.getElementById('tratButtons').innerHTML = tratamientosList.map(t =>
         `<button class="btn-trat" data-id="t-${t.id}" data-trat="${t.nombre} - " data-monto="${t.monto || 0}">${t.nombre}</button>`
       ).join('');
