@@ -209,6 +209,14 @@
         <div class="stats-chart"><h3>⏰ Horarios más pedidos</h3><div id="chartHoras"></div></div>
       </div>
       <div class="stats-chart"><h3>💰 Ingresos del año</h3><div id="chartPagos" style="font-size:0.9rem"></div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
+        <div class="stats-chart"><h3>🏆 Tratamientos más realizados</h3><div id="chartTratamientos" style="font-size:0.9rem"></div></div>
+        <div class="stats-chart"><h3>🔄 Pacientes nuevos vs recurrentes</h3><div id="chartPacientes" style="font-size:0.9rem"></div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
+        <div class="stats-chart"><h3>📅 Días más concurridos</h3><div id="chartDias" style="font-size:0.9rem"></div></div>
+        <div class="stats-chart"><h3>💰 Gasto promedio por visita</h3><div id="chartGastoProm" style="font-size:0.9rem"></div></div>
+      </div>
       </div>
     </div>
   </div>
@@ -1161,6 +1169,51 @@
       let totalPagos = 0;
       citasYear.forEach(e => { const m = e.monto ? parseFloat(e.monto) : 0; pagosMes[parseInt(e.fecha.slice(5,7)) - 1] += m; totalPagos += m; });
       document.getElementById('chartPagos').innerHTML = `<div style="display:flex;flex-wrap:wrap;gap:8px">${pagosMes.map((v,i) => v > 0 ? `<div style="min-width:60px;padding:8px;background:#f0fdfa;border-radius:8px;text-align:center;border:1px solid #a7f3d0"><div style="font-size:0.7rem;color:#64748b">${nomMeses[i]}</div><div style="font-weight:700;color:#065f46">$${v.toLocaleString()}</div></div>` : '').join('')}</div><div style="margin-top:12px;font-weight:700;color:#0b5345">Total: $${totalPagos.toLocaleString()}</div>`;
+      // Tratamientos más realizados
+      const tratCount = {};
+      citasYear.filter(e => e.notas).forEach(e => {
+        e.notas.split(' - ').map(s => s.trim()).filter(Boolean).forEach(p => {
+          if (!tratCount[p]) tratCount[p] = 0;
+          tratCount[p]++;
+        });
+      });
+      const tratArr = Object.entries(tratCount).sort((a, b) => b[1] - a[1]).slice(0, 8);
+      const maxTrat = tratArr.length ? Math.max(...tratArr.map(t => t[1])) : 1;
+      document.getElementById('chartTratamientos').innerHTML = tratArr.length ? tratArr.map(([n, c]) =>
+        `<div style="display:flex;align-items:center;gap:8px;margin:4px 0;font-size:0.8rem"><span style="min-width:80px;font-weight:600">${n}</span><div style="flex:1;height:20px;background:#f1f5f9;border-radius:10px;overflow:hidden"><div style="height:100%;width:${c/maxTrat*100}%;background:#7fdbd0;border-radius:10px;min-width:4px"></div></div><span style="font-weight:700;color:#065f46">${c}</span></div>`
+      ).join('') : '<p style="color:#94a3b8">Sin datos de tratamientos</p>';
+      // Pacientes nuevos vs recurrentes
+      const pacCount = {};
+      citasYear.forEach(e => { const nom = (e.paciente || '').trim(); if (nom) pacCount[nom] = (pacCount[nom] || 0) + 1; });
+      const nuevos = Object.values(pacCount).filter(c => c === 1).length;
+      const recurrentes = Object.values(pacCount).filter(c => c >= 2).length;
+      document.getElementById('chartPacientes').innerHTML = `
+        <div style="display:flex;gap:16px;flex-wrap:wrap">
+          <div style="flex:1;min-width:80px;padding:12px;background:#f0fdfa;border-radius:10px;text-align:center;border:1px solid #a7f3d0"><div style="font-size:1.2rem;font-weight:800;color:#065f46">${nuevos}</div><div style="font-size:0.7rem;color:#64748b">Nuevos</div></div>
+          <div style="flex:1;min-width:80px;padding:12px;background:#fef3c7;border-radius:10px;text-align:center;border:1px solid #fde68a"><div style="font-size:1.2rem;font-weight:800;color:#92400e">${recurrentes}</div><div style="font-size:0.7rem;color:#64748b">Recurrentes</div></div>
+          <div style="flex:1;min-width:80px;padding:12px;background:#f1f5f9;border-radius:10px;text-align:center;border:1px solid #e2e8f0"><div style="font-size:1.2rem;font-weight:800;color:#1a2a3a">${nuevos + recurrentes}</div><div style="font-size:0.7rem;color:#64748b">Total</div></div>
+        </div>`;
+      // Días más concurridos
+      const diasSem = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+      const diasCount = [0, 0, 0, 0, 0, 0, 0];
+      citasYear.forEach(e => {
+        if (!e.fecha) return;
+        const d = new Date(e.fecha + 'T12:00:00').getDay();
+        diasCount[d]++;
+      });
+      const maxDia = Math.max(...diasCount, 1);
+      document.getElementById('chartDias').innerHTML = diasSem.map((n, i) =>
+        `<div style="display:flex;align-items:center;gap:8px;margin:4px 0;font-size:0.8rem"><span style="min-width:35px;font-weight:600">${n}</span><div style="flex:1;height:20px;background:#f1f5f9;border-radius:10px;overflow:hidden"><div style="height:100%;width:${diasCount[i]/maxDia*100}%;background:#1a9e8e;border-radius:10px;min-width:4px"></div></div><span>${diasCount[i]}</span></div>`
+      ).join('');
+      // Gasto promedio por visita
+      const citasConPago = citasYear.filter(e => e.monto && parseFloat(e.monto) > 0);
+      const totalMonto = citasConPago.reduce((s, e) => s + parseFloat(e.monto), 0);
+      const prom = citasConPago.length ? Math.round(totalMonto / citasConPago.length) : 0;
+      document.getElementById('chartGastoProm').innerHTML = `
+        <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">
+          <div style="padding:12px 20px;background:#f0fdfa;border-radius:10px;text-align:center;border:1px solid #a7f3d0"><div style="font-size:1.6rem;font-weight:800;color:#065f46">$${prom.toLocaleString()}</div><div style="font-size:0.7rem;color:#64748b">Promedio por visita</div></div>
+          <div style="padding:8px 12px;border-radius:8px;text-align:center;background:#f1f5f9"><div style="font-size:0.85rem;font-weight:600">$${totalMonto.toLocaleString()}</div><div style="font-size:0.7rem;color:#64748b">Total cobrado (${citasConPago.length} visitas)</div></div>
+        </div>`;
     }
 
     /* ---- TRATAMIENTOS ---- */
