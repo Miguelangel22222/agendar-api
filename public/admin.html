@@ -498,16 +498,11 @@
     ncGuardar.addEventListener('click', async () => {
       const nom = ncNombre.value.trim(), tel = ncTelefono.value.trim(), email = ncEmail.value.trim(), f = ncFecha.value, h = ncHora.value;
       if (!nom || !tel || !f || !h) { showToast('Completá nombre, teléfono, fecha y hora', 'error'); return; }
-      const start = new Date(`${f}T${h}:00`); const end = new Date(start.getTime() + 45*60*1000);
       modalNuevaCita.classList.remove('show');
       try {
         const res = await fetch(`${API}/agendar`, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            summary: `Cita Podológica: ${nom}`,
-            description: `Paciente: ${nom}\nTeléfono: ${tel}\nEmail: ${email}`,
-            email, start: { dateTime: start.toISOString(), timeZone: 'America/Montevideo' }, end: { dateTime: end.toISOString(), timeZone: 'America/Montevideo' }
-          })
+          body: JSON.stringify({ paciente: nom, telefono: tel, email, fecha: f, hora: h })
         });
         const d = await res.json();
         if (d.success) { showToast('Cita agendada manualmente', 'success'); cargarCitas(); }
@@ -568,8 +563,8 @@
         const d = await r.json();
         if (d.success && d.bloqueos) {
           bloqueosLista.innerHTML = d.bloqueos.map(b => {
-            const txt = b.inicio ? `${b.fecha} ${b.inicio.slice(11,16)}-${b.fin.slice(11,16)}` : b.fecha;
-            return `<div class="bloqueo-item"><span>${txt} — ${b.summary.replace('[BLOQUEADO] ','')}</span><button class="btn-xs btn-danger" data-id="${b.id}">Eliminar</button></div>`;
+            const txt = b.inicio ? `${b.fecha} ${b.inicio}-${b.fin}` : b.fecha;
+            return `<div class="bloqueo-item"><span>${txt} — ${b.motivo || 'Bloqueado'}</span><button class="btn-xs btn-danger" data-id="${b.id}">Eliminar</button></div>`;
           }).join('');
           document.querySelectorAll('#bloqueosLista .btn-xs').forEach(btn => btn.addEventListener('click', () => {
             const id = btn.dataset.id;
