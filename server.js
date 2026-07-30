@@ -218,8 +218,31 @@ app.put(['/admin/citas/:id', '/api/admin/citas/:id', '/db/admin/citas/:id', '/ap
       return;
     }
 
-    // Direct field updates (for future use)
+    // Direct field updates
     await docRef.update(req.body);
+
+    if (req.body.estado === 'cancelada') {
+      const feVieja = new Date(`${data.fecha}T${data.hora}:00`).toLocaleString('es-UY', { timeZone: 'America/Montevideo' });
+      const nomPac = data.paciente || 'Paciente';
+      const emailPac = data.email || '';
+      if (process.env.RESEND_API_KEY) {
+        if (emailPac) {
+          resend.emails.send({
+            from: 'Clinica del Pie Isabel Aguiar <onboarding@resend.dev>',
+            to: emailPac,
+            subject: 'Cita cancelada - Clínica del Pie Isabel Aguiar',
+            html: `<div style="font-family:sans-serif;max-width:600px"><h2 style="color:#991b1b">Cita cancelada</h2><p>Hola ${nomPac}, tu cita del <strong>${feVieja}</strong> fue cancelada.</p><p>Si querés agendar un nuevo turno, podés hacerlo desde nuestra web.</p><p style="color:#64748b;font-size:0.85rem">Clínica del Pie Isabel Aguiar</p></div>`,
+          }).catch(e => console.log('Error email cancel paciente:', e.message));
+        }
+        resend.emails.send({
+          from: 'Clinica del Pie Isabel Aguiar <onboarding@resend.dev>',
+          to: process.env.GMAIL_USER,
+          subject: `Cita cancelada - ${nomPac}`,
+          html: `<div style="font-family:sans-serif;max-width:600px"><h2 style="color:#991b1b">Cita cancelada</h2><p><strong>Paciente:</strong> ${nomPac}</p><p><strong>Email:</strong> ${emailPac}</p><p><strong>Fecha:</strong> ${feVieja}</p><p><a href="https://clinicadelpieisabelaguiar.web.app/admin.html" style="color:#1a9e8e">Ver panel admin</a></p></div>`,
+        }).catch(e => console.log('Error email isabel cancel:', e.message));
+      }
+    }
+
     res.json({ success: true });
   } catch (e) {
     console.error('Error update cita:', e.message);
