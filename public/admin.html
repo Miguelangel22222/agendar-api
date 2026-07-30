@@ -218,7 +218,6 @@
         <input type="date" id="filtroFecha" style="padding:10px 12px;border:2px solid #e2e8f0;border-radius:10px;font-size:0.85rem;font-family:inherit;outline:none;">
         <button class="btn-sm btn-primary" id="btnNuevaCita">+ Nueva</button>
         <button class="btn-sm btn-block" id="btnBloquear">Bloquear</button>
-        <span style="font-size:0.7rem;color:#94a3b8;cursor:pointer" id="btnConfigFeriados">⚙️ Configurar feriados</span>
         <button class="btn-sm btn-outline" id="btnExportar">CSV</button>
         <button class="btn-sm btn-outline" id="btnToggleView">📅 Calendario</button>
         <button class="btn-sm btn-outline" id="btnPacientes">👥 Pacientes</button>
@@ -806,25 +805,14 @@
     blCerrar.addEventListener('click', () => modalBloquear.classList.remove('show'));
     document.getElementById('blCerrarX').addEventListener('click', () => modalBloquear.classList.remove('show'));
     modalBloquear.addEventListener('click', (e) => { if (e.target === modalBloquear) modalBloquear.classList.remove('show'); });
-    document.getElementById('btnConfigFeriados').addEventListener('click', () => {
-      const lista = ['01/01 — Año Nuevo', '04/03 — Carnaval', '01/05 — Día del Trabajador', '25/08 — Declaratoria de la Independencia', '25/12 — Navidad'];
-      modalTitulo.textContent = '📅 Feriados no laborables';
-      modalTexto.innerHTML = lista.map(f => `<div style="padding:4px 0">${f}</div>`).join('') + '<div style="margin-top:8px;font-size:0.75rem;color:#94a3b8">Se bloquean automáticamente al iniciar el servidor</div>';
-      modalSi.textContent = 'Entendido';
-      modalSi.style.background = '#1a9e8e';
-      modalNo.style.display = 'none';
-      pendingConfirmCb = () => { modalNo.style.display = ''; modalSi.textContent = 'Confirmar'; modalSi.style.background = '#dc2626'; };
-      modalConfirm.classList.add('show');
-    });
 
     async function cargarBloqueos() {
       try {
         const r = await fetch(`${API}/admin/bloqueados`);
         const d = await r.json();
         if (d.success && d.bloqueos) {
-          const manuales = d.bloqueos.filter(b => !b.motivo || !b.motivo.startsWith('Feriado:'));
-          if (!manuales.length) { bloqueosLista.innerHTML = '<p style="color:#94a3b8;text-align:center">Sin bloqueos manuales</p>'; return; }
-          bloqueosLista.innerHTML = manuales.map(b => {
+          if (!d.bloqueos.length) { bloqueosLista.innerHTML = '<p style="color:#94a3b8;text-align:center">Sin bloqueos</p>'; return; }
+          bloqueosLista.innerHTML = d.bloqueos.map(b => {
             const txt = b.inicio ? `${b.fecha} ${b.inicio}-${b.fin}` : b.fecha;
             return `<div class="bloqueo-item"><span>${txt} — ${b.motivo || 'Bloqueado'}</span><button class="btn-xs btn-danger" data-id="${b.id}">Eliminar</button></div>`;
           }).join('');
