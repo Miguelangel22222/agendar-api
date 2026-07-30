@@ -2,15 +2,15 @@ const express = require('express');
 const cors = require('cors');
 const { google } = require('googleapis');
 const { Resend } = require('resend');
-const admin = require('firebase-admin');
+const { initializeApp, cert, getFirestore, FieldValue } = require('firebase-admin');
 
 let db = null;
 try {
   const sa = process.env.FIREBASE_SERVICE_ACCOUNT;
   if (sa) {
     const cred = JSON.parse(sa);
-    admin.initializeApp({ credential: admin.credential.cert(cred) });
-    db = admin.firestore();
+    initializeApp({ credential: cert(cred) });
+    db = getFirestore();
     console.log('Firestore iniciado');
   } else {
     console.log('FIREBASE_SERVICE_ACCOUNT no configurado, Firestore no disponible');
@@ -434,7 +434,7 @@ app.post(['/db/agendar', '/api/db/agendar'], async (req, res) => {
     const mmFin = String(totalMin % 60).padStart(2, '0');
     const docRef = await db.collection('citas').add({
       paciente, telefono, email: email || '', fecha, hora, hora_fin: `${hhFin}:${mmFin}`,
-      estado: 'pendiente', notas: '', createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      estado: 'pendiente', notas: '', createdAt: FieldValue.serverTimestamp(),
     });
     res.json({ success: true, id: docRef.id });
   } catch (e) {
@@ -485,7 +485,7 @@ app.post(['/db/admin/bloquear', '/api/db/admin/bloquear'], async (req, res) => {
   if (requireDb(req, res)) return;
   try {
     const { fecha, inicio, fin, motivo } = req.body;
-    await db.collection('bloqueos').add({ fecha, inicio: inicio || '', fin: fin || '', motivo: motivo || 'Bloqueado', createdAt: admin.firestore.FieldValue.serverTimestamp() });
+    await db.collection('bloqueos').add({ fecha, inicio: inicio || '', fin: fin || '', motivo: motivo || 'Bloqueado', createdAt: FieldValue.serverTimestamp() });
     res.json({ success: true });
   } catch (e) {
     console.error('Error db bloquear:', e.message);
