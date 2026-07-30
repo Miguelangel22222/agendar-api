@@ -772,6 +772,7 @@
       modalBloquear.classList.add('show');
     });
     blCerrar.addEventListener('click', () => modalBloquear.classList.remove('show'));
+    modalBloquear.addEventListener('click', (e) => { if (e.target === modalBloquear) modalBloquear.classList.remove('show'); });
 
     async function cargarBloqueos() {
       try {
