@@ -2,7 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const { google } = require('googleapis');
 const { Resend } = require('resend');
-const { initializeApp, cert, getFirestore, FieldValue } = require('firebase-admin');
+const { initializeApp, cert } = require('firebase-admin');
+const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 
 let db = null;
 try {
