@@ -29,7 +29,25 @@
     body.dark .btn-trat:hover { background: #7fdbd0; color: #0f172a; }
     body.dark .bar { background: #7fdbd0; }
     body.dark #statsView select, body.dark .bloqueo-item { border-color: #334155; }
-    @media print { body * { visibility:hidden !important; } #reciboArea, #reciboArea * { visibility:visible !important; } #reciboArea { position:fixed; top:20px; left:50%; transform:translateX(-50%); width:320px; background:#fff; color:#000; padding:24px; border-radius:0; box-shadow:none; display:block !important; z-index:9999; } }
+    body.dark .grupo-card { background: #1e293b; border-color: #334155; }
+    body.dark .grupo-card h4 { color: #e2e8f0; }
+    body.dark .grupo-alumno { color: #94a3b8; }
+    .sidebar-grupos { position:fixed; left:0; top:56px; bottom:0; width:240px; background:#f8fafc; border-right:1px solid #e2e8f0; padding:12px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; z-index:100; transition:background 0.3s; }
+    body.dark .sidebar-grupos { background:#1e293b; border-color:#334155; }
+    .sidebar-grupos h3 { font-size:0.8rem; font-weight:700; color:#0b5345; margin-bottom:4px; }
+    .grupo-card { background:#fff; border-radius:10px; padding:8px 10px; box-shadow:0 1px 3px rgba(0,0,0,0.06); border:1px solid #e2e8f0; }
+    body.dark .grupo-card { background:#334155; border-color:#475569; }
+    .grupo-card h4 { font-size:0.78rem; font-weight:700; color:#1a2a3a; display:flex; justify-content:space-between; align-items:center; }
+    .grupo-card h4 .hora { color:#1a9e8e; font-weight:800; font-size:0.85rem; }
+    .grupo-alumno { font-size:0.72rem; color:#64748b; padding:1px 0; display:flex; align-items:center; gap:4px; }
+    .grupo-alumno .del { color:#ef4444; cursor:pointer; font-size:0.65rem; opacity:0.7; }
+    .grupo-alumno .del:hover { opacity:1; }
+    .grupo-actions { display:flex; gap:4px; margin-top:4px; flex-wrap:wrap; }
+    .grupo-actions .btn-xs { font-size:0.65rem; padding:2px 6px; }
+    .grupo-add-alumno { display:flex; gap:4px; margin-top:4px; }
+    .grupo-add-alumno input { flex:1; padding:3px 6px; border:1px solid #e2e8f0; border-radius:5px; font-size:0.72rem; font-family:inherit; outline:none; }
+    body.dark .grupo-add-alumno input { background:#1e293b; border-color:#475569; color:#e2e8f0; }
+    @media (max-width:900px) { .sidebar-grupos { display:none; } }
     nav { background: #0b5345; color: #fff; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
     nav h2 a { color:#fff; text-decoration:none; }
     nav .nav-actions { display: flex; align-items: center; gap: 16px; }
@@ -37,7 +55,7 @@
     nav .btn-logout { background: rgba(255,255,255,0.15); color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-size: 0.8rem; font-family: inherit; font-weight: 600; cursor: pointer; }
     nav .btn-logout:hover { background: rgba(255,255,255,0.25); }
     nav a.nav-link { color:rgba(255,255,255,0.7); font-size:0.8rem; text-decoration:none; }
-    .container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 24px 24px 24px 270px; }
     .header-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
     .header-bar h1 { font-size: 1.3rem; font-weight: 800; color: #0b5345; }
     .header-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
@@ -181,6 +199,16 @@
       <button class="btn-logout" id="btnLogout">Salir</button>
     </div>
   </nav>
+
+  <div class="sidebar-grupos auth-hidden" id="sidebarGrupos">
+    <h3>👥 Grupos</h3>
+    <div id="gruposLista"></div>
+    <div class="grupo-add-alumno" style="margin-top:4px">
+      <input type="text" id="grupoNombreInput" placeholder="Nuevo grupo..." style="width:100%">
+      <input type="time" id="grupoHorarioInput" value="10:00" style="width:60px;padding:3px 4px;border:1px solid #e2e8f0;border-radius:5px;font-size:0.72rem;font-family:inherit">
+      <button id="btnCrearGrupo" class="btn-xs btn-primary" style="white-space:nowrap">+</button>
+    </div>
+  </div>
 
   <div class="container auth-hidden">
     <div class="header-bar">
@@ -1269,6 +1297,75 @@
       showToast('Tratamiento guardado', 'success');
     });
     let pendingTratId = null;
+
+    /* ---- GRUPOS ---- */
+    async function cargarGrupos() {
+      try {
+        const r = await fetch(`${API}/admin/grupos`);
+        const d = await r.json();
+        if (!d.success || !d.grupos) { document.getElementById('gruposLista').innerHTML = '<p style="color:#94a3b8;font-size:0.72rem">Sin grupos</p>'; return; }
+        document.getElementById('gruposLista').innerHTML = d.grupos.map(g => `
+          <div class="grupo-card">
+            <h4><span>${g.nombre}</span><span class="hora">${g.horario}</span></h4>
+            <div>${(g.alumnos || []).map((a, i) => `<div class="grupo-alumno"><span>${a}</span><span class="del" data-gid="${g.id}" data-idx="${i}">✕</span></div>`).join('')}</div>
+            <div class="grupo-actions">
+              <button class="btn-xs btn-primary cargar-grupo" data-id="${g.id}">📋 Cargar hoy</button>
+              <button class="btn-xs btn-danger eliminar-grupo" data-id="${g.id}">🗑️</button>
+            </div>
+            <div class="grupo-add-alumno">
+              <input type="text" placeholder="Agregar alumno..." class="alumno-input" data-id="${g.id}">
+              <button class="btn-xs btn-primary add-alumno" data-id="${g.id}">+</button>
+            </div>
+          </div>
+        `).join('');
+        // add alumno
+        document.querySelectorAll('.add-alumno').forEach(b => b.addEventListener('click', async () => {
+          const input = b.parentElement.querySelector('.alumno-input');
+          const nom = input.value.trim();
+          if (!nom) return;
+          const g = d.grupos.find(gr => gr.id === b.dataset.id);
+          if (!g) return;
+          const alumnos = [...(g.alumnos || []), nom];
+          await fetch(`${API}/admin/grupos/${b.dataset.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ alumnos }) });
+          input.value = '';
+          cargarGrupos();
+        }));
+        // delete alumno
+        document.querySelectorAll('.grupo-alumno .del').forEach(el => el.addEventListener('click', async () => {
+          const g = d.grupos.find(gr => gr.id === el.dataset.gid);
+          if (!g) return;
+          const alumnos = (g.alumnos || []).filter((_, i) => i !== parseInt(el.dataset.idx));
+          await fetch(`${API}/admin/grupos/${el.dataset.gid}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ alumnos }) });
+          cargarGrupos();
+        }));
+        // cargar grupo
+        document.querySelectorAll('.cargar-grupo').forEach(b => b.addEventListener('click', async () => {
+          const r = await fetch(`${API}/admin/grupos/${b.dataset.id}/cargar`, { method: 'POST' });
+          const d2 = await r.json();
+          if (d2.success) { showToast(`Creadas ${d2.creadas} citas`, 'success'); cargarCitas(); }
+          else showToast('Error: ' + (d2.error || ''), 'error');
+        }));
+        // eliminar grupo
+        document.querySelectorAll('.eliminar-grupo').forEach(b => b.addEventListener('click', () => {
+          confirmar('Eliminar grupo', '¿Eliminar este grupo y sus alumnos?', '#dc2626', async () => {
+            await fetch(`${API}/admin/grupos/${b.dataset.id}`, { method: 'DELETE' });
+            cargarGrupos(); showToast('Grupo eliminado', 'success');
+          });
+        }));
+      } catch (e) { document.getElementById('gruposLista').innerHTML = '<p style="color:#94a3b8;font-size:0.72rem">Error</p>'; }
+    }
+    document.getElementById('btnCrearGrupo').addEventListener('click', async () => {
+      const nombre = document.getElementById('grupoNombreInput').value.trim();
+      const horario = document.getElementById('grupoHorarioInput').value;
+      if (!nombre) { showToast('Ingresá un nombre', 'error'); return; }
+      await fetch(`${API}/admin/grupos`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nombre, horario }) });
+      document.getElementById('grupoNombreInput').value = '';
+      cargarGrupos(); showToast('Grupo creado', 'success');
+    });
+    // enter key on grupo name input
+    document.getElementById('grupoNombreInput').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btnCrearGrupo').click(); });
+    // load grupos on auth
+    cargarGrupos();
   </script>
 </body>
 </html>
