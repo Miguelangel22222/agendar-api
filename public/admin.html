@@ -27,6 +27,7 @@
     body.dark .btn-trat:hover { background: #7fdbd0; color: #0f172a; }
     body.dark .bar { background: #7fdbd0; }
     body.dark #statsView select, body.dark .bloqueo-item { border-color: #334155; }
+    @media print { body * { visibility:hidden; } #reciboArea, #reciboArea * { visibility:visible; } #reciboArea { position:fixed; top:20px; left:50%; transform:translateX(-50%); width:300px; background:#fff; color:#000; padding:24px; border-radius:0; box-shadow:none; display:block !important; } }
     nav { background: #0b5345; color: #fff; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
     nav h2 a { color:#fff; text-decoration:none; }
     nav .nav-actions { display: flex; align-items: center; gap: 16px; }
@@ -278,7 +279,14 @@
       <label>Monto ($)</label><input type="number" id="pagoMonto" placeholder="0" step="1" min="0">
       <label>Método de pago</label>
       <select id="pagoMetodo"><option value="Efectivo">Efectivo</option><option value="Transferencia">Transferencia</option><option value="Débito">Débito</option><option value="Crédito">Crédito</option></select>
-      <div class="modal-actions"><button id="pagoCerrar" style="background:#f1f5f9;color:#64748b;">Cancelar</button><button id="pagoGuardar" style="background:#1a9e8e;color:#fff;">Guardar pago</button></div>
+      <div style="margin-top:16px;border-top:2px dashed #e2e8f0;padding-top:12px;display:none" id="reciboArea">
+        <div style="text-align:center;font-size:0.8rem" id="reciboContenido"></div>
+      </div>
+      <div class="modal-actions" style="gap:6px">
+        <button id="pagoCerrar" style="flex:1;padding:12px;border-radius:12px;font-size:0.85rem;font-weight:600;font-family:inherit;cursor:pointer;border:none;background:#f1f5f9;color:#64748b;">Cancelar</button>
+        <button id="pagoImprimir" style="flex:1;padding:12px;border-radius:12px;font-size:0.85rem;font-weight:600;font-family:inherit;cursor:pointer;border:none;background:#0b5345;color:#fff;">🖨️ Imprimir</button>
+        <button id="pagoGuardar" style="flex:1;padding:12px;border-radius:12px;font-size:0.85rem;font-weight:600;font-family:inherit;cursor:pointer;border:none;background:#1a9e8e;color:#fff;">💾 Guardar</button>
+      </div>
     </div>
   </div>
 
@@ -602,7 +610,16 @@
       }));
       document.querySelectorAll('[data-action="pago"]').forEach(b => b.addEventListener('click', () => {
         pendingPagoId = b.dataset.id;
-        pagoPaciente.querySelector('strong').textContent = b.dataset.paciente;
+        pendingPagoNombre = b.dataset.paciente;
+        pendingPagoFecha = b.dataset.fecha;
+        pendingPagoHora = b.dataset.hora;
+        pagoPaciente.querySelector('strong').textContent = pendingPagoNombre;
+        pagoMonto.value = b.dataset.monto || '';
+        pagoMetodo.value = b.dataset.metodo || 'Efectivo';
+        reciboArea.style.display = 'none';
+        pagoGuardar.textContent = '💾 Guardar';
+        pagoGuardar.disabled = false;
+        modalPago.classList.add('show');
         pagoMonto.value = b.dataset.monto || '';
         pagoMetodo.value = b.dataset.metodo || 'Efectivo';
         modalPago.classList.add('show');
@@ -793,17 +810,51 @@
     const pagoMetodo = document.getElementById('pagoMetodo');
     const pagoGuardar = document.getElementById('pagoGuardar');
     const pagoCerrar = document.getElementById('pagoCerrar');
+    const pagoImprimir = document.getElementById('pagoImprimir');
+    const reciboArea = document.getElementById('reciboArea');
+    const reciboContenido = document.getElementById('reciboContenido');
     let pendingPagoId = null;
-    pagoCerrar.addEventListener('click', () => modalPago.classList.remove('show'));
+    let pendingPagoNombre = '';
+    let pendingPagoFecha = '';
+    let pendingPagoHora = '';
+    function generarRecibo(nom, monto, metodo, fecha, hora) {
+      const f = new Date().toLocaleString('es-UY', { timeZone: 'America/Montevideo' });
+      return `<div style="font-family:monospace;font-size:12px;line-height:1.6">
+        <div style="text-align:center;font-weight:700;font-size:14px;margin-bottom:4px">🦶 Clínica del Pie</div>
+        <div style="text-align:center;font-size:11px;margin-bottom:8px">Isabel Aguiar</div>
+        <div style="text-align:center;border-top:1px dashed #aaa;border-bottom:1px dashed #aaa;padding:8px 0;margin-bottom:8px">
+          <div><strong>${nom}</strong></div>
+          <div>${fecha} ${hora}</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Monto:</span><strong>$${monto}</strong></div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Método:</span>${metodo}</div>
+        <div style="border-top:1px dashed #aaa;padding-top:8px;margin-top:8px;text-align:center;font-size:10px;color:#666">Emitido: ${f}<br>¡Gracias por su visita!</div>
+      </div>`;
+    }
+    pagoCerrar.addEventListener('click', () => { modalPago.classList.remove('show'); reciboArea.style.display = 'none'; });
+    pagoImprimir.addEventListener('click', () => {
+      const nom = pagoPaciente.querySelector('strong').textContent;
+      const monto = pagoMonto.value || '0';
+      const metodo = pagoMetodo.value;
+      reciboContenido.innerHTML = generarRecibo(nom, monto, metodo, pendingPagoFecha, pendingPagoHora);
+      reciboArea.style.display = 'block';
+      setTimeout(() => window.print(), 300);
+    });
     pagoGuardar.addEventListener('click', async () => {
       const monto = parseFloat(pagoMonto.value);
       if (isNaN(monto) || monto < 0) { showToast('Ingresá un monto válido', 'error'); return; }
-      modalPago.classList.remove('show');
+      const metodo = pagoMetodo.value;
       try {
-        const r = await fetch(`${API}/admin/citas/${pendingPagoId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ monto, metodo_pago: pagoMetodo.value, pago_date: new Date().toISOString().slice(0,10) }) });
+        const r = await fetch(`${API}/admin/citas/${pendingPagoId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ monto, metodo_pago: metodo, pago_date: new Date().toISOString().slice(0,10) }) });
         const d = await r.json();
-        if (d.success) { showToast('Pago registrado', 'success'); cargarCitas(); }
-        else showToast('Error: ' + (d.error || ''), 'error');
+        if (d.success) {
+          reciboContenido.innerHTML = generarRecibo(pendingPagoNombre, monto, metodo, pendingPagoFecha, pendingPagoHora);
+          reciboArea.style.display = 'block';
+          pagoGuardar.textContent = '✅ Guardado';
+          pagoGuardar.disabled = true;
+          showToast('Pago registrado', 'success');
+          cargarCitas();
+        } else showToast('Error: ' + (d.error || ''), 'error');
       } catch (e) { showToast('Error de conexión', 'error'); }
     });
 
