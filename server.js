@@ -49,6 +49,37 @@ async function autoBloquearFeriados() {
 }
 setTimeout(autoBloquearFeriados, 3000);
 
+async function enviarRecordatorios() {
+  if (!db || !process.env.RESEND_API_KEY) return;
+  try {
+    const manana = new Date();
+    manana.setDate(manana.getDate() + 1);
+    const fecha = manana.toISOString().slice(0, 10);
+    const snap = await db.collection('citas').where('fecha', '==', fecha).get();
+    let count = 0;
+    snap.forEach(doc => {
+      const d = doc.data();
+      if (!d.email || d.recordatorioEnviado) return;
+      const estadosNoRecordar = ['cancelada', 'completada', 'noasistio'];
+      if (estadosNoRecordar.includes(d.estado)) return;
+      const fe = new Date(`${d.fecha}T${d.hora}:00`).toLocaleString('es-UY', { timeZone: 'America/Montevideo' });
+      resend.emails.send({
+        from: 'Clinica del Pie Isabel Aguiar <onboarding@resend.dev>',
+        to: d.email,
+        subject: 'Recordatorio de cita - Clínica del Pie Isabel Aguiar',
+        html: `<div style="font-family:sans-serif;max-width:600px"><h2 style="color:#0b5345">Recordatorio de cita</h2><p>Hola ${d.paciente}, te recordamos tu cita:</p><p><strong>Fecha y hora:</strong> ${fe}</p><p><strong>Dirección:</strong> Galería — Montevideo</p><p style="color:#64748b;font-size:0.85rem">Si necesitas cancelar o reprogramar, comunicate al teléfono de la clínica.</p></div>`,
+      }).then(() => doc.ref.update({ recordatorioEnviado: true }).catch(() => {}))
+        .catch(e => console.log('Error recordatorio email:', e.message));
+      count++;
+    });
+    if (count > 0) console.log(`Recordatorios enviados para ${fecha}: ${count}`);
+  } catch (e) {
+    console.log('Error enviar recordatorios:', e.message);
+  }
+}
+setInterval(enviarRecordatorios, 3600000);
+setTimeout(enviarRecordatorios, 5000);
+
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const hoy = () => new Date().toISOString().slice(0, 10);
