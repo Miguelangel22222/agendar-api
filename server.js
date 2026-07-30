@@ -35,9 +35,23 @@ async function autoBloquearFeriados() {
   if (!db) return;
   try {
     const year = new Date().getFullYear();
+    // clean duplicates from previous buggy runs
+    const todas = await db.collection('bloqueos').where('fecha', '>=', `${year}-01-01`).where('fecha', '<=', `${year}-12-31`).get();
+    const seen = {};
+    const toDelete = [];
+    todas.forEach(doc => {
+      const d = doc.data();
+      if (!d.motivo || !d.motivo.startsWith('Feriado:')) return;
+      const key = d.fecha;
+      if (seen[key]) toDelete.push(doc.id);
+      else seen[key] = doc.id;
+    });
+    for (const id of toDelete) await db.collection('bloqueos').doc(id).delete();
+    if (toDelete.length) console.log(`Eliminados ${toDelete.length} feriados duplicados`);
+
     for (const f of FERIADOS) {
       const fecha = `${year}-${f.mes}-${f.dia}`;
-      const snap = await db.collection('bloqueos').where('fecha', '==', fecha).where('motivo', 'in', ['Feriado', f.nombre]).get();
+      const snap = await db.collection('bloqueos').where('fecha', '==', fecha).where('motivo', '==', `Feriado: ${f.nombre}`).get();
       if (snap.empty) {
         await db.collection('bloqueos').add({ fecha, inicio: '', fin: '', motivo: `Feriado: ${f.nombre}`, createdAt: FieldValue.serverTimestamp() });
         console.log(`Feriado bloqueado: ${fecha} (${f.nombre})`);
