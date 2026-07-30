@@ -8,7 +8,25 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family: 'Inter', sans-serif; background: #f1f5f9; color: #1a2a3a; min-height: 100vh; }
+    body { font-family: 'Inter', sans-serif; background: #f1f5f9; color: #1a2a3a; min-height: 100vh; transition: background 0.3s, color 0.3s; }
+    body.dark { background: #0f172a; color: #e2e8f0; }
+    body.dark .table-wrapper, body.dark .stat-card, body.dark .cal-day, body.dark .modal-box, body.dark .stats-chart { background: #1e293b; }
+    body.dark td { border-color: #334155; }
+    body.dark table tr:hover td { background: #334155; }
+    body.dark .stat-card .num { color: #7fdbd0; }
+    body.dark .cal-day { border-color: #334155; }
+    body.dark .cal-day:hover { background: #334155; }
+    body.dark .cal-day .day-num { color: #e2e8f0; }
+    body.dark .cal-day.today { border-color: #7fdbd0; background: #1a3a3a; }
+    body.dark .modal-box h3 { color: #e2e8f0; }
+    body.dark .modal-box input, body.dark .modal-box select, body.dark .modal-box textarea, body.dark .search-box, body.dark input[type="date"] { background: #334155; border-color: #475569; color: #e2e8f0; }
+    body.dark .btn-outline { background: #334155; color: #e2e8f0; border-color: #475569; }
+    body.dark .filtro-btn { background: #334155; color: #94a3b8; border-color: #475569; }
+    body.dark .filtro-btn.active { background: #7fdbd0; color: #0f172a; border-color: #7fdbd0; }
+    body.dark .btn-trat { background: #334155; border-color: #475569; color: #e2e8f0; }
+    body.dark .btn-trat:hover { background: #7fdbd0; color: #0f172a; }
+    body.dark .bar { background: #7fdbd0; }
+    body.dark #statsView select, body.dark .bloqueo-item { border-color: #334155; }
     nav { background: #0b5345; color: #fff; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
     nav h2 a { color:#fff; text-decoration:none; }
     nav .nav-actions { display: flex; align-items: center; gap: 16px; }
@@ -156,6 +174,7 @@
     <div class="nav-actions">
       <a href="/" class="nav-link">← Volver al inicio</a>
       <span class="user-email" id="userEmail"></span>
+      <button class="btn-logout" id="btnTheme">🌙</button>
       <button class="btn-logout" id="btnLogout">Salir</button>
     </div>
   </nav>
@@ -428,6 +447,12 @@
     });
 
     btnLogout.addEventListener('click', () => signOut(auth).then(() => window.location.href = 'login.html'));
+    document.getElementById('btnTheme').addEventListener('click', () => {
+      document.body.classList.toggle('dark');
+      document.getElementById('btnTheme').textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
+      localStorage.setItem('adminTheme', document.body.classList.contains('dark') ? 'dark' : 'light');
+    });
+    if (localStorage.getItem('adminTheme') === 'dark') { document.body.classList.add('dark'); document.getElementById('btnTheme').textContent = '☀️'; }
     modalNo.addEventListener('click', () => { modalConfirm.classList.remove('show'); pendingConfirmCb = null; });
     modalSi.addEventListener('click', () => { modalConfirm.classList.remove('show'); if (pendingConfirmCb) pendingConfirmCb(); pendingConfirmCb = null; });
 
