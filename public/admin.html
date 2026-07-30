@@ -109,6 +109,9 @@
     .cal-event.noasistio { background:#d97706; }
     .cal-event.cancelada { background:#dc2626; }
     #calendarioView { display:none; margin-top:16px; }
+    #pacientesView { display:none; }
+    .paciente-row { cursor:pointer; }
+    .paciente-row:hover td { background:#f0fdfa; }
     @media (max-width:768px) {
       .container { padding: 12px; }
       th, td { padding: 4px 4px; font-size: 0.6rem; }
@@ -145,7 +148,7 @@
 
   <div class="container auth-hidden">
     <div class="header-bar">
-      <h1>Citas</h1>
+      <h1 id="viewTitle">Citas</h1>
       <div class="header-actions">
         <input type="text" class="search-box" id="searchBox" placeholder="Buscar...">
         <input type="date" id="filtroFecha" style="padding:10px 12px;border:2px solid #e2e8f0;border-radius:10px;font-size:0.85rem;font-family:inherit;outline:none;">
@@ -153,6 +156,9 @@
         <button class="btn-sm btn-block" id="btnBloquear">Bloquear</button>
         <button class="btn-sm btn-outline" id="btnExportar">CSV</button>
         <button class="btn-sm btn-outline" id="btnToggleView">📅 Calendario</button>
+        <button class="btn-sm btn-outline" id="btnPacientes">👥 Pacientes</button>
+      </div>
+    </div>
       </div>
     </div>
 
@@ -190,6 +196,18 @@
         <button id="calNext">→</button>
       </div>
       <div class="cal-grid" id="calGrid"></div>
+    </div>
+
+    <div id="pacientesView">
+      <input type="text" class="search-box" id="pacSearch" placeholder="Buscar paciente..." style="margin-bottom:16px;width:300px;">
+      <div class="table-wrapper">
+        <div id="pacLoading" class="loading"><div class="spinner"></div></div>
+        <table id="tablaPacientes" style="display:none;">
+          <thead><tr><th>Paciente</th><th>Teléfono</th><th>Email</th><th>Total citas</th><th>Última visita</th><th>Estado</th></tr></thead>
+          <tbody id="pacBody"></tbody>
+        </table>
+        <div id="pacEmpty" class="empty" style="display:none;">Sin pacientes</div>
+      </div>
     </div>
   </div>
 
@@ -739,6 +757,63 @@
     }
     document.getElementById('calPrev').addEventListener('click', () => { calDate.setMonth(calDate.getMonth() - 1); renderCalendario(); });
     document.getElementById('calNext').addEventListener('click', () => { calDate.setMonth(calDate.getMonth() + 1); renderCalendario(); });
+
+    /* ---- PACIENTES ---- */
+    let viewPacientes = false;
+    document.getElementById('btnPacientes').addEventListener('click', () => {
+      viewPacientes = !viewPacientes;
+      document.getElementById('pacientesView').style.display = viewPacientes ? 'block' : 'none';
+      document.querySelector('.table-wrapper').style.display = viewPacientes ? 'none' : '';
+      document.getElementById('calendarioView').style.display = 'none';
+      document.getElementById('filtrosRapidos').style.display = viewPacientes ? 'none' : '';
+      document.getElementById('btnToggleView').textContent = '📅 Calendario';
+      document.getElementById('viewTitle').textContent = viewPacientes ? 'Pacientes' : 'Citas';
+      document.getElementById('btnPacientes').textContent = viewPacientes ? '📋 Citas' : '👥 Pacientes';
+      if (viewPacientes) renderPacientes();
+    });
+    function renderPacientes() {
+      const q = document.getElementById('pacSearch').value.toLowerCase().trim();
+      const map = {};
+      allEvents.forEach(e => {
+        if (e.esBloqueo) return;
+        const nom = (e.paciente || '').trim();
+        if (!nom) return;
+        if (q && !nom.toLowerCase().includes(q) && !(e.telefono || '').includes(q)) return;
+        if (!map[nom]) map[nom] = { paciente: nom, telefono: e.telefono || '', email: e.email || '', visitas: 0, ultima: '', estados: {} };
+        map[nom].visitas++;
+        if (e.fecha > map[nom].ultima) { map[nom].ultima = e.fecha; if (!map[nom].telefono) map[nom].telefono = e.telefono || ''; if (!map[nom].email) map[nom].email = e.email || ''; }
+        const est = e.estado || 'pendiente';
+        map[nom].estados[est] = (map[nom].estados[est] || 0) + 1;
+      });
+      const lista = Object.values(map).sort((a, b) => b.visitas - a.visitas);
+      const tbody = document.getElementById('pacBody');
+      if (lista.length === 0) { document.getElementById('tablaPacientes').style.display = 'none'; document.getElementById('pacEmpty').style.display = 'block'; return; }
+      document.getElementById('tablaPacientes').style.display = ''; document.getElementById('pacEmpty').style.display = 'none';
+      tbody.innerHTML = lista.map(p => {
+        const ult = p.ultima || '-';
+        const estStr = Object.entries(p.estados).map(([k, v]) => `${k}: ${v}`).join(' | ');
+        return `<tr class="paciente-row" data-paciente="${p.paciente}"><td><strong>${p.paciente}</strong></td><td>${p.telefono}</td><td>${p.email}</td><td>${p.visitas}</td><td>${ult}</td><td style="font-size:0.7rem;color:#64748b">${estStr}</td></tr>`;
+      }).join('');
+      tbody.querySelectorAll('.paciente-row').forEach(r => r.addEventListener('click', () => {
+        const nom = r.dataset.paciente;
+        hisNombre = nom;
+        const pasadas = allEvents.filter(e => e.paciente === nom && e.fecha < new Date().toISOString().slice(0,10));
+        document.getElementById('historialNombre').textContent = `${nom} (${pasadas.length} visitas)`;
+        if (pasadas.length === 0) document.getElementById('historialBody').innerHTML = '<p style="text-align:center;color:#94a3b8;padding:24px;">Sin historial</p>';
+        else {
+          let h = '<table style="width:100%;font-size:0.8rem;"><tr><th>Fecha</th><th>Hora</th><th>Estado</th><th>Notas</th></tr>';
+          pasadas.sort((a,b) => b.fecha.localeCompare(a.fecha)).forEach(p => {
+            const cls = p.estado === 'completada' ? 'completada' : (p.estado === 'noasistio' ? 'noasistio' : (p.estado === 'cancelada' ? 'cancelada' : 'pasada'));
+            const lbl = p.estado === 'completada' ? 'Completada' : (p.estado === 'noasistio' ? 'No asistió' : (p.estado === 'cancelada' ? 'Cancelada' : 'Completada'));
+            h += `<tr><td>${p.fecha}</td><td>${p.hora}</td><td><span class="badge ${cls}">${lbl}</span></td><td style="font-size:0.75rem;color:#64748b">${p.notas || '-'}</td></tr>`;
+          });
+          h += '</table>';
+          document.getElementById('historialBody').innerHTML = h;
+        }
+        document.getElementById('modalHistorial').classList.add('show');
+      }));
+    }
+    document.getElementById('pacSearch').addEventListener('input', renderPacientes);
   </script>
 </body>
 </html>
