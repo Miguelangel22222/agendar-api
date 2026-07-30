@@ -27,7 +27,7 @@
     body.dark .btn-trat:hover { background: #7fdbd0; color: #0f172a; }
     body.dark .bar { background: #7fdbd0; }
     body.dark #statsView select, body.dark .bloqueo-item { border-color: #334155; }
-    @media print { body * { visibility:hidden; } #reciboArea, #reciboArea * { visibility:visible; } #reciboArea { position:fixed; top:20px; left:50%; transform:translateX(-50%); width:300px; background:#fff; color:#000; padding:24px; border-radius:0; box-shadow:none; display:block !important; } }
+    @media print { body * { visibility:hidden !important; } #reciboArea, #reciboArea * { visibility:visible !important; } #reciboArea { position:fixed; top:20px; left:50%; transform:translateX(-50%); width:320px; background:#fff; color:#000; padding:24px; border-radius:0; box-shadow:none; display:block !important; z-index:9999; } }
     nav { background: #0b5345; color: #fff; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
     nav h2 a { color:#fff; text-decoration:none; }
     nav .nav-actions { display: flex; align-items: center; gap: 16px; }
@@ -543,7 +543,7 @@
         }
         html += `<button class="btn-xs btn-outline" data-id="${ev.id}" data-paciente="${ev.paciente}" data-action="notas">📝 Notas</button>`;
         html += `<button class="btn-xs btn-outline" data-id="${ev.id}" data-paciente="${ev.paciente}" data-telefono="${ev.telefono}" data-email="${ev.email}" data-fecha="${ev.fecha}" data-hora="${ev.hora}" data-action="editar">✏️ Editar</button>`;
-        html += `<button class="btn-xs btn-outline" data-id="${ev.id}" data-paciente="${ev.paciente}" data-monto="${ev.monto || ''}" data-metodo="${ev.metodo_pago || ''}" data-action="pago">💰 Pago</button>`;
+        html += `<button class="btn-xs btn-outline" data-id="${ev.id}" data-paciente="${ev.paciente}" data-monto="${ev.monto || ''}" data-metodo="${ev.metodo_pago || ''}" data-fecha="${ev.fecha}" data-hora="${ev.hora}" data-action="pago">💰 Pago</button>`;
         if (puedeEditar) {
           html += `<button class="btn-xs btn-danger" data-id="${ev.id}" data-paciente="${ev.paciente}" data-action="cancel">Cancelar</button>`;
           html += `<button class="btn-xs btn-danger mobile-hide" data-id="${ev.id}" data-action="eliminar" style="background:#fef2f2;color:#991b1b;border:1px solid #fecaca;opacity:0.5">Eliminar</button>`;
