@@ -23,6 +23,32 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+const FERIADOS = [
+  { mes: '01', dia: '01', nombre: 'Año Nuevo' },
+  { mes: '03', dia: '04', nombre: 'Carnaval' },
+  { mes: '05', dia: '01', nombre: 'Día del Trabajador' },
+  { mes: '08', dia: '25', nombre: 'Declaratoria de la Independencia' },
+  { mes: '12', dia: '25', nombre: 'Navidad' },
+];
+
+async function autoBloquearFeriados() {
+  if (!db) return;
+  try {
+    const year = new Date().getFullYear();
+    for (const f of FERIADOS) {
+      const fecha = `${year}-${f.mes}-${f.dia}`;
+      const snap = await db.collection('bloqueos').where('fecha', '==', fecha).where('motivo', 'in', ['Feriado', f.nombre]).get();
+      if (snap.empty) {
+        await db.collection('bloqueos').add({ fecha, inicio: '', fin: '', motivo: `Feriado: ${f.nombre}`, createdAt: FieldValue.serverTimestamp() });
+        console.log(`Feriado bloqueado: ${fecha} (${f.nombre})`);
+      }
+    }
+  } catch (e) {
+    console.log('Error auto-bloquear feriados:', e.message);
+  }
+}
+setTimeout(autoBloquearFeriados, 3000);
+
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const hoy = () => new Date().toISOString().slice(0, 10);
